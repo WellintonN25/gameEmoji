@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>EmojiWar: Legends</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #fbbf24; 
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --bg-deep: #020617;
+            
+            /* Rarity Colors */
+            --r-common: #94a3b8;
+            --r-rare: #3b82f6;
+            --r-epic: #a855f7;
+            --r-legend: #eab308;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--bg-deep);
+            color: #e2e8f0;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 70%);
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 480px;
+            background-color: rgba(2, 6, 23, 0.8);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* --- UTILS --- */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+        .glass-heavy { background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        
+        /* --- GLOWS --- */
+        .glow-common { box-shadow: 0 0 10px rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.3); }
+        .glow-rare { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); }
+        .glow-epic { box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); border: 1px solid rgba(168, 85, 247, 0.5); }
+        .glow-legend { box-shadow: 0 0 25px rgba(234, 179, 8, 0.3); border: 1px solid rgba(234, 179, 8, 0.6); animation: legend-pulse 3s infinite; }
+
+        @keyframes legend-pulse { 0%, 100% { box-shadow: 0 0 25px rgba(234, 179, 8, 0.3); } 50% { box-shadow: 0 0 35px rgba(234, 179, 8, 0.6); } }
+
+        /* --- ANIMATIONS --- */
+        @keyframes breathe { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.05); filter: brightness(1.2); } }
+        .anim-breathe { animation: breathe 4s ease-in-out infinite; }
+        
+        @keyframes hit-shake { 0% { transform: translate(0, 0); filter: brightness(2) saturate(0); } 20% { transform: translate(-4px, 2px); } 40% { transform: translate(4px, -2px); } 60% { transform: translate(-2px, 0); } 100% { transform: translate(0, 0); filter: none; } }
+        .anim-hit { animation: hit-shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+
+        @keyframes float-hero { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .hero-float { animation: float-hero 5s ease-in-out infinite; }
+
+        @keyframes slide-up { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .slide-up { animation: slide-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        /* Fix for bounce-in starting state */
+        @keyframes bounce-in { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        .animate-bounce-in { animation: bounce-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* Screen Shake for Crits */
+        @keyframes shake-screen { 0% { transform: translate(0,0); } 25% { transform: translate(-2px, 2px); } 50% { transform: translate(2px, -2px); } 75% { transform: translate(-2px, -2px); } 100% { transform: translate(0,0); } }
+        .anim-shake-screen { animation: shake-screen 0.2s ease-in-out; }
+
+        /* --- UI COMPONENTS --- */
+        .btn-primary {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: #0f172a;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); }
+        .btn-primary:disabled { background: #334155; color: #64748b; box-shadow: none; cursor: not-allowed; }
+
+        .card { 
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:active { transform: scale(0.97); }
+
+        .emoji-unit { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+        .img-unit { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+        
+        /* Bars */
+        .bar-bg { background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.3s ease-out; position: relative; }
+        .bar-fill::after { content:''; position: absolute; top:0; right:0; bottom:0; width: 1px; background: rgba(255,255,255,0.5); box-shadow: 0 0 5px white; }
+
+        .xp-grad { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
+        .hp-grad { background: linear-gradient(90deg, #22c55e, #10b981); }
+        .en-grad { background: linear-gradient(90deg, #eab308, #f59e0b); }
+        .atb-grad { background: linear-gradient(90deg, #facc15, #fef08a); }
+
+        /* VFX SYSTEM */
+        .vfx-container { pointer-events: none; position: absolute; inset: 0; z-index: 50; overflow: hidden; }
+        .dmg-text {
+            position: fixed; font-weight: 800; pointer-events: none; z-index: 100;
+            text-shadow: 2px 2px 0 #000;
+            animation: dmg-float 0.8s ease-out forwards;
+        }
+        @keyframes dmg-float { 0% { transform:translateY(0) scale(0.5); opacity:0; } 20% { transform:translateY(-20px) scale(1.2); opacity:1; } 100% { transform:translateY(-60px) scale(1); opacity:0; } }
+
+        /* VFX Animations - Customização
+           Para adicionar novas animações:
+           1. Crie uma classe .vfx-NOMEDAANIMACAO
+           2. Defina o @keyframes correspondente
+           3. Use o nome 'NOMEDAANIMACAO' no array DB do personagem (propriedade 'anim')
+        */
+
+        /* Slash (Corte) */
+        .vfx-slash { position: absolute; height: 4px; background: white; box-shadow: 0 0 10px white, 0 0 20px cyan; animation: slash-anim 0.3s ease-out forwards; z-index: 60; }
+        @keyframes slash-anim { 0% { width: 0; opacity: 0.8; transform: rotate(-45deg) translateX(-30px) scale(0.5); } 50% { width: 150px; opacity: 1; transform: rotate(-45deg) translateX(0) scale(1.2); } 100% { width: 150px; opacity: 0; transform: rotate(-45deg) translateX(30px) scale(1); } }
+
+        /* Explosion (Explosão) */
+        .vfx-explosion { position: absolute; width: 120px; height: 120px; background: radial-gradient(circle, #facc15, transparent 70%); border-radius: 50%; animation: explode-anim 0.5s ease-out forwards; z-index: 60; mix-blend-mode: screen; transform: translate(-50%, -50%); }
+        @keyframes explode-anim { 0% { transform: translate(-50%, -50%) scale(0.1); opacity: 1; } 50% { opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
+
+        /* Shockwave (Onda de Choque) */
+        .vfx-shockwave { position: absolute; width: 20px; height: 20px; border: 4px solid rgba(255, 255, 255, 0.8); border-radius: 50%; animation: shockwave-anim 0.6s ease-out forwards; z-index: 60; box-shadow: 0 0 20px rgba(255,255,255,0.5); transform: translate(-50%, -50%); }
+        @keyframes shockwave-anim { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; border-width: 10px; } 100% { transform: translate(-50%, -50%) scale(20); opacity: 0; border-width: 0; } }
+
+        /* Beam (Raio) */
+        .vfx-beam { position: absolute; width: 80px; height: 1000px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); animation: beam-anim 0.4s ease-out forwards; z-index: 60; mix-blend-mode: overlay; transform-origin: bottom center; transform: translateX(-50%); }
+        @keyframes beam-anim { 0% { transform: translateX(-50%) scaleX(0); opacity: 0; } 20% { transform: translateX(-50%) scaleX(1.5); opacity: 1; } 100% { transform: translateX(-50%) scaleX(0); opacity: 0; } }
+
+
+        /* Battle Camera & Zoom (Restored) */
+        .battle-camera-wrapper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        .battle-stage { width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center center; will-change: transform; }
+        
+        /* Adjusted Unit Wrapper for smaller size */
+        .unit-wrapper { transition: transform 0.3s, filter 0.3s, opacity 0.3s; width: 4rem; /* w-16 */ }
+        /* Focus Mode: Dim others */
+        .focus-mode .unit-wrapper { filter: grayscale(0.8) brightness(0.6) blur(1px); opacity: 0.6; }
+        /* Focus Mode: Highlight Active */
+        .focus-mode .unit-wrapper.active-turn { filter: grayscale(0) brightness(1.2) blur(0); opacity: 1; z-index: 50; transform: scale(1.15); }
+
+        /* Gradients for Elements */
+        .bg-el-fire { background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.3), transparent 70%); }
+        .bg-el-water { background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.3), transparent 70%); }
+        .bg-el-wind { background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.3), transparent 70%); }
+        .bg-el-earth { background: radial-gradient(circle at top right, rgba(161, 98, 7, 0.3), transparent 70%); }
+        .bg-el-light { background: radial-gradient(circle at top right, rgba(253, 224, 71, 0.3), transparent 70%); }
+        .bg-el-dark { background: radial-gradient(circle at top right, rgba(126, 34, 206, 0.3), transparent 70%); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+
+    <!-- LOGIN -->
+    <div id="login-screen" class="absolute inset-0 z-[100] flex flex-col items-center justify-center p-8 bg-slate-950 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950"></div>
+        <div class="relative z-10 text-center mb-16">
+            <div class="text-9xl mb-6 filter drop-shadow-[0_0_30px_rgba(251,191,36,0.4)] anim-breathe">⚔️</div>
+            <h1 class="text-6xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">EMOJI<br><span class="text-yellow-400">WAR</span></h1>
+            <p class="text-slate-400 tracking-widest text-xs mt-2 uppercase">Legends RPG</p>
+        </div>
+        <div class="w-full max-w-xs space-y-4 relative z-10">
+            <input type="text" id="login-input" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 text-white font-bold text-center text-xl outline-none focus:border-yellow-500 focus:bg-slate-900/80 transition-all backdrop-blur-sm" placeholder="Seu Nome">
+            <button onclick="login()" class="btn-primary w-full py-4 rounded-2xl text-xl shadow-lg">Entrar</button>
+        </div>
+    </div>
+
+    <!-- APP UI -->
+    <div id="app-screen" class="flex flex-col h-full hidden bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
+        
+        <!-- Top Bar -->
+        <div class="h-24 glass flex flex-col justify-center px-4 z-20 shrink-0 relative">
+            <div class="flex justify-between items-center w-full">
+                <!-- User Info -->
+                <div class="flex items-center gap-4 w-3/5">
+                    <div class="relative shrink-0">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 flex items-center justify-center text-2xl shadow-lg relative z-10 overflow-hidden">
+                            🪖
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 bg-yellow-500 text-slate-950 text-xs w-5 h-5 flex items-center justify-center rounded-full font-black z-20 shadow-md border border-white/20" id="ui-acc-lvl-badge">1</div>
+                    </div>
+                    <div class="flex flex-col justify-center w-full overflow-hidden">
+                        <span class="text-base font-bold text-white leading-none mb-1.5 truncate tracking-tight w-full" id="ui-name">Player</span>
+                        
+                        <!-- Account XP -->
+                        <div class="w-full max-w-[120px] flex items-center gap-2 mb-1">
+                            <div class="flex-1 h-1.5 bar-bg">
+                                <div id="ui-acc-xp-bar" class="bar-fill xp-grad" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Energy -->
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            <span class="text-yellow-400">⚡ Energia</span>
+                            <span id="ui-energy-text" class="text-white">30/30</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Resources -->
+                <div class="flex flex-col gap-2 justify-end items-end w-2/5">
+                    <div class="bg-black/40 px-3 py-1 rounded-lg border border-white/5 flex items-center gap-2 shadow-inner w-full justify-between backdrop-blur-md max-w-[100px]">
+                        <span class="text-xs">💎</span> <span id="ui-gems" class="text-sm font-bold text-white truncate">0</span>
+                    </div>
+                    <div class="bg-black/40 px-3 py-1 rounded-lg border border-white/5 flex items-center gap-2 shadow-inner w-full justify-between backdrop-blur-md max-w-[100px]">
+                        <span class="text-xs">🔵</span> <span id="ui-mana" class="text-sm font-bold text-blue-200 truncate">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="main-view" class="flex-1 overflow-y-auto hide-scrollbar relative pb-28"></div>
+
+        <!-- Navigation -->
+        <div class="absolute bottom-0 w-full h-20 glass-heavy flex justify-around items-center px-2 z-30 pb-2 shadow-2xl">
+            <button onclick="nav('home')" class="nav-btn text-slate-500 hover:text-white w-16 h-full flex flex-col items-center justify-center gap-1 transition-all group">
+                <div class="text-xl group-hover:-translate-y-1 transition-transform duration-300"><i class="fas fa-home"></i></div>
+                <span class="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100">Início</span>
+            </button>
+            <button onclick="nav('monsters')" class="nav-btn text-slate-500 hover:text-white w-16 h-full flex flex-col items-center justify-center gap-1 transition-all group">
+                <div class="text-xl group-hover:-translate-y-1 transition-transform duration-300"><i class="fas fa-dragon"></i></div>
+                <span class="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100">Box</span>
+            </button>
+            
+            <!-- Center Button -->
+            <button onclick="nav('battle')" class="w-16 h-16 -mt-8 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 text-slate-900 shadow-[0_0_20px_rgba(251,191,36,0.4)] flex items-center justify-center text-2xl border-4 border-slate-900 active:scale-95 transition-transform z-40">
+                <i class="fas fa-swords"></i>
+            </button>
+
+            <button onclick="nav('summon')" class="nav-btn text-slate-500 hover:text-white w-16 h-full flex flex-col items-center justify-center gap-1 transition-all group">
+                <div class="text-xl group-hover:-translate-y-1 transition-transform duration-300"><i class="fas fa-star"></i></div>
+                <span class="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100">Gacha</span>
+            </button>
+            <button onclick="openShop()" class="nav-btn text-slate-500 hover:text-white w-16 h-full flex flex-col items-center justify-center gap-1 transition-all group">
+                <div class="text-xl group-hover:-translate-y-1 transition-transform duration-300"><i class="fas fa-store"></i></div>
+                <span class="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100">Loja</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- GLOBAL MODALS -->
+    
+    <!-- Toast -->
+    <div id="toast-modal" class="absolute top-24 left-0 right-0 z-[200] hidden justify-center pointer-events-none fade-in">
+        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-700 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 max-w-[90%] pointer-events-auto transform scale-100 transition-all">
+            <div class="text-2xl">⚠️</div>
+            <div id="toast-msg" class="text-white font-bold text-sm"></div>
+        </div>
+    </div>
+
+    <!-- Confirm -->
+    <div id="confirm-modal" class="absolute inset-0 z-[1000] hidden flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4 fade-in">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-3xl shadow-2xl max-w-xs w-full text-center relative">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
+            <div class="text-5xl mb-4">❓</div>
+            <h3 class="text-white font-bold mb-6 text-lg leading-tight" id="confirm-msg">Tem certeza?</h3>
+            <div class="flex gap-3">
+                <button onclick="closeConfirm(false)" class="bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl flex-1 uppercase active:scale-95 transition-transform border border-slate-700 text-xs">Cancelar</button>
+                <button onclick="closeConfirm(true)" class="btn-primary py-3 px-4 rounded-xl flex-1 uppercase text-xs">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail & Full Screen Modals -->
+    <div id="detail-modal" class="absolute inset-0 bg-slate-950/95 z-50 hidden flex-col p-0 overflow-y-auto backdrop-blur-md slide-up">
+        <div class="h-16 flex justify-between items-center px-6 shrink-0 sticky top-0 z-20 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800">
+            <h2 class="text-lg font-bold text-white uppercase tracking-wider">Detalhes</h2>
+            <button onclick="closeDetail()" class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="detail-content" class="flex-1 flex flex-col items-center pb-32 pt-4 px-4"></div>
+    </div>
+
+    <div id="inv-modal" class="absolute inset-0 bg-slate-950/95 z-50 hidden flex-col p-0 slide-up">
+        <div class="h-16 flex justify-between items-center px-6 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
+            <h2 class="text-lg font-bold text-white uppercase tracking-wider">Inventário</h2>
+            <button onclick="closeInv()" class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="inv-list" class="grid grid-cols-1 gap-2 overflow-y-auto pb-32 p-4"></div>
+    </div>
+
+    <div id="shop-modal" class="absolute inset-0 bg-slate-950/95 z-50 hidden flex-col p-0 slide-up">
+        <div class="h-16 flex justify-between items-center px-6 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
+            <h2 class="text-lg font-bold text-white uppercase tracking-wider">Loja</h2>
+            <button onclick="closeShop()" class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="shop-list" class="grid grid-cols-1 gap-3 overflow-y-auto pb-32 p-4"></div>
+    </div>
+
+    <!-- Team Select -->
+    <div id="team-select-screen" class="absolute inset-0 bg-slate-950 z-40 hidden flex-col slide-up">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 bg-slate-900">
+            <h2 class="text-lg font-bold text-white uppercase tracking-wider">Preparar Time</h2>
+            <button onclick="closePrep()" class="text-slate-400 hover:text-white w-8 h-8 flex items-center justify-center"><i class="fas fa-times text-lg"></i></button>
+        </div>
+        
+        <div class="flex-1 p-3 overflow-y-auto overflow-x-hidden pb-24">
+            <!-- Slots -->
+            <div class="flex justify-between gap-2 mb-6">
+                <div id="slot-0" class="h-16 flex-1 bg-slate-900 rounded-xl border border-slate-700 flex items-center justify-center relative shadow-inner min-w-0"></div>
+                <div id="slot-1" class="h-16 flex-1 bg-slate-900 rounded-xl border border-slate-700 flex items-center justify-center relative shadow-inner min-w-0"></div>
+                <div id="slot-2" class="h-16 flex-1 bg-slate-900 rounded-xl border border-slate-700 flex items-center justify-center relative shadow-inner min-w-0"></div>
+                <div id="slot-3" class="h-16 flex-1 bg-slate-900 rounded-xl border border-slate-700 flex items-center justify-center relative shadow-inner min-w-0"></div>
+            </div>
+
+            <!-- Blitz -->
+            <div id="blitz-container" class="mb-6 hidden">
+                <button onclick="blitzBattle()" class="w-full bg-gradient-to-r from-purple-900 to-slate-900 border border-purple-500/50 text-purple-200 font-bold py-3 rounded-2xl shadow-lg active:scale-95 transition uppercase flex items-center justify-center gap-3 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-purple-500/10 group-hover:bg-purple-500/20 transition"></div>
+                    <i class="fas fa-bolt text-yellow-400 animate-pulse"></i>
+                    <span>Batalha Rápida (3x)</span>
+                    <span class="text-xs bg-slate-950 px-2 py-1 rounded text-purple-300 font-mono" id="blitz-cost">15⚡</span>
+                </button>
+            </div>
+
+            <div class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-widest pl-1">Sua Coleção</div>
+            <div id="roster-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="p-4 bg-slate-900 border-t border-slate-800 pb-8">
+            <button onclick="confirmBattle()" id="btn-start-battle" class="btn-primary w-full py-4 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-lg">INICIAR</button>
+        </div>
+    </div>
+
+    <!-- Summon Reveal -->
+    <div id="summon-reveal-modal" class="absolute inset-0 bg-slate-950 z-[100] hidden flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+        <!-- Close Button for Safety -->
+        <button onclick="closeSummonReveal()" class="absolute top-6 right-6 text-white text-2xl z-[110] opacity-50 hover:opacity-100"><i class="fas fa-times"></i></button>
+
+        <div id="summon-card-back" class="w-56 h-80 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl border-2 border-indigo-500/50 shadow-[0_0_50px_rgba(99,102,241,0.3)] flex items-center justify-center anim-summon-shake cursor-pointer hover:scale-105 transition-transform relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30"></div>
+            <div class="text-7xl text-indigo-400 opacity-50"><i class="fas fa-question"></i></div>
+        </div>
+        
+        <div id="summon-card-front" class="hidden flex-col items-center w-full h-full justify-center relative">
+            <div id="summon-shine" class="absolute inset-0 pointer-events-none hidden">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-tr from-yellow-500/20 to-transparent rotate-45 blur-3xl"></div>
+            </div>
+            
+            <div class="animate-bounce-in flex flex-col items-center">
+                <div id="summon-icon-container" class="mb-8 relative z-10 w-40 h-40 flex items-center justify-center"></div>
+                
+                <div id="summon-stars" class="flex gap-1 text-2xl mb-4 drop-shadow-md"></div>
+                <h1 id="summon-name" class="text-4xl font-black text-white uppercase mb-2 text-center text-shadow tracking-tight"></h1>
+                <div id="summon-rarity-text" class="text-sm font-bold text-slate-400 uppercase tracking-[0.3em] mb-12 border-t border-b border-slate-700 py-1 px-8"></div>
+                
+                <button onclick="closeSummonReveal()" class="bg-white text-slate-900 px-10 py-4 rounded-full font-bold uppercase shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:bg-slate-200 transition active:scale-95 tracking-wider">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BATTLE SCREEN -->
+    <div id="battle-screen" class="absolute inset-0 bg-slate-950 z-50 flex flex-col hidden">
+        <!-- Battle Top -->
+        <div class="h-14 bg-gradient-to-b from-slate-900 to-transparent flex items-center justify-between px-4 shrink-0 z-[60]">
+            <button onclick="quitBattle()" class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-600 text-slate-300 hover:text-white backdrop-blur-md flex items-center justify-center"><i class="fas fa-chevron-left text-xs"></i></button>
+            
+            <div class="flex flex-col items-center">
+                <span class="font-bold text-yellow-500 uppercase text-[10px] tracking-widest">Em Combate</span>
+                <span class="font-black text-white uppercase text-xs shadow-black drop-shadow-md" id="battle-title">Arena</span>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="toggleSpeed()" id="btn-speed" class="text-[9px] font-bold border border-slate-600 bg-slate-800/50 px-2 py-1 rounded-lg text-slate-300 backdrop-blur-md min-w-[30px]">1x</button>
+                <button onclick="toggleAuto()" id="btn-auto" class="text-[9px] font-bold border border-slate-600 bg-slate-800/50 px-2 py-1 rounded-lg text-slate-300 backdrop-blur-md">AUTO</button>
+            </div>
+        </div>
+
+        <!-- Stage -->
+        <div class="flex-1 relative bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] overflow-hidden" id="battle-container-el">
+            <!-- Background Environment -->
+            <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-indigo-950/20 to-slate-900 opacity-80"></div>
+            
+            <div class="battle-camera-wrapper perspective-1000">
+                <div id="battle-stage" class="battle-stage flex flex-col justify-center gap-4 py-4 relative h-full">
+                    <!-- Enemy Row -->
+                    <div class="flex justify-center items-end gap-2 px-4 min-h-[80px] relative z-10" id="enemy-row"></div>
+                    
+                    <!-- Center Spacing (Invisible) -->
+                    <div class="h-8 w-full"></div>
+                    
+                    <!-- Ally Row -->
+                    <div class="flex justify-center items-end gap-2 px-4 min-h-[80px] relative z-20" id="ally-row"></div>
+                </div>
+            </div>
+            <div id="vfx-layer" class="vfx-container"></div>
+        </div>
+
+        <!-- Battle UI - Reduced Height -->
+        <div class="h-48 glass-heavy shrink-0 z-[60] flex flex-col rounded-t-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.6)] relative -mt-2 border-t border-white/10">
+            <div class="h-6 flex items-center justify-between px-4 border-b border-white/5 text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-black/20">
+                <span id="battle-log">Batalha iniciada...</span>
+                <span id="target-indicator" class="text-yellow-500 opacity-0 transition-opacity">--</span>
+            </div>
+            <div id="skill-container" class="flex-1 flex gap-2 p-3 items-center justify-center overflow-x-auto hide-scrollbar"></div>
+        </div>
+
+        <!-- Result -->
+        <div id="result-modal" class="absolute inset-0 bg-slate-950/95 backdrop-blur-xl hidden flex-col items-center justify-center z-[80] p-8 fade-in">
+            <div class="text-8xl mb-6 anim-breathe drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" id="res-icon"></div>
+            <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 italic mb-2 uppercase tracking-tighter" id="res-title"></h1>
+            <div class="w-24 h-1.5 bg-yellow-500 rounded-full mb-10 shadow-[0_0_15px_rgba(234,179,8,0.5)]"></div>
+            
+            <div class="bg-slate-900/50 rounded-3xl p-6 w-full max-w-xs border border-white/10 shadow-xl mb-8">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                        <span class="text-xs text-slate-400 font-bold uppercase flex items-center gap-2"><i class="fas fa-bolt text-blue-400"></i> Mana</span>
+                        <span class="text-2xl font-bold text-blue-400 text-shadow" id="res-mana">0</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                        <span class="text-xs text-slate-400 font-bold uppercase flex items-center gap-2"><i class="fas fa-gem text-pink-400"></i> Cristais</span>
+                        <span class="text-2xl font-bold text-pink-400 text-shadow" id="res-gems">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-400 font-bold uppercase flex items-center gap-2"><i class="fas fa-user-circle text-purple-400"></i> Conta XP</span>
+                        <span class="text-2xl font-bold text-purple-400 text-shadow" id="res-acc-xp">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="drop-msg" class="text-yellow-400 font-bold text-sm mb-8 h-6 tracking-wide uppercase"></div>
+            <button onclick="closeResult()" class="btn-primary w-full max-w-xs py-4 rounded-xl text-lg">Continuar</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* EMOJIWAR LEGENDS - CORE LOGIC 
+    (Logic preserved, UI rendering updated for Pro Design)
+*/
+
+// --- UTILS ---
+let confirmCallback = null;
+
+function showToast(msg) {
+    const el = document.getElementById('toast-msg');
+    const m = document.getElementById('toast-modal');
+    el.innerText = msg;
+    m.classList.remove('hidden'); m.classList.add('flex');
+    setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 2000);
+}
+function showConfirm(msg, callback) {
+    confirmCallback = callback;
+    document.getElementById('confirm-msg').innerText = msg;
+    const m = document.getElementById('confirm-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeConfirm(result) {
+    const m = document.getElementById('confirm-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+    if (result && confirmCallback) confirmCallback();
+    confirmCallback = null;
+}
+function showMiniFeedback(event, text) {
+    // Optional click feedback logic
+}
+
+function getStarColor(stars) {
+    if (stars >= 5) return 'text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]';
+    if (stars === 4) return 'text-purple-400';
+    return 'text-slate-500';
+}
+function getRarityClass(stars) {
+    if (stars >= 5) return 'glow-legend border-yellow-500/50';
+    if (stars === 4) return 'glow-epic border-purple-500/50';
+    if (stars === 3) return 'glow-rare border-blue-500/50';
+    return 'glow-common border-slate-600/50';
+}
+
+function getElIcon(el) {
+    switch(el) {
+        case 'fire': return '🔥'; case 'water': return '💧'; case 'wind': return '🌪️';
+        case 'earth': return '🪨'; case 'light': return '✨'; case 'dark': return '🌑';
+        default: return '';
+    }
+}
+function getUnitIcon(dbEntry, cssClass = '') {
+    if (dbEntry && dbEntry.img) return `<img src="${dbEntry.img}" class="img-unit ${cssClass}" alt="${dbEntry.name}">`;
+    const icon = dbEntry ? dbEntry.icon : '❓';
+    return `<div class="emoji-unit ${cssClass}">${icon}</div>`;
+}
+
+// --- DATABASE & DATA ---
+var BOSS_STAGES = [
+    { id:1, name:'Guardião Bronze', icon:'👺', cost:5, dropRate:0.3 },
+    { id:2, name:'Guardião Prata', icon:'🤖', cost:5, dropRate:0.4 },
+    { id:3, name:'Guardião Ouro', icon:'🌞', cost:5, dropRate:0.5 },
+    { id:4, name:'Lorde Runa', icon:'🧿', cost:5, dropRate:0.6 },
+    { id:5, name:'Rei Antigo', icon:'👑', cost:5, dropRate:0.7 },
+    { id:6, name:'Imperador', icon:'🔱', cost:5, dropRate:0.8 },
+    { id:7, name:'Deus Caído', icon:'👿', cost:5, dropRate:1.0 }
+];
+
+var DB = [
+    { 
+        id:'wind1', 
+        name:'Grifo', 
+        el:'wind', 
+        icon:'🦅',
+        img: null, // COLOCAR URL DA IMAGEM AQUI (ex: 'https://site.com/grifo.png')
+        stars:3, 
+        stats:{hp:2200, atk:150, def:180, spd:95}, 
+        skills:[
+            {name:'Bicar', mul:1.0, cd:0, type:'phys', anim:'slash'}, 
+            {name:'Rasante', mul:1.6, cd:2, type:'phys', anim:'slash'}, 
+            {name:'Vendaval', mul:2.0, cd:4, type:'magic', anim:'shockwave'}
+        ] 
+    },
+    { 
+        id:'fire1', 
+        name:'Oni', 
+        el:'fire', 
+        icon:'👹',
+        img: null,
+        stars:3, 
+        stats:{hp:1800, atk:220, def:140, spd:105}, 
+        skills:[
+            {name:'Golpe', mul:1.0, cd:0, type:'phys', anim:'slash'}, 
+            {name:'Esmagar', mul:1.8, cd:3, type:'phys', anim:'explosion'}, 
+            {name:'Fúria', mul:2.5, cd:5, type:'magic', anim:'beam'}
+        ] 
+    },
+    { 
+        id:'fire_imp', 
+        name:'Diabrete', 
+        el:'fire', 
+        icon:'👿',
+        img: null,
+        stars:1, 
+        stats:{hp:1200, atk:100, def:80, spd:110}, 
+        skills:[
+            {name:'Brasa', mul:1, cd:0, type:'magic', anim:'slash'},
+            {name:'Morder', mul:1.2, cd:2, type:'phys', anim:'slash'},
+            {name:'Rir', mul:0, cd:4, type:'magic', anim:'shockwave'}
+        ] 
+    },
+    { 
+        id:'fire_fox', 
+        name:'Raposa', 
+        el:'fire', 
+        icon:'🦊',
+        img: null,
+        stars:2, 
+        stats:{hp:1500, atk:140, def:100, spd:115}, 
+        skills:[
+            {name:'Arranhar', mul:1, cd:0, type:'phys', anim:'slash'},
+            {name:'Chama', mul:1.5, cd:3, type:'magic', anim:'explosion'},
+            {name:'Vulto', mul:1.8, cd:5, type:'magic', anim:'shockwave'}
+        ] 
+    },
+    { 
+        id:'fire_lion', 
+        name:'Leão Fogo', 
+        el:'fire', 
+        icon:'🦁',
+        img: null,
+        stars:4, 
+        stats:{hp:2600, atk:230, def:150, spd:100}, 
+        skills:[
+            {name:'Rugido', mul:1.2, cd:0, type:'magic', anim:'shockwave'},
+            {name:'Garras', mul:1.8, cd:3, type:'phys', anim:'slash'},
+            {name:'Inferno', mul:2.5, cd:6, type:'magic', anim:'beam'}
+        ] 
+    },
+    { 
+        id:'fire_phoenix', 
+        name:'Fênix', 
+        el:'fire', 
+        icon:'🐦',
+        img: null,
+        stars:5, 
+        stats:{hp:3500, atk:280, def:180, spd:105}, 
+        skills:[
+            {name:'Cinzas', mul:1.2, cd:0, type:'magic', anim:'shockwave'},
+            {name:'Renascer', mul:2.0, cd:4, type:'magic', anim:'beam'},
+            {name:'Supernova', mul:3.5, cd:7, type:'magic', aoe:true, anim:'explosion'}
+        ] 
+    },
+    { 
+        id:'water_fish', 
+        name:'Peixinho', 
+        el:'water', 
+        icon:'🐠',
+        img: null,
+        stars:1, 
+        stats:{hp:1300, atk:90, def:90, spd:100}, 
+        skills:[
+            {name:'Bolha', mul:1, cd:0, type:'magic', anim:'slash'},
+            {name:'Nadar', mul:1.2, cd:2, type:'phys', anim:'slash'},
+            {name:'Splash', mul:1.5, cd:4, type:'magic', anim:'shockwave'}
+        ] 
+    },
+    { 
+        id:'water_shark', 
+        name:'Tubarão', 
+        el:'water', 
+        icon:'🦈',
+        img: null,
+        stars:4, 
+        stats:{hp:2400, atk:250, def:140, spd:105}, 
+        skills:[
+            {name:'Mordida', mul:1.2, cd:0, type:'phys', anim:'slash'},
+            {name:'Caçada', mul:2.0, cd:3, type:'phys', anim:'slash'},
+            {name:'Frenesi', mul:2.8, cd:5, type:'phys', anim:'explosion'}
+        ] 
+    },
+    { 
+        id:'water_whale', 
+        name:'Baleia', 
+        el:'water', 
+        icon:'🐋',
+        img: null,
+        stars:5, 
+        stats:{hp:4500, atk:180, def:250, spd:85}, 
+        skills:[
+            {name:'Onda', mul:1.2, cd:0, type:'magic', anim:'shockwave'},
+            {name:'Mergulho', mul:2.0, cd:4, type:'phys', anim:'explosion'},
+            {name:'Tsunami', mul:3.0, cd:6, type:'magic', aoe:true, anim:'beam'}
+        ] 
+    },
+    { 
+        id:'wind_bee', 
+        name:'Abelha', 
+        el:'wind', 
+        icon:'🐝',
+        img: null,
+        stars:1, 
+        stats:{hp:1000, atk:150, def:60, spd:130}, 
+        skills:[
+            {name:'Ferrão', mul:1.1, cd:0, type:'phys', anim:'slash'},
+            {name:'Zumbido', mul:1.3, cd:2, type:'magic', anim:'shockwave'},
+            {name:'Enxame', mul:1.8, cd:4, type:'phys', anim:'explosion'}
+        ] 
+    },
+    { 
+        id:'wind_eagle', 
+        name:'Águia', 
+        el:'wind', 
+        icon:'🦅',
+        img: null,
+        stars:3, 
+        stats:{hp:2000, atk:170, def:120, spd:120}, 
+        skills:[
+            {name:'Garra', mul:1.1, cd:0, type:'phys', anim:'slash'},
+            {name:'Voo', mul:1.5, cd:3, type:'phys', anim:'slash'},
+            {name:'Tornado', mul:2.2, cd:5, type:'magic', anim:'shockwave'}
+        ] 
+    },
+    { 
+        id:'wind_dragon', 
+        name:'Dragão Celeste', 
+        el:'wind', 
+        icon:'🐲',
+        img: null,
+        stars:5, 
+        stats:{hp:3800, atk:260, def:200, spd:110}, 
+        skills:[
+            {name:'Sopro', mul:1.3, cd:0, type:'magic', anim:'beam'},
+            {name:'Tempestade', mul:2.2, cd:4, type:'magic', anim:'shockwave'},
+            {name:'Furacão', mul:3.2, cd:6, type:'magic', aoe:true, anim:'explosion'}
+        ] 
+    },
+    { 
+        id:'earth_ant', 
+        name:'Formiga', 
+        el:'earth', 
+        icon:'🐜',
+        img: null,
+        stars:1, 
+        stats:{hp:1400, atk:110, def:110, spd:90}, 
+        skills:[
+            {name:'Picada', mul:1, cd:0, type:'phys', anim:'slash'},
+            {name:'Cavar', mul:1.2, cd:2, type:'phys', anim:'slash'},
+            {name:'Pedra', mul:1.5, cd:4, type:'phys', anim:'explosion'}
+        ] 
+    },
+    { 
+        id:'earth_boar', 
+        name:'Javali', 
+        el:'earth', 
+        icon:'🐗',
+        img: null,
+        stars:2, 
+        stats:{hp:2200, atk:130, def:160, spd:95}, 
+        skills:[
+            {name:'Chifrada', mul:1.1, cd:0, type:'phys', anim:'slash'},
+            {name:'Investida', mul:1.6, cd:3, type:'phys', anim:'slash'},
+            {name:'Lama', mul:1.8, cd:5, type:'magic', anim:'shockwave'}
+        ] 
+    },
+    { 
+        id:'earth_rhino', 
+        name:'Rinoceronte', 
+        el:'earth', 
+        icon:'🦏',
+        img: null,
+        stars:4, 
+        stats:{hp:3200, atk:160, def:280, spd:70}, 
+        skills:[
+            {name:'Esmagar', mul:1.2, cd:0, type:'phys', anim:'explosion'},
+            {name:'Atropelar', mul:2.0, cd:4, type:'phys', anim:'slash'},
+            {name:'Terremoto', mul:2.5, cd:6, type:'phys', aoe:true, anim:'shockwave'}
+        ] 
+    },
+    { 
+        id:'light_orb', 
+        name:'Luz', 
+        el:'light', 
+        icon:'✨',
+        img: null,
+        stars:1, 
+        stats:{hp:1100, atk:120, def:80, spd:105}, 
+        skills:[
+            {name:'Brilho', mul:1, cd:0, type:'magic', anim:'slash'},
+            {name:'Flash', mul:1.3, cd:2, type:'magic', anim:'beam'},
+            {name:'Raio', mul:1.6, cd:4, type:'magic', anim:'beam'}
+        ] 
+    },
+    { 
+        id:'light_star', 
+        name:'Estrela', 
+        el:'light', 
+        icon:'⭐',
+        img: null,
+        stars:3, 
+        stats:{hp:1800, atk:190, def:120, spd:110}, 
+        skills:[
+            {name:'Cintilar', mul:1.1, cd:0, type:'magic', anim:'slash'},
+            {name:'Cadente', mul:1.8, cd:3, type:'phys', anim:'explosion'},
+            {name:'Explosão', mul:2.4, cd:5, type:'magic', anim:'beam'}
+        ] 
+    },
+    { 
+        id:'light_god', 
+        name:'Divindade', 
+        el:'light', 
+        icon:'😇',
+        img: null,
+        stars:5, 
+        stats:{hp:4000, atk:240, def:240, spd:100}, 
+        skills:[
+            {name:'Punição', mul:1.3, cd:0, type:'magic', anim:'beam'},
+            {name:'Graça', mul:2.2, cd:4, type:'magic', anim:'shockwave'},
+            {name:'Juízo Final', mul:3.5, cd:7, type:'magic', aoe:true, anim:'beam'}
+        ] 
+    },
+    { 
+        id:'dark_bat', 
+        name:'Morcego', 
+        el:'dark', 
+        icon:'🦇',
+        img: null,
+        stars:1, 
+        stats:{hp:1000, atk:110, def:70, spd:120}, 
+        skills:[
+            {name:'Mordida', mul:1, cd:0, type:'phys', anim:'slash'},
+            {name:'Sônico', mul:1.2, cd:2, type:'magic', anim:'shockwave'},
+            {name:'Suga', mul:1.5, cd:4, type:'magic', anim:'beam'}
+        ] 
+    },
+    { 
+        id:'dark_ghost', 
+        name:'Fantasma', 
+        el:'dark', 
+        icon:'👻',
+        img: null,
+        stars:3, 
+        stats:{hp:1600, atk:200, def:100, spd:115}, 
+        skills:[
+            {name:'Susto', mul:1.1, cd:0, type:'magic', anim:'shockwave'},
+            {name:'Assombrar', mul:1.7, cd:3, type:'magic', anim:'slash'},
+            {name:'Possessão', mul:2.5, cd:5, type:'magic', anim:'explosion'}
+        ] 
+    },
+    { 
+        id:'dark_reaper', 
+        name:'Ceifador', 
+        el:'dark', 
+        icon:'💀',
+        img: null,
+        stars:5, 
+        stats:{hp:3000, atk:320, def:140, spd:110}, 
+        skills:[
+            {name:'Foice', mul:1.4, cd:0, type:'phys', anim:'slash'},
+            {name:'Morte', mul:2.5, cd:4, type:'phys', anim:'slash'},
+            {name:'Abismo', mul:3.2, cd:6, type:'magic', aoe:true, anim:'explosion'}
+        ] 
+    }
+];
+
+var BOOKS = [
+    { id: 'bk_atk', name: 'Runa Força', stat: 'atk', val: 0.10, icon: '⚔️', type: 'atk' },
+    { id: 'bk_hp', name: 'Runa Vida', stat: 'hp', val: 0.10, icon: '❤️', type: 'hp' },
+    { id: 'bk_def', name: 'Runa Ferro', stat: 'def', val: 0.10, icon: '🛡️', type: 'def' },
+    { id: 'bk_spd', name: 'Runa Vento', stat: 'spd', val: 5, icon: '👢', type: 'spd' }
+];
+
+var SHOP_ITEMS = [
+    { id: 'tik_common', name: 'Cartão Comum', cost: 500, curr: 'mana', icon: '🎫', desc: 'Invoca 1-4★' },
+    { id: 'tik_rare', name: 'Cartão Raro', cost: 100, curr: 'gems', icon: '🎟️', desc: 'Invoca 3-5★' },
+    { id: 'pot_xp', name: 'Poção XP', cost: 200, curr: 'mana', icon: '🧪', desc: '+500 XP' },
+    { id: 'energy_refill', name: 'Energia Full', cost: 50, curr: 'gems', icon: '⚡', desc: 'Recarrega Tudo' }
+];
+
+var STAGES = [
+    { id:1, name:'Floresta Antiga', eny:['wind_bee','fire_imp','earth_ant'], cost:2 },
+    { id:2, name:'Vulcão Ativo', eny:['fire_imp','fire_fox','fire_lion'], cost:2 },
+    { id:3, name:'Abismo Oceânico', eny:['water_fish','water_shark','water_whale'], cost:2 },
+    { id:4, name:'Caverna Profunda', eny:['earth_boar','earth_rhino','earth_ant'], cost:2 },
+    { id:5, name:'Torre do Caos', eny:['dark_ghost','light_star','dark_reaper'], cost:2 }
+];
+
+var p = null; 
+var prep = { team: [], stageId: 0, type: 'pve', isBoss: false };
+var activeSlot = -1;
+var activeMonUid = null;
+var monFilter = 'all';
+var sellingMode = false;
+
+// --- SYSTEM ---
+function login() {
+    const n = document.getElementById('login-input').value.trim() || 'Invocador';
+    const s = localStorage.getItem('ew_pro_' + n); // Changed save key to separate from old version
+    p = s ? JSON.parse(s) : { 
+        name:n, mana:2000, gems:200, en:30, 
+        accLv: 1, accXp: 0, maxEn: 30, lastRegen: Date.now(),
+        mons:[], inventory: [], bag: {tik_common:0, tik_rare:0, pot_xp:0},
+        global: { g_atk:0, g_hp:0, g_def:0 },
+        clearedStages: [], clearedBosses: []
+    };
+    
+    // Safety
+    if(!p.inventory) p.inventory = [];
+    if(!p.bag) p.bag = {tik_common:0, tik_rare:0, pot_xp:0};
+    if(!p.global) p.global = { g_atk:0, g_hp:0, g_def:0 };
+    if(!p.clearedStages) p.clearedStages = [];
+    if(!p.clearedBosses) p.clearedBosses = [];
+    p.accXp = parseInt(p.accXp) || 0;
+    p.accLv = parseInt(p.accLv) || 1;
+    p.mana = parseInt(p.mana) || 0;
+    p.gems = parseInt(p.gems) || 0;
+    
+    if(p.mons.length === 0) addMon('wind1',1); 
+    
+    p.mons.forEach(m => {
+        if (!m.equip) m.equip = [null, null, null, null];
+        if (!m.xp) m.xp = 0;
+        if (!m.skLvs) m.skLvs = [1, 1, 1];
+        m.lv = Number(m.lv);
+    });
+    
+    checkEnergyRegen();
+    setInterval(checkEnergyRegen, 10000); 
+
+    save();
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app-screen').classList.remove('hidden');
+    document.getElementById('app-screen').classList.add('flex');
+    updUI(); nav('home');
+}
+function logout() { location.reload(); }
+function save() { if(p) localStorage.setItem('ew_pro_'+p.name, JSON.stringify(p)); }
+
+function checkEnergyRegen() {
+    if(!p) return;
+    const now = Date.now();
+    const diff = now - p.lastRegen;
+    const regenTime = 3 * 60 * 1000; 
+    if(diff >= regenTime) {
+        const amt = Math.floor(diff / regenTime);
+        if(p.en < p.maxEn) {
+            p.en = Math.min(p.maxEn, p.en + amt);
+            updUI();
+        }
+        p.lastRegen = now - (diff % regenTime);
+        save();
+    }
+}
+
+function addMon(id, lvl) { 
+    const t = DB.find(x=>x.id===id);
+    const uid = (Date.now() + Math.random()).toString(); 
+    p.mons.push({ uid: uid, id:id, lv:lvl, s:t.stars, xp:0, equip: [null,null,null,null], skLvs:[1,1,1] });
+}
+
+function updUI() {
+    document.getElementById('ui-name').innerText = p.name;
+    document.getElementById('ui-mana').innerText = p.mana;
+    document.getElementById('ui-gems').innerText = p.gems;
+    document.getElementById('ui-acc-lvl-badge').innerText = p.accLv;
+    document.getElementById('ui-energy-text').innerText = `${p.en}/${p.maxEn}`;
+    
+    const accReq = p.accLv * 500;
+    const accPct = Math.min(100, (p.accXp / accReq) * 100);
+    document.getElementById('ui-acc-xp-bar').style.width = accPct + '%';
+}
+
+function nav(scr) {
+    const v = document.getElementById('main-view');
+    v.innerHTML = '';
+    
+    // Reset Nav
+    document.querySelectorAll('.nav-btn').forEach(b => {
+        b.querySelector('div').classList.remove('text-yellow-400');
+        b.querySelector('span').classList.remove('text-white', 'opacity-100');
+    });
+
+    if(scr === 'home') {
+        const leader = p.mons[0];
+        const d = DB.find(x => x.id === leader.id);
+        // Reduced container size from w-32 h-32 to w-24 h-24
+        // Reduced text size slightly to text-6xl for better fit
+        const iconHtml = getUnitIcon(d, 'hero-float w-24 h-24 text-6xl drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center leading-none');
+        const bgEl = `bg-el-${d.el}`;
+
+        v.innerHTML = `
+        <div class="flex flex-col min-h-full pb-6 pt-4">
+            <!-- Hero Showcase - Compacted & Spaced from Top -->
+            <div class="relative h-48 w-full flex items-center justify-center overflow-visible shrink-0 mb-2">
+                <div class="absolute inset-0 ${bgEl} opacity-30 blur-xl scale-75 rounded-full"></div>
+                <!-- z-30 to stay above elements, flex-col with tight spacing -->
+                <div class="relative z-30 flex flex-col items-center justify-center">
+                    <div class="mb-1">${iconHtml}</div>
+                    <div class="text-center">
+                        <h2 class="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-lg leading-none mb-1">${d.name}</h2>
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 backdrop-blur-sm">Lv.${leader.lv}</span>
+                            <div class="flex text-[10px] ${getStarColor(leader.s)}">${'★'.repeat(leader.s)}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Cards - Compacted -->
+            <div class="px-4 relative z-20 grid grid-cols-2 gap-2 pb-8">
+                
+                <!-- Campaign Card -->
+                <div onclick="nav('battle')" class="col-span-2 h-20 rounded-2xl relative overflow-hidden group cursor-pointer shadow-xl border border-white/10">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-slate-900 transition group-hover:scale-105 duration-500"></div>
+                    <div class="absolute right-[-10px] bottom-[-10px] text-6xl opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-500">⚔️</div>
+                    <div class="relative z-10 h-full flex flex-col justify-center px-6">
+                        <div class="text-[9px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-0.5">Campanha</div>
+                        <div class="text-xl font-black text-white italic tracking-tighter">BATALHAR</div>
+                        <div class="text-[9px] text-slate-400">Farmar XP</div>
+                    </div>
+                </div>
+
+                <!-- PvP Card -->
+                <div onclick="openPrep(0, 'pvp')" class="col-span-2 h-16 rounded-2xl relative overflow-hidden group cursor-pointer shadow-lg border border-white/10">
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-900 to-slate-900 transition group-hover:scale-105 duration-500"></div>
+                    <div class="absolute right-4 top-1 text-4xl opacity-10">🏆</div>
+                    <div class="relative z-10 h-full flex items-center justify-between px-6">
+                        <div>
+                            <div class="text-[9px] font-bold text-red-400 uppercase tracking-[0.2em]">Competitivo</div>
+                            <div class="text-lg font-black text-white italic tracking-tighter">ARENA PVP</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-white/20"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-auto px-4 text-center pb-4">
+                <div class="text-[8px] text-slate-600 uppercase tracking-[0.3em] font-bold">Version 2.4 Pro</div>
+            </div>
+        </div>`;
+    } 
+    else if(scr === 'monsters') { renderMonsterList(v); }
+    else if(scr === 'battle') {
+        let h = `<div class="p-6 space-y-6">`;
+        
+        // Campaign
+        h += `<div>
+            <h2 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest pl-1 border-l-4 border-blue-500 ml-1">Campanha</h2>
+            <div class="space-y-3">`;
+        STAGES.forEach((s, i) => {
+            const isUnlocked = i === 0 || p.clearedStages.includes(STAGES[i-1].id);
+            const isCleared = p.clearedStages.includes(s.id);
+            const opacity = isUnlocked ? 'opacity-100' : 'opacity-50 grayscale pointer-events-none';
+            
+            h += `<div onclick="openPrep(${s.id},'pve')" class="h-20 bg-slate-900 rounded-2xl border border-slate-800 relative overflow-hidden active:scale-95 transition-all cursor-pointer shadow-lg group ${opacity}">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-transparent group-hover:from-blue-900/40 transition"></div>
+                <div class="relative z-10 p-4 flex flex-col justify-center h-full pl-6">
+                    <div class="text-[9px] font-bold text-blue-400 uppercase tracking-wider">Estágio ${s.id}</div>
+                    <div class="text-lg font-bold text-white flex items-center gap-2">
+                        ${s.name} ${isCleared ? '<i class="fas fa-check text-green-500 text-xs"></i>' : ''}
+                    </div>
+                    <div class="text-[10px] text-slate-500 font-bold mt-0.5">Custo: ${s.cost}⚡</div>
+                </div>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-2xl text-slate-700 group-hover:text-blue-500 transition"><i class="fas fa-play"></i></div>
+            </div>`;
+        });
+        h += `</div></div>`;
+
+        // Bosses
+        h += `<div class="mt-8">
+            <h2 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest pl-1 border-l-4 border-red-500 ml-1">Chefes</h2>
+            <div class="space-y-3">`;
+        BOSS_STAGES.forEach((s, i) => {
+            const isUnlocked = i === 0 || p.clearedBosses.includes(BOSS_STAGES[i-1].id);
+            const isCleared = p.clearedBosses.includes(s.id);
+            const opacity = isUnlocked ? 'opacity-100' : 'opacity-50 grayscale pointer-events-none';
+            
+            h += `<div onclick="openPrep(${s.id},'boss')" class="h-24 bg-gradient-to-br from-red-950 to-slate-900 rounded-2xl border border-red-900/50 relative overflow-hidden active:scale-95 transition-all cursor-pointer shadow-lg group ${opacity}">
+                <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-20 group-hover:rotate-12 transition-transform duration-500">${s.icon}</div>
+                <div class="relative z-10 p-4 flex flex-col justify-center h-full pl-6">
+                    <div class="text-[9px] font-bold text-red-400 uppercase tracking-wider">Chefe Nível ${s.id}</div>
+                    <div class="text-xl font-black text-white flex items-center gap-2 tracking-tight">
+                        ${s.name} ${isCleared ? '<i class="fas fa-crown text-yellow-500 text-xs"></i>' : ''}
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <span class="bg-black/30 px-2 py-0.5 rounded text-[9px] text-red-200 border border-red-500/20">${s.cost}⚡</span>
+                        <span class="bg-black/30 px-2 py-0.5 rounded text-[9px] text-red-200 border border-red-500/20">Drop: Runas</span>
+                    </div>
+                </div>
+            </div>`;
+        });
+        h += `</div></div></div>`;
+        v.innerHTML = h;
+    }
+    else if(scr === 'summon') {
+        v.innerHTML = `
+        <div class="p-6 h-full flex flex-col items-center overflow-y-auto">
+            <h2 class="text-2xl font-black text-white mb-8 uppercase tracking-widest text-center">Portal de<br>Invocação</h2>
+            
+            <div class="flex justify-center gap-4 w-full max-w-sm mb-8">
+                <div class="bg-slate-900 px-4 py-2 rounded-xl border border-slate-700 flex flex-col items-center min-w-[100px]">
+                    <span class="text-xs text-slate-400 uppercase">Comum</span>
+                    <span class="text-xl font-bold text-white">x${p.bag.tik_common || 0}</span>
+                </div>
+                <div class="bg-slate-900 px-4 py-2 rounded-xl border border-slate-700 flex flex-col items-center min-w-[100px]">
+                    <span class="text-xs text-yellow-400 uppercase">Raro</span>
+                    <span class="text-xl font-bold text-white">x${p.bag.tik_rare || 0}</span>
+                </div>
+            </div>
+
+            <div class="space-y-6 w-full max-w-sm">
+                <!-- Common -->
+                <div onclick="summon('common')" class="h-32 bg-slate-800 rounded-3xl relative overflow-hidden group cursor-pointer border border-slate-600 active:scale-95 transition shadow-lg">
+                    <div class="absolute inset-0 bg-gradient-to-r from-slate-700 to-transparent opacity-50"></div>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-6xl opacity-20 group-hover:scale-110 transition">🎫</div>
+                    <div class="relative z-10 p-6 flex flex-col justify-center h-full">
+                        <div class="text-2xl font-black text-white uppercase italic">Normal</div>
+                        <div class="text-xs text-slate-300">1-4 Estrelas</div>
+                        <div class="mt-2 text-xs bg-slate-900 inline-block px-3 py-1 rounded-full text-slate-400">Usar 1</div>
+                    </div>
+                </div>
+
+                <!-- Rare -->
+                <div onclick="summon('rare')" class="h-32 bg-gradient-to-r from-yellow-900 to-slate-900 rounded-3xl relative overflow-hidden group cursor-pointer border border-yellow-600/50 active:scale-95 transition shadow-xl shadow-yellow-900/20">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30"></div>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-6xl opacity-40 group-hover:scale-110 transition drop-shadow-lg">🎟️</div>
+                    <div class="relative z-10 p-6 flex flex-col justify-center h-full">
+                        <div class="text-2xl font-black text-yellow-400 uppercase italic">Premium</div>
+                        <div class="text-xs text-yellow-200/70">3-5 Estrelas</div>
+                        <div class="mt-2 text-xs bg-black/40 inline-block px-3 py-1 rounded-full text-yellow-200 border border-yellow-500/30">Usar 1</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+}
+
+function renderMonsterList(container) {
+    let filterHtml = `<div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2 mb-4 px-1">
+        <button onclick="setFilter('all')" class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase transition-colors ${monFilter=='all'?'bg-yellow-500 text-black shadow-lg shadow-yellow-500/30':'bg-slate-800 text-slate-400 border border-slate-700'}">Todos</button>
+        ${['fire','water','wind','earth','light','dark'].map(el => `<button onclick="setFilter('${el}')" class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase transition-colors ${monFilter==el?'bg-white text-black':'bg-slate-800 text-slate-400 border border-slate-700'}">${getElIcon(el)}</button>`).join('')}
+    </div>
+    <div class="flex justify-end mb-4">
+        <button onclick="toggleSellMode()" class="text-[10px] font-bold uppercase px-3 py-1 rounded border ${sellingMode ? 'bg-red-500/20 text-red-400 border-red-500 animate-pulse' : 'border-slate-700 text-slate-500'}">${sellingMode ? 'Modo Venda Ativo' : 'Vender Monstros'}</button>
+    </div>`;
+    
+    // Updated Grid Logic: 3 cols on small screens, 4 on larger
+    let gridHtml = `<div class="grid grid-cols-3 sm:grid-cols-4 gap-3 pb-8">`;
+    p.mons.forEach(m => {
+        const d = DB.find(x=>x.id===m.id);
+        if(monFilter !== 'all' && d.el !== monFilter) return;
+        
+        const rarityClass = getRarityClass(m.s);
+        const sellClass = sellingMode ? 'animate-shake' : '';
+        const action = sellingMode ? `sellMon('${m.uid}')` : `showMonDetail('${m.uid}')`;
+        const iconHtml = getUnitIcon(d, 'w-[70%] h-[70%]');
+        
+        gridHtml += `<div onclick="${action}" class="aspect-square bg-slate-800 rounded-xl relative cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center overflow-hidden group ${rarityClass} ${sellClass}">
+            <div class="absolute inset-0 bg-el-${d.el} opacity-20 group-hover:opacity-40 transition"></div>
+            <div class="relative z-10 transition-transform group-hover:scale-110 duration-300 text-4xl">${iconHtml}</div>
+            <div class="absolute bottom-0 w-full bg-black/70 backdrop-blur-sm py-0.5 text-[8px] text-center font-bold text-white border-t border-white/10">Lv.${m.lv}</div>
+            <div class="absolute top-1 right-1 flex text-[6px] gap-0.5 ${getStarColor(m.s)}">${'★'.repeat(m.s)}</div>
+        </div>`;
+    });
+    gridHtml += `</div>`;
+    
+    container.innerHTML = `<div class="p-6"><h2 class="text-xl font-black text-white mb-4 uppercase tracking-wider">Seus Monstros</h2>${filterHtml}${gridHtml}</div>`;
+}
+function setFilter(f) { monFilter = f; nav('monsters'); }
+function toggleSellMode() { sellingMode = !sellingMode; nav('monsters'); }
+
+function sellMon(uid) {
+    if(prep.team.includes(uid.toString())) return showToast("Está no time!");
+    const idx = p.mons.findIndex(m => m.uid.toString() === uid.toString());
+    if(idx === -1) return;
+    const m = p.mons[idx];
+    const price = m.s * 300 * (m.s === 5 ? 10 : 1);
+    
+    showConfirm(`Vender Lv.${m.lv} por ${price} Mana?`, () => {
+        p.mons.splice(idx, 1);
+        p.mana += price;
+        save(); updUI(); nav('monsters');
+        showToast(`+${price} Mana`);
+    });
+}
+
+// Team Prep
+function openPrep(id, type) {
+    prep = { team: [], stageId: id, type: type, isBoss: type === 'boss' };
+    if(p.mons.length > 0) prep.team = p.mons.slice(0,4).map(m => m.uid.toString());
+    document.getElementById('team-select-screen').classList.remove('hidden');
+    document.getElementById('team-select-screen').classList.add('flex');
+    renderPrep();
+
+    const blitzBtn = document.getElementById('blitz-container');
+    if (type === 'boss' && p.clearedBosses.includes(id)) {
+        blitzBtn.classList.remove('hidden');
+        const cost = BOSS_STAGES.find(s=>s.id===id).cost;
+        document.getElementById('blitz-cost').innerText = (cost*3) + '⚡';
+    } else {
+        blitzBtn.classList.add('hidden');
+    }
+}
+function closePrep() {
+    document.getElementById('team-select-screen').classList.add('hidden');
+    document.getElementById('team-select-screen').classList.remove('flex');
+}
+function toggleTeam(uid) {
+    uid = uid.toString();
+    const idx = prep.team.indexOf(uid);
+    if(idx > -1) prep.team.splice(idx, 1);
+    else { if(prep.team.length >= 4) return showToast("Time cheio!"); prep.team.push(uid); }
+    renderPrep();
+}
+function renderPrep() {
+    for(let i=0; i<4; i++) {
+        const el = document.getElementById(`slot-${i}`);
+        const uid = prep.team[i];
+        if(uid) {
+            const m = p.mons.find(x=>x.uid.toString() === uid);
+            if(m) {
+                const d = DB.find(x=>x.id===m.id);
+                el.innerHTML = `<div class="text-4xl filter drop-shadow-md relative z-10">${getUnitIcon(d)}</div><div class="absolute top-[-5px] right-[-5px] bg-red-500 rounded-full w-5 h-5 flex items-center justify-center text-xs text-white border border-slate-900 shadow-md"><i class="fas fa-times"></i></div>`;
+                el.className = `h-16 flex-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-slate-600 flex items-center justify-center active:scale-95 transition-all cursor-pointer relative overflow-visible shadow-lg min-w-0`;
+                el.onclick = () => { prep.team.splice(i, 1); renderPrep(); };
+            }
+        } else {
+            el.innerHTML = `<i class="fas fa-plus opacity-20 text-2xl"></i>`;
+            el.className = "h-16 flex-1 bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-800 flex items-center justify-center text-slate-600 min-w-0";
+            el.onclick = null;
+        }
+    }
+    let h = '';
+    p.mons.forEach(m => {
+        const d = DB.find(x=>x.id===m.id);
+        const isSel = prep.team.includes(m.uid.toString());
+        const border = isSel ? 'border-green-500 ring-2 ring-green-500/20' : 'border-slate-700';
+        const op = isSel ? 'opacity-40 grayscale' : 'opacity-100 hover:scale-105';
+        const bg = `bg-el-${d.el}`;
+        
+        h += `<div onclick="toggleTeam('${m.uid}')" class="aspect-square bg-slate-800 rounded-lg border ${border} ${op} flex flex-col items-center justify-center relative active:scale-95 cursor-pointer transition-all overflow-hidden">
+            <div class="absolute inset-0 ${bg} opacity-20"></div>
+            <div class="text-2xl relative z-10">${getUnitIcon(d)}</div>
+            ${isSel ? '<div class="absolute inset-0 flex items-center justify-center z-20"><i class="fas fa-check text-green-400 drop-shadow-md text-xl"></i></div>' : ''}
+            <div class="absolute bottom-0.5 right-1 text-[8px] font-bold text-slate-400">Lv.${m.lv}</div>
+        </div>`;
+    });
+    document.getElementById('roster-grid').className = "grid grid-cols-3 sm:grid-cols-4 gap-2";
+    document.getElementById('roster-grid').innerHTML = h;
+    const btn = document.getElementById('btn-start-battle');
+    btn.disabled = prep.team.length === 0;
+}
+function confirmBattle() {
+    if(prep.team.length > 0) { closePrep(); startBattle(prep.stageId, prep.type, prep.team); }
+}
+
+// Stats & Details
+function calcStats(m) {
+    const d = DB.find(x=>x.id===m.id);
+    let stats = { hp: Math.floor(d.stats.hp * (1+m.lv*0.1)), atk: Math.floor(d.stats.atk * (1+m.lv*0.1)), def: Math.floor(d.stats.def * (1+m.lv*0.1)), spd: d.stats.spd };
+    let adds = { hp:0, atk:0, def:0, spd:0 }, mults = { hp:0, atk:0, def:0, spd:0 }, sets = { hp:0, atk:0, def:0, spd:0 };
+    m.equip.forEach(bid => { if(!bid) return; const bk = BOOKS.find(b=>b.id === bid); if(!bk) return; if(bk.stat === 'spd') adds.spd += bk.val; else mults[bk.stat] += bk.val; if(bk.type) sets[bk.type]++; });
+    if(sets.hp >= 2) mults.hp += 0.20; if(sets.atk >= 4) mults.atk += 0.35; if(sets.def >= 2) mults.def += 0.20; if(sets.spd >= 4) mults.spd += 0.25;
+    stats.hp = Math.floor(stats.hp * (1 + mults.hp) + adds.hp);
+    stats.atk = Math.floor(stats.atk * (1 + mults.atk) + adds.atk);
+    stats.def = Math.floor(stats.def * (1 + mults.def) + adds.def);
+    stats.spd = Math.floor(stats.spd * (1 + mults.spd) + adds.spd);
+    return { total: stats };
+}
+
+function showMonDetail(uid) {
+    activeMonUid = uid;
+    const m = p.mons.find(x=>x.uid.toString() === uid.toString());
+    const d = DB.find(x=>x.id===m.id);
+    const modal = document.getElementById('detail-modal');
+    const content = document.getElementById('detail-content');
+    const s = calcStats(m);
+    const reqXp = m.lv * 100;
+    const xpPct = Math.min(100, (m.xp / reqXp) * 100);
+    const bgEl = `bg-el-${d.el}`;
+    const iconHtml = getUnitIcon(d, 'text-8xl drop-shadow-2xl z-10 w-32 h-32');
+
+    let slotsHtml = `<div class="flex gap-3 justify-center mb-6">`;
+    m.equip.forEach((bid, idx) => {
+        if(bid) { const bk = BOOKS.find(b=>b.id === bid); slotsHtml += `<div onclick="slotAction('${uid}', ${idx})" class="w-12 h-12 bg-slate-800 rounded-lg border border-slate-600 flex items-center justify-center text-xl shadow-lg relative cursor-pointer hover:border-yellow-500 transition">${bk.icon}</div>`; } 
+        else { slotsHtml += `<div onclick="slotAction('${uid}', ${idx})" class="w-12 h-12 bg-slate-900/50 rounded-lg border border-dashed border-slate-700 flex items-center justify-center text-slate-600 cursor-pointer hover:border-slate-500 transition"><i class="fas fa-plus"></i></div>`; }
+    });
+    slotsHtml += `</div>`;
+
+    let skillsHtml = '<div class="space-y-2 mb-4">';
+    d.skills.forEach((sk, i) => {
+        const lvl = m.skLvs ? m.skLvs[i] : 1;
+        skillsHtml += `<div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs border border-slate-700 shadow-sm">
+            <div>
+                <div class="font-bold text-white text-sm">${sk.name}</div>
+                <div class="text-[10px] text-slate-400">Lv.${lvl} • CD: ${sk.cd}</div>
+            </div>
+            <span class="text-yellow-500 font-bold bg-yellow-500/10 px-2 py-1 rounded">${Math.round(sk.mul * (1 + (lvl-1)*0.15) * 100)}%</span>
+        </div>`;
+    });
+    skillsHtml += '</div>';
+
+    const dupeCount = p.mons.filter(x => x.id === m.id && x.uid !== m.uid && !prep.team.includes(x.uid)).length;
+
+    content.innerHTML = `
+        <div class="w-full relative">
+            <!-- Header Card -->
+            <div class="bg-gradient-to-b from-slate-800 to-slate-900 rounded-3xl overflow-hidden border border-slate-700 shadow-2xl relative mb-6">
+                <div class="absolute inset-0 ${bgEl} opacity-30"></div>
+                <div class="p-6 flex flex-col items-center relative z-10">
+                    ${iconHtml}
+                    <h2 class="text-3xl font-black text-white uppercase tracking-tight mt-4">${d.name}</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-slate-300 border border-white/10 uppercase tracking-widest">${d.el}</span>
+                        <div class="flex text-xs ${getStarColor(m.s)}">${'★'.repeat(m.s)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats & XP -->
+            <div class="space-y-6">
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Nível ${m.lv}</span>
+                        <span class="text-[10px] text-slate-500">${Math.floor(m.xp)}/${reqXp} XP</span>
+                    </div>
+                    <div class="h-2 w-full bar-bg mb-4">
+                        <div class="bar-fill xp-grad" style="width: ${xpPct}%"></div>
+                    </div>
+                    <button onclick="trainMon('${uid}')" class="w-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 font-bold py-3 rounded-xl text-xs transition uppercase tracking-wider flex justify-center items-center gap-2">
+                        <span>Treinar (+500XP)</span>
+                        <span class="bg-black/30 px-1.5 py-0.5 rounded text-[10px]">1🧪</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase">HP</span>
+                        <span class="text-sm font-black text-green-400">${s.total.hp}</span>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase">ATK</span>
+                        <span class="text-sm font-black text-red-400">${s.total.atk}</span>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase">DEF</span>
+                        <span class="text-sm font-black text-blue-400">${s.total.def}</span>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase">SPD</span>
+                        <span class="text-sm font-black text-yellow-400">${s.total.spd}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">Runas</h3>
+                    ${slotsHtml}
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">Habilidades</h3>
+                    ${skillsHtml}
+                    ${dupeCount > 0 ? 
+                        `<button onclick="powerUpSkill('${uid}')" class="w-full bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/50 text-purple-300 font-bold py-3 rounded-xl text-xs transition uppercase tracking-wider">
+                            Evoluir Skill (Usar ${dupeCount} Duplicata)
+                        </button>` 
+                    : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    modal.classList.remove('hidden'); modal.classList.add('flex');
+}
+
+function trainMon(uid) {
+    if(!p.bag.pot_xp || p.bag.pot_xp <= 0) return showToast("Sem Poções!");
+    p.bag.pot_xp--;
+    const m = p.mons.find(x=>x.uid.toString() === uid.toString());
+    m.xp += 500; checkLevelUp(m); save(); showMonDetail(uid); updUI();
+}
+function checkLevelUp(m) { const req = m.lv * 100; if(m.xp >= req) { m.xp -= req; m.lv++; checkLevelUp(m); } }
+function closeDetail() { activeMonUid = null; document.getElementById('detail-modal').classList.add('hidden'); document.getElementById('detail-modal').classList.remove('flex'); }
+
+function powerUpSkill(targetUid) {
+    const target = p.mons.find(m => m.uid.toString() === targetUid.toString());
+    const fodderIdx = p.mons.findIndex(m => m.id === target.id && m.uid !== target.uid && !prep.team.includes(m.uid));
+    if (fodderIdx === -1) return showToast("Erro: Duplicata não encontrada.");
+    showConfirm("Sacrificar monstro idêntico?", () => {
+        if(!target.skLvs) target.skLvs = [1,1,1];
+        const validIndices = target.skLvs.map((l, i) => l < 5 ? i : -1).filter(i => i !== -1);
+        if(validIndices.length === 0) return showToast("Skills Maximizadas!");
+        const skillIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
+        target.skLvs[skillIdx]++;
+        p.mons.splice(fodderIdx, 1);
+        save(); showMonDetail(targetUid); showToast("Habilidade +1!");
+    });
+}
+
+function slotAction(uid, slotIdx) { 
+    activeSlot = slotIdx; 
+    const m = p.mons.find(x=>x.uid.toString() === uid.toString()); 
+    if(m.equip[slotIdx]) { 
+        showConfirm(`Remover Runa? (500 Mana)`, () => {
+            if(p.mana >= 500) { 
+                p.mana -= 500; p.inventory.push(m.equip[slotIdx]); m.equip[slotIdx] = null; 
+                save(); updUI(); showMonDetail(uid); 
+            } else showToast("Mana insuficiente!"); 
+        });
+    } else showInventoryToEquip(); 
+}
+
+function showInventoryToEquip() { 
+    const list = document.getElementById('inv-list'); list.innerHTML = ''; 
+    if(p.inventory.length === 0) list.innerHTML = '<div class="text-slate-500 text-center p-8 italic">Mochila vazia</div>'; 
+    else p.inventory.forEach((bid, i) => { 
+        const bk = BOOKS.find(b=>b.id === bid); 
+        list.innerHTML += `<div onclick="equipRune('${i}')" class="bg-slate-800 p-4 rounded-xl flex justify-between items-center cursor-pointer border border-slate-700 active:scale-95 transition">
+            <div class="flex items-center gap-4"><div class="text-3xl">${bk.icon}</div><div><div class="text-sm font-bold text-white uppercase">${bk.name}</div><div class="text-xs text-slate-500">${bk.desc||'Runa de Poder'}</div></div></div>
+            <div class="text-green-400 text-sm font-black">+${bk.val < 1 ? (bk.val*100)+'%' : bk.val} ${bk.stat.toUpperCase()}</div>
+        </div>`; 
+    }); 
+    document.getElementById('inv-modal').classList.remove('hidden'); document.getElementById('inv-modal').classList.add('flex'); 
+}
+function equipRune(invIdx) {
+    const m = p.mons.find(x=>x.uid.toString() == activeMonUid.toString());
+    m.equip[activeSlot] = p.inventory[invIdx];
+    p.inventory.splice(invIdx, 1);
+    save(); closeInv(); showMonDetail(activeMonUid);
+}
+
+function openShop() {
+    const list = document.getElementById('shop-list'); list.innerHTML = '';
+    SHOP_ITEMS.forEach(it => {
+        list.innerHTML += `<div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 shadow-md">
+            <div class="flex items-center gap-4"><div class="text-3xl bg-slate-700 w-12 h-12 rounded-lg flex items-center justify-center">${it.icon}</div><div><div class="text-sm font-bold text-white uppercase">${it.name}</div><div class="text-xs text-slate-400">${it.desc}</div></div></div>
+            <button onclick="buyItem('${it.id}', ${it.cost}, '${it.curr}', event)" class="bg-slate-900 border border-slate-600 px-4 py-2 rounded-lg text-xs font-bold text-white active:scale-95 transition hover:bg-slate-700">${it.cost} ${it.curr === 'gems' ? '💎' : '🔵'}</button>
+        </div>`;
+    });
+    document.getElementById('shop-modal').classList.remove('hidden'); document.getElementById('shop-modal').classList.add('flex');
+}
+function buyItem(id, cost, curr, event) {
+    if(p[curr] >= cost) { p[curr] -= cost; if(id === 'energy_refill') { p.en = p.maxEn; } else { p.bag[id] = (p.bag[id] || 0) + 1; } save(); updUI(); showToast("Comprado!"); } 
+    else showToast("Saldo insuficiente!");
+}
+function closeShop() { document.getElementById('shop-modal').classList.add('hidden'); document.getElementById('shop-modal').classList.remove('flex'); }
+function closeInv() { document.getElementById('inv-modal').classList.add('hidden'); document.getElementById('inv-modal').classList.remove('flex'); }
+
+function summon(type) {
+    const ticket = type === 'common' ? 'tik_common' : 'tik_rare';
+    if(!p.bag[ticket] || p.bag[ticket] <= 0) return showToast("Sem tickets!");
+    p.bag[ticket]--;
+    let pool = type === 'common' ? DB.filter(x => x.stars <= 4) : DB.filter(x => x.stars >= 3);
+    let weighted = [];
+    pool.forEach(m => { let n = m.stars === 5 ? 1 : (m.stars === 4 ? 5 : (m.stars === 3 ? 20 : 50)); for(let i=0; i<n; i++) weighted.push(m); });
+    const r = weighted[Math.floor(Math.random()*weighted.length)];
+    addMon(r.id, 1); save(); updUI(); 
+    if(document.getElementById('main-view').innerHTML.includes('INVOCAÇÃO')) nav('summon');
+    showSummonReveal(r);
+}
+
+function showSummonReveal(mon) {
+    const modal = document.getElementById('summon-reveal-modal'); const back = document.getElementById('summon-card-back'); const front = document.getElementById('summon-card-front'); const shine = document.getElementById('summon-shine');
+    modal.classList.remove('hidden'); modal.classList.add('flex'); back.classList.remove('hidden'); front.classList.add('hidden'); front.classList.remove('flex'); shine.classList.add('hidden');
+    back.onclick = () => {
+        back.classList.add('hidden'); front.classList.remove('hidden'); front.classList.add('flex');
+        const iconHtml = getUnitIcon(mon, 'text-9xl drop-shadow-2xl');
+        document.getElementById('summon-icon-container').innerHTML = iconHtml; 
+        document.getElementById('summon-name').innerText = mon.name; 
+        const starColor = getStarColor(mon.stars);
+        document.getElementById('summon-stars').className = `flex gap-1 text-3xl mb-4 drop-shadow-md ${starColor}`;
+        document.getElementById('summon-stars').innerHTML = '★'.repeat(mon.stars);
+        
+        let rarityText = "COMUM";
+        if(mon.stars === 5) { rarityText = "LENDÁRIO"; document.getElementById('summon-name').className = "text-5xl font-black text-yellow-400 uppercase mb-2 text-center drop-shadow-[0_0_20px_rgba(250,204,21,0.6)]"; shine.classList.remove('hidden'); }
+        else if(mon.stars === 4) { rarityText = "ÉPICO"; document.getElementById('summon-name').className = "text-4xl font-black text-purple-400 uppercase mb-2 text-center drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]"; }
+        else { document.getElementById('summon-name').className = "text-4xl font-black text-white uppercase mb-2 text-center"; }
+        document.getElementById('summon-rarity-text').innerText = rarityText;
+    };
+}
+function closeSummonReveal() { 
+    document.getElementById('summon-reveal-modal').classList.add('hidden'); 
+    document.getElementById('summon-reveal-modal').classList.remove('flex'); 
+    nav('summon'); // Refresh current screen, don't jump to 'monsters'
+}
+
+function blitzBattle() {
+    if(prep.team.length === 0) return showToast("Time vazio!");
+    const cost = BOSS_STAGES.find(s=>s.id===prep.stageId).cost * 3;
+    if(p.en < cost) return showToast("Sem energia!");
+    p.en -= cost;
+    let totalMana = 0, booksFound = [];
+    for(let i=0; i<3; i++) {
+        totalMana += 3000;
+        prep.team.forEach(uid => { const m = p.mons.find(x=>x.uid.toString()===uid); if(m) { m.xp += 300; checkLevelUp(m); } });
+        if(Math.random() < BOSS_STAGES.find(s=>s.id===prep.stageId).dropRate) { const book = BOOKS[Math.floor(Math.random()*BOOKS.length)]; p.inventory.push(book.id); booksFound.push(book.icon); }
+    }
+    save(); updUI(); closePrep();
+    showToast(`Blitz: +${totalMana} Mana, Drops: ${booksFound.length||0}`);
+}
+
+// BATTLE ENGINE
+var bat = null, selTgt = null;
+function startBattle(id, type, teamUids) {
+    let cost = 0, enys = [];
+    id = Number(id);
+    if (type === 'boss') {
+        const bs = BOSS_STAGES.find(x=>x.id===id); cost = bs.cost;
+        const bossMap = ['fire_lion', 'earth_rhino', 'light_god', 'dark_reaper', 'wind_dragon', 'light_orb', 'dark_ghost'];
+        const baseBoss = mkUnit(bossMap[id-1] || 'dark_reaper', 1, true, id*10); 
+        baseBoss.maxHp *= 3; baseBoss.curHp = baseBoss.maxHp; baseBoss.atk *= 1.5; enys = [baseBoss];
+    } else if (type === 'pve') {
+        cost = 2; enys = STAGES.find(x=>x.id===id).eny.map((eid,i) => mkUnit(eid,i,true, id*5));
+    } else {
+        cost = 2; enys = [0,1,2,3].map(i=>mkUnit(DB[Math.floor(Math.random()*DB.length)].id, i, true, p.mons[0].lv));
+    }
+
+    if(p.en < cost) return showToast("Sem energia!");
+    p.en -= cost; save(); updUI();
+    
+    let alys = teamUids.map((uid, i) => { 
+        const m = p.mons.find(x=>x.uid.toString()===uid.toString());
+        return mkUnit(m.id, i, false, m.lv, m.uid, m.equip, m.skLvs); 
+    });
+    
+    bat = { active:true, type:type, stageId:id, alys:alys, enys:enys, auto:false, turnCount:0, speed: 1 }; 
+    document.getElementById('battle-title').innerText = type === 'pve' ? STAGES.find(s=>s.id===id).name : (type === 'boss' ? BOSS_STAGES.find(s=>s.id===id).name : "PVP");
+    document.getElementById('battle-screen').classList.remove('hidden'); document.getElementById('battle-screen').classList.add('flex');
+    document.getElementById('result-modal').classList.add('hidden'); document.getElementById('result-modal').classList.remove('flex');
+    
+    resetCamera(); // Ensure camera is reset at start
+    renderField(); loop();
+}
+
+function mkUnit(dbId, idx, isEny, lv, uid=null, equipArr=null, skLvs=null) {
+    const d = DB.find(x=>x.id===dbId);
+    let stats = { hp:Math.floor(d.stats.hp*(1+lv*0.1)), atk:Math.floor(d.stats.atk*(1+lv*0.1)), def:Math.floor(d.stats.def*(1+lv*0.1)), spd:d.stats.spd };
+    if(!isEny && equipArr) {
+        let mults={hp:0,atk:0,def:0,spd:0}, adds={spd:0}, sets={hp:0,atk:0,def:0,spd:0};
+        equipArr.forEach(bid=>{ if(!bid)return; const bk=BOOKS.find(b=>b.id===bid); if(bk){ if(bk.stat==='spd')adds.spd+=bk.val; else mults[bk.stat]+=bk.val; sets[bk.type]++; } });
+        if(sets.hp>=2)mults.hp+=0.2; if(sets.atk>=4)mults.atk+=0.35; if(sets.def>=2)mults.def+=0.2; if(sets.spd>=4)mults.spd+=0.25;
+        stats.hp=Math.floor(stats.hp*(1+mults.hp)); stats.atk=Math.floor(stats.atk*(1+mults.atk)); stats.def=Math.floor(stats.def*(1+mults.def)); stats.spd=Math.floor(stats.spd*(1+mults.spd)+adds.spd);
+    }
+    const skills = d.skills.map(s => ({...s, curCd: 0}));
+    return { ...stats, curHp:stats.hp, maxHp:stats.hp, atb:Math.random()*20, db:d, skills:skills, isEny:isEny, uuid: uid || (isEny?'e':'a')+idx, lv:lv, skLvs: skLvs || [1,1,1] };
+}
+
+function renderField() {
+    const draw = (u) => {
+        const pct = (u.curHp/u.maxHp)*100;
+        const hpColor = pct > 50 ? 'hp-grad' : (pct > 25 ? 'bg-yellow-500' : 'bg-red-500');
+        // Reduced icon size significantly
+        const iconHtml = getUnitIcon(u.db, 'text-3xl md:text-4xl transform origin-bottom drop-shadow-lg');
+        
+        return `<div id="${u.uuid}" onclick="pick('${u.uuid}')" class="unit-wrapper relative flex flex-col items-center cursor-pointer select-none transition-all duration-300 group mx-1">
+            <div class="w-12 mb-1 opacity-90 transition-opacity">
+                <div class="h-1 w-full bar-bg mb-0.5"><div class="bar-fill ${hpColor}" style="width:${pct}%"></div></div>
+                <div class="h-0.5 w-full bar-bg"><div id="atb-${u.uuid}" class="bar-fill atb-grad" style="width:0%"></div></div>
+            </div>
+            <div class="relative flex flex-col items-center group-hover:scale-110 transition-transform">
+                ${iconHtml}
+                <div class="w-8 h-1.5 bg-black/40 rounded-[50%] blur-sm mt-[-2px]"></div>
+                <div class="sel-ring absolute -inset-2 border border-yellow-400 rounded-full opacity-0 scale-75 transition-all shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
+            </div>
+        </div>`;
+    };
+    document.getElementById('enemy-row').innerHTML = bat.enys.map(draw).join('');
+    document.getElementById('ally-row').innerHTML = bat.alys.map(draw).join('');
+}
+
+function pick(uuid) { 
+    const unit = [...bat.enys, ...bat.alys].find(u=>u.uuid===uuid); if(!unit) return; selTgt = uuid; 
+    document.querySelectorAll('.sel-ring').forEach(el => { el.style.opacity = '0'; el.style.transform = 'scale(0.75)'; }); 
+    const el = document.getElementById(uuid); 
+    if(el) { el.querySelector('.sel-ring').style.opacity = '1'; el.querySelector('.sel-ring').style.transform = 'scale(1)'; 
+    const ind = document.getElementById('target-indicator'); ind.style.opacity = '1'; ind.innerText = `ALVO: ${unit.db.name}`; } 
+}
+
+// Camera Logic (Restored)
+function focusCamera(u) { 
+    const stage = document.getElementById('battle-stage'); 
+    const uEl = document.getElementById(u.uuid); 
+    const container = document.getElementById('battle-container-el'); // Use container to scope focus mode
+    
+    // Clear previous focus
+    document.querySelectorAll('.unit-wrapper').forEach(el => el.classList.remove('active-turn')); 
+    
+    // Apply focus mode
+    if(container) container.classList.add('focus-mode');
+    
+    if(uEl) { 
+        uEl.classList.add('active-turn'); 
+        // Move stage to center the active unit more
+        const yOffset = u.isEny ? '10%' : '-10%'; 
+        stage.style.transform = `scale(1.2) translateY(${yOffset})`; 
+    } 
+}
+
+function resetCamera() { 
+    const stage = document.getElementById('battle-stage'); 
+    stage.style.transform = 'scale(1) translateY(0)'; 
+    const container = document.getElementById('battle-container-el');
+    if(container) container.classList.remove('focus-mode'); 
+    document.querySelectorAll('.unit-wrapper').forEach(el => el.classList.remove('active-turn')); 
+}
+
+async function loop() { 
+    if(!bat.active) return; 
+    if(bat.alys.every(u=>u.curHp<=0)) return end(false); 
+    if(bat.enys.every(u=>u.curHp<=0)) return end(true); 
+    let act = null; 
+    while(!act) { 
+        [...bat.alys, ...bat.enys].forEach(u => { if(u.curHp>0) { u.atb += u.spd * 0.05; const b = document.getElementById(`atb-${u.uuid}`); if(b) b.style.width = Math.min(100, u.atb) + '%'; } }); 
+        act = [...bat.alys, ...bat.enys].filter(u=>u.curHp>0 && u.atb>=100).sort((a,b)=>b.atb-a.atb)[0]; 
+        if(!act) await new Promise(r=>setTimeout(r, 30 / bat.speed)); 
+    } 
+    turn(act); 
+}
+
+function turn(u) { 
+    u.atb = 0; document.getElementById(`atb-${u.uuid}`).style.width = '0%'; 
+    bat.turnCount++; u.skills.forEach(s => { if(s.curCd > 0) s.curCd--; }); 
+    document.getElementById('battle-log').innerHTML = `<span class="${u.isEny?'text-red-400':'text-green-400'} font-bold uppercase tracking-wide">${u.db.name}</span> <span class="text-slate-500 text-[9px]">Turno</span>`; 
+    
+    // Trigger Zoom/Focus
+    focusCamera(u);
+
+    if(!selTgt || !document.getElementById(selTgt) || document.getElementById(selTgt).parentElement.style.display==='none') { 
+        const t = u.isEny ? bat.alys : bat.enys; const live = t.filter(x=>x.curHp>0); if(live.length) pick(live[0].uuid); 
+    } 
+    const delay = 600 / bat.speed; 
+    if(u.isEny || bat.auto) { 
+        document.getElementById('skill-container').style.opacity = '0.5'; document.getElementById('skill-container').style.pointerEvents = 'none'; 
+        let avail = u.skills.filter(s => s.curCd === 0); let choice = avail.length ? u.skills.indexOf(avail[avail.length-1]) : 0; 
+        setTimeout(()=>move(u, choice), delay); 
+    } else { 
+        document.getElementById('skill-container').style.opacity = '1'; document.getElementById('skill-container').style.pointerEvents = 'auto'; 
+        showSkills(u); 
+    } 
+}
+
+function showSkills(u) { 
+    const b = document.getElementById('skill-container'); b.innerHTML = ''; 
+    u.skills.forEach((sk, i) => { 
+        const onCd = sk.curCd > 0; 
+        const btn = document.createElement('div'); 
+        // More compact button design
+        btn.className = `flex-1 min-w-[80px] h-28 rounded-lg flex flex-col justify-between p-2 cursor-pointer select-none transition-all active:scale-95 border ${onCd ? 'bg-slate-900 border-slate-700 opacity-60' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-600 hover:border-yellow-500 hover:shadow-lg hover:shadow-yellow-500/10 shadow-md'}`; 
+        
+        let icon = '';
+        if(sk.type === 'phys') icon = '<i class="fas fa-fist-raised"></i>';
+        else icon = '<i class="fas fa-bolt"></i>';
+
+        btn.innerHTML = `
+            <div class="flex justify-between items-start">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">${sk.type === 'phys' ? 'Físico' : 'Magia'}</span>
+                <span class="text-[9px] ${onCd ? 'text-red-500' : 'text-yellow-500'} font-bold">${onCd ? sk.curCd : 'OK'}</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 my-1">
+                <div class="text-xl ${onCd ? 'text-slate-600' : 'text-white'}">${icon}</div>
+                <span class="text-[10px] font-black uppercase text-white text-center leading-tight truncate w-full">${sk.name}</span>
+            </div>
+            <div class="w-full bg-black/30 rounded text-[8px] text-center text-slate-400 py-0.5 border border-white/5">
+                ${sk.aoe ? 'AREA' : 'ALVO'}
+            </div>
+        `;
+        if(!onCd) btn.onclick = () => move(u, i); 
+        b.appendChild(btn); 
+    }); 
+}
+
+async function move(atk, skIdx) { 
+    const skill = atk.skills[skIdx]; skill.curCd = skill.cd + 1; 
+    const el = document.getElementById(atk.uuid); 
+    if(el) { 
+        const unitDiv = el.querySelector('.emoji-unit') || el.querySelector('.img-unit'); 
+        unitDiv.classList.add('anim-hit'); setTimeout(()=>unitDiv.classList.remove('anim-hit'), 300);
+    }
+    let targets = []; const opp = atk.isEny ? bat.alys : bat.enys; 
+    if (skill.aoe) targets = opp.filter(u => u.curHp > 0); 
+    else { 
+        let t = [...bat.alys, ...bat.enys].find(x=>x.uuid===selTgt); 
+        if(!t || t.curHp<=0 || (atk.isEny && t.isEny) || (!atk.isEny && !t.isEny)) { const live = opp.filter(x=>x.curHp>0); t = live[Math.floor(Math.random()*live.length)]; } 
+        if (t) targets = [t]; 
+    }
+    if(targets.length === 0) { loop(); return; }
+    for (let t of targets) await applyDamage(atk, t, skill, skIdx);
+    
+    // Wait and Reset Camera before next loop
+    await new Promise(r=>setTimeout(r, 600/bat.speed)); 
+    resetCamera();
+    await new Promise(r=>setTimeout(r, 200/bat.speed)); 
+    loop(); 
+}
+
+async function applyDamage(atk, t, skill, skIdx) {
+    let elMul = 1.0; const atEl = atk.db.el, dfEl = t.db.el;
+    if((atEl==='fire'&&dfEl==='plant') || (atEl==='water'&&dfEl==='fire') || (atEl==='wind'&&dfEl==='water')) elMul = 1.5; 
+    const skLvl = (atk.skLvs && atk.skLvs[skIdx]) ? atk.skLvs[skIdx] : 1;
+    let dmgMul = skill.mul * (1 + ((skLvl - 1) * 0.15));
+    if (skill.aoe) dmgMul *= 0.75;
+    let dmg = Math.floor(((atk.atk * dmgMul) - (t.def * 0.4)) * elMul); 
+    dmg = Math.max(10, dmg); 
+    const isCrit = Math.random() < 0.25; if(isCrit) dmg = Math.floor(dmg * 1.5); 
+    t.curHp -= dmg; 
+    
+    const tel = document.getElementById(t.uuid); 
+    if(tel) { 
+        // Trigger generic 'hit' shake
+        playVfx(tel, 'hit');
+        
+        // --- 1. DETERMINE VFX TYPE ---
+        let vfxType = skill.anim || 'slash'; // Use skill.anim if available, else default
+        
+        // --- 2. PLAY SPECIFIC VFX ---
+        const rect = tel.getBoundingClientRect();
+        playVfx(tel, vfxType, rect.left + rect.width/2, rect.top + rect.height/2);
+
+        // --- 3. SCREEN SHAKE FOR CRITS ---
+        if(isCrit) {
+            const container = document.getElementById('game-container');
+            container.classList.add('anim-shake-screen');
+            setTimeout(() => container.classList.remove('anim-shake-screen'), 300);
+        }
+
+        // CORREÇÃO DO BUG DE HP INFINITO
+        const hpPct = Math.max(0, (t.curHp/t.maxHp)*100);
+        const hpBar = tel.querySelector('.bar-fill'); // Seleciona a primeira barra (HP)
+        if(hpBar) {
+            hpBar.style.width = hpPct + '%';
+            // Atualiza cor dinamicamente
+            hpBar.className = `bar-fill ${hpPct > 50 ? 'hp-grad' : (hpPct > 25 ? 'bg-yellow-500' : 'bg-red-500')}`;
+        }
+
+        const ft = document.createElement('div'); ft.className = "dmg-text flex flex-col items-center"; 
+        ft.innerHTML = `<span style="font-size:${isCrit?'2rem':'1.5rem'}; color:${isCrit?'#ef4444':'#fff'};">${dmg}</span>${isCrit?'<span class="text-[8px] font-black text-yellow-500 uppercase">CRIT!</span>':''}`; 
+        ft.style.left = (rect.left + 20) + 'px'; ft.style.top = (rect.top) + 'px'; 
+        document.body.appendChild(ft); setTimeout(()=>ft.remove(), 800); 
+        if(t.curHp<=0) { tel.style.transition = 'all 0.5s'; tel.style.opacity = 0; tel.style.filter = 'grayscale(1)'; setTimeout(() => tel.style.visibility = 'hidden', 500); } 
+    }
+}
+
+function playVfx(targetEl, type, x, y) {
+    // If x,y provided, spawn specific vfx
+    if (x !== undefined && y !== undefined) {
+        const layer = document.getElementById('vfx-layer');
+        const el = document.createElement('div');
+        const rect = layer.getBoundingClientRect();
+        const finalX = x - rect.left;
+        const finalY = y - rect.top;
+
+        if(type === 'slash') {
+            el.className = 'vfx-slash';
+            el.style.left = finalX + 'px'; el.style.top = finalY + 'px';
+        } else if(type === 'explosion') {
+            el.className = 'vfx-explosion';
+            el.style.left = finalX + 'px'; el.style.top = finalY + 'px';
+        } else if(type === 'beam') {
+            el.className = 'vfx-beam';
+            el.style.left = finalX + 'px'; el.style.top = (finalY - 500) + 'px'; // Start higher
+        } else if(type === 'shockwave') {
+            el.className = 'vfx-shockwave';
+            el.style.left = finalX + 'px'; el.style.top = finalY + 'px';
+        }
+
+        layer.appendChild(el);
+        setTimeout(() => el.remove(), 600);
+    } else {
+        // Fallback or simple target flash
+        const flash = document.createElement('div');
+        flash.className = 'absolute inset-0 bg-white/50 rounded-full z-50';
+        targetEl.appendChild(flash);
+        setTimeout(() => flash.remove(), 100);
+    }
+}
+
+function end(win) { 
+    bat.active = false; 
+    resetCamera(); // Ensure camera resets on end
+    const m = document.getElementById('result-modal'); m.classList.remove('hidden'); m.classList.add('flex'); 
+    document.getElementById('res-icon').innerText = win ? "🏆" : "💀"; document.getElementById('res-title').innerText = win ? "VITÓRIA" : "DERROTA"; 
+    document.getElementById('drop-msg').innerText = ""; 
+    let earnedGems = 0, mn = 0, accXp = 0;
+    if(win) { 
+        mn = bat.type === 'pvp' ? 500 : (bat.type === 'boss' ? 5000 : 2000); 
+        accXp = bat.type === 'boss' ? 250 : 100;
+        if(bat.type === 'boss' && !p.clearedBosses.includes(bat.stageId)) { p.clearedBosses.push(bat.stageId); earnedGems += 50; }
+        if(bat.type === 'pve' && !p.clearedStages.includes(bat.stageId)) { p.clearedStages.push(bat.stageId); earnedGems += 20; }
+        
+        // Random Drops
+        if(bat.type === 'boss' && Math.random() < 0.5) { const b = BOOKS[Math.floor(Math.random()*BOOKS.length)]; p.inventory.push(b.id); document.getElementById('drop-msg').innerText = `DROP: ${b.name}`; }
+        if(bat.type === 'pve' && Math.random() < 0.2) { p.bag.pot_xp++; document.getElementById('drop-msg').innerText = `DROP: Poção XP`; }
+
+        p.accXp += accXp; if(p.accXp >= p.accLv * 500) { p.accXp = 0; p.accLv++; p.maxEn++; p.en = p.maxEn; earnedGems += 50; showToast("Level Up!"); }
+    } else mn = 100;
+    p.mana += mn; p.gems += earnedGems; 
+    document.getElementById('res-mana').innerText = "+"+mn; document.getElementById('res-acc-xp').innerText = "+"+accXp; document.getElementById('res-gems').innerText = "+"+earnedGems;
+    save(); updUI(); 
+}
+function closeResult() { document.getElementById('battle-screen').classList.add('hidden'); nav('home'); }
+function quitBattle() { showConfirm("Sair da batalha?", () => closeResult()); }
+function toggleAuto() { bat.auto = !bat.auto; const btn = document.getElementById('btn-auto'); btn.className = `text-[10px] font-bold border px-3 py-1.5 rounded-lg backdrop-blur-md transition-colors ${bat.auto ? 'bg-green-500 border-green-400 text-white' : 'bg-slate-800/50 border-slate-600 text-slate-300'}`; if(bat.auto){const u=[...bat.alys].find(x=>x.atb>=100);if(u)move(u,0);} }
+function toggleSpeed() { bat.speed = bat.speed === 1 ? 2 : 1; document.getElementById('btn-speed').innerText = bat.speed + "x"; }
+</script>
+</body>
+</html>
