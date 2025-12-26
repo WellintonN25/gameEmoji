@@ -21,15 +21,30 @@
         .shake-screen { animation: shake-screen 0.3s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake-screen { 10%, 90% { transform: translate3d(-2px, -2px, 0); } 20%, 80% { transform: translate3d(2px, 2px, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 2px, 0); } 40%, 60% { transform: translate3d(4px, -2px, 0); } }
 
+        /* Animação Lendária */
+        .flash-gold { animation: flash-gold-anim 1s ease-out; }
+        @keyframes flash-gold-anim { 0% { background: rgba(245, 158, 11, 0); } 50% { background: rgba(245, 158, 11, 0.8); } 100% { background: rgba(245, 158, 11, 0); } }
+        
+        .card.legendary-spawn {
+            animation: legendary-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 50px var(--gold), 0 0 100px var(--gold);
+            border-color: #fff;
+        }
+        @keyframes legendary-pop { 0% { transform: scale(0.5) rotate(180deg); opacity: 0; } 60% { transform: scale(1.2) rotate(0deg); } 100% { transform: scale(1); } }
+
         /* --- TELAS --- */
         .screen { position: absolute; inset: 0; display: none; flex-direction: column; z-index: 10; background: #0f172a; }
         .screen.active { display: flex; animation: fade 0.3s ease-out; }
         @keyframes fade { from{opacity:0} to{opacity:1} }
         
-        #login { background: url('https://images.unsplash.com/photo-1533134486753-c833f0ed4866?w=800&q=60') center/cover; align-items: center; justify-content: center; }
-        #hub { background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=60') center/cover; }
+        #login { background: url('https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?w=800&q=60') center/cover; align-items: center; justify-content: center; }
+        #hub { background: url('https://images.unsplash.com/photo-1542256851-e1293fb84338?w=800&q=60') center/cover; }
         #battle { background: url('https://images.unsplash.com/photo-1518066000714-58c45f1a2c0a?w=800&q=60') center/cover; }
-        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 0; pointer-events: none; }
+        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 0; pointer-events: none; }
+        #hub .overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent 40%, rgba(0,0,0,0.8)); }
+        
+        /* Flash Screen Layer */
+        #flash-layer { position: absolute; inset: 0; pointer-events: none; z-index: 999; }
 
         /* --- UI LOGIN --- */
         .login-box { background: rgba(0,0,0,0.8); padding: 40px; border-radius: 20px; border: 2px solid var(--accent); text-align: center; z-index: 2; width: 90%; max-width: 350px; backdrop-filter: blur(5px); }
@@ -38,9 +53,10 @@
 
         /* --- UI GERAL --- */
         .btn {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;
-            padding: 8px 12px; border-radius: 6px; font-weight: 800; cursor: pointer; text-transform: uppercase;
-            display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; font-size: 0.85rem;
+            background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.2); color: white;
+            padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; font-size: 0.9rem;
+            backdrop-filter: blur(4px);
         }
         .btn:active { transform: scale(0.95); }
         .btn:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
@@ -50,27 +66,98 @@
         .btn-blue { background: var(--accent); border: none; box-shadow: 0 0 10px var(--accent); }
         .btn-red { background: var(--danger); border: none; box-shadow: 0 0 10px var(--danger); }
         .btn-crystal { background: #0ea5e9; border: none; box-shadow: 0 0 15px #0ea5e9; }
-        .btn-shop-item { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; height:auto; gap:5px; background:#334155; border:1px solid #475569; }
         
-        .top-bar { position: relative; z-index: 10; display: flex; flex-direction: column; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); padding: 5px 15px; height: 75px; flex-shrink: 0; justify-content: center; }
-        .top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; }
-        .currency { display: flex; gap: 10px; font-size: 0.8rem; font-weight: bold; text-shadow: 0 2px 2px black; align-items: center; }
+        /* --- LOJA REDESIGN --- */
+        .shop-grid { 
+            display: grid; 
+            /* Mudança: auto-fit para melhor responsividade e evitar esticar */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 15px; 
+            max-height: 400px; 
+            overflow-y: auto; 
+            padding: 10px; 
+        }
+        .shop-item {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid #334155; border-radius: 16px;
+            padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            text-align: center; transition: 0.2s; position: relative; overflow: hidden;
+            min-height: 220px; /* Altura fixa mínima para uniformidade */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .shop-item:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        
+        .shop-icon { 
+            font-size: 3.5rem; /* Aumentado */
+            margin-bottom: 10px; 
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.1));
+            /* Novo estilo de fundo para o ícone */
+            background: rgba(255, 255, 255, 0.05);
+            width: 80px; height: 80px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .shop-name { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .shop-desc { font-size: 0.75rem; color: #94a3b8; margin-bottom: 15px; line-height: 1.2; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        
+        .shop-price-btn {
+            background: #334155; border: 1px solid #475569; border-radius: 8px;
+            padding: 8px 10px; font-size: 0.9rem; width: 100%; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+            margin-top: auto; /* Garante que fique no fundo */
+        }
+        .shop-price-btn:hover { background: var(--success); border-color: var(--success); color: #000; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+
+        .top-bar { position: relative; z-index: 10; display: flex; flex-direction: column; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); padding: 10px 15px; height: 85px; flex-shrink: 0; justify-content: center; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px; }
+        .currency { display: flex; gap: 12px; font-size: 0.85rem; font-weight: bold; text-shadow: 0 2px 2px black; align-items: center; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 15px; }
         .mana-icon { color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-right: 2px; }
         
-        .xp-bar-container { width: 100%; height: 4px; background: #333; border-radius: 2px; margin-top: 2px; position: relative; }
-        .xp-fill { height: 100%; background: var(--gold); width: 0%; transition: 0.5s; box-shadow: 0 0 5px var(--gold); }
+        .xp-bar-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 4px; position: relative; overflow: hidden; border: 1px solid #555; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #fbbf24); width: 0%; transition: 0.5s; box-shadow: 0 0 10px var(--gold); }
+
+        /* --- HUB AVATAR --- */
+        .hub-avatar-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
+        .hub-emblem { 
+            width: 140px; height: 140px; 
+            background: rgba(0,0,0,0.3); border: 4px solid var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 5rem;
+            box-shadow: 0 0 30px var(--accent), inset 0 0 20px rgba(0,0,0,0.5);
+            animation: breathe 4s infinite ease-in-out; backdrop-filter: blur(2px);
+        }
+        @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 30px var(--accent); } 50% { transform: scale(1.05); box-shadow: 0 0 50px var(--accent); } }
+        .hub-title { margin-top: 15px; font-size: 2rem; color: white; text-transform: uppercase; letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 800; }
+        .btn-logout { background: transparent; border: 1px solid rgba(255,255,255,0.3); font-size: 0.7rem; padding: 5px 15px; margin-top: 10px; opacity: 0.8; }
+        .btn-logout:hover { background: rgba(255,0,0,0.2); border-color: var(--danger); opacity: 1; }
+
+        /* --- RUNAS --- */
+        .rune-container { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
+        .rune-slot { width: 50px; height: 50px; background: #111; border: 2px dashed #444; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: 0.2s; }
+        .rune-slot:active { transform: scale(0.95); }
+        .rune-slot.filled { border-style: solid; border-color: #666; background: #222; }
+        .rune-icon { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; border: 2px solid; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .rune-rare { border-color: #3b82f6; background: radial-gradient(#1e3a8a, #000); color: #3b82f6; }
+        .rune-epic { border-color: #a855f7; background: radial-gradient(#581c87, #000); color: #a855f7; }
+        .rune-legend { border-color: #f59e0b; background: radial-gradient(#78350f, #000); color: #f59e0b; }
+        .rune-list-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #334155; cursor: pointer; }
+        .rune-list-item:hover { background: #334155; }
 
         /* --- MAPAS & ESTÁGIOS --- */
         .stage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; overflow-y: auto; }
         .stage-btn { aspect-ratio: 1; background: #222; border: 2px solid #555; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; position: relative; transition: 0.2s; }
         .stage-btn.locked { opacity: 0.3; pointer-events: none; border-color: #333; }
         .stage-btn.cleared { border-color: var(--success); color: var(--success); }
-        .stage-btn.boss { border-color: var(--danger); color: var(--danger); }
+        .stage-btn.boss { background: linear-gradient(135deg, #450a0a, #1a0505); border-color: #ef4444; color: #fca5a5; box-shadow: inset 0 0 15px rgba(0,0,0,0.7); }
+        .stage-btn.boss:hover { filter: brightness(1.2); }
+        .boss-floor-num { font-size: 2rem; font-weight: 800; line-height: 1; text-shadow: 0 2px 4px black; }
+        .boss-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; opacity: 0.8; }
         .stage-btn:active { transform: scale(0.9); }
         .first-clear-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
 
-        /* --- MONSTROS --- */
+        /* --- MONSTROS & MONSTER BOX RESPONSIVO --- */
         .mon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 5px; padding: 8px; overflow-y: auto; align-content: start; }
         .mon-slot { width: 50px; height: 50px; background: #222; border: 2px solid #555; border-radius: 6px; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; overflow: hidden; }
         .mon-slot.selected { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); background: #333; }
@@ -82,6 +169,15 @@
         .stars-row { position: absolute; top: 0; width: 100%; text-align: center; display: flex; justify-content: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 2; }
         .star { font-size: 0.6rem; color: var(--gold); text-shadow: 0 1px 2px black; margin: 0 -1px; }
         .star.purple { color: var(--purple); }
+
+        /* CSS RESPONSIVO PARA MONSTER BOX */
+        @media (max-width: 768px) {
+            .inv-container { flex-direction: column; }
+            .inv-list-panel { width: 100%; height: 40%; border-right: none; border-bottom: 2px solid #444; }
+            .inv-detail-panel { width: 100%; height: 60%; }
+            .mon-grid { padding: 5px; gap: 3px; }
+            .mon-slot { width: 45px; height: 45px; } /* Ligeiramente menor no mobile */
+        }
 
         /* --- INVENTÁRIO --- */
         .inv-container { flex: 1; display: flex; position: relative; z-index: 2; overflow: hidden; }
@@ -157,11 +253,45 @@
         .modal.open { display: flex; }
         .evo-box { background: #1e293b; border: 2px solid var(--purple); padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
         .skill-box { background: #1e293b; border: 2px solid var(--accent); padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
+        .rune-box { background: #1e293b; border: 2px solid var(--gold); padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; height: 70vh; display: flex; flex-direction: column; }
         .evo-materials { display: flex; justify-content: center; gap: 10px; margin: 20px 0; min-height: 50px; }
         .mat-slot { width: 50px; height: 50px; border: 2px dashed #555; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #aaa; }
-        .gacha-box { background: #1e293b; border: 2px solid var(--gold); padding: 25px; border-radius: 20px; width: 320px; text-align: center; }
-        .card { width: 140px; height: 200px; border: 3px solid var(--gold); border-radius: 15px; font-size: 4rem; display: flex; align-items: center; justify-content: center; background: #111; transition: 0.5s; margin: 0 auto 15px; }
-        .card img { width: 90%; height: 90%; object-fit: contain; }
+        
+        /* GACHA 2.0 REDESIGN */
+        .gacha-box { 
+            background: radial-gradient(circle at center, #1e293b, #0f172a); 
+            border: 2px solid var(--gold); padding: 30px; border-radius: 20px; width: 340px; text-align: center; 
+            box-shadow: 0 0 50px rgba(245, 158, 11, 0.2); position: relative; overflow: hidden;
+        }
+        .gacha-altar {
+            position: absolute; inset: 0; background: url('https://www.transparenttextures.com/patterns/black-scales.png'); opacity: 0.1; z-index: 0;
+        }
+        .card { 
+            width: 140px; height: 210px; 
+            background: linear-gradient(135deg, #333, #000);
+            border: 2px solid #555; border-radius: 15px; 
+            font-size: 4rem; display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 20px; position: relative; z-index: 2;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: 0.5s; transform-style: preserve-3d;
+        }
+        /* CORREÇÃO DO ICONE DE INTERROGAÇÃO */
+        .card.unknown::before { content: '?'; color: #444; font-weight: bold; }
+        
+        .gacha-btns { display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; position: relative; z-index: 2; }
+        .btn-summon {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px;
+            background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            transition: 0.2s; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .btn-summon:active { transform: scale(0.95); }
+        .btn-summon.common { border-bottom: 3px solid var(--accent); }
+        .btn-summon.rare { border-bottom: 3px solid var(--gold); box-shadow: 0 0 15px rgba(245, 158, 11, 0.1); }
+        .btn-summon h4 { font-size: 0.9rem; margin-bottom: 5px; color: #fff; }
+        .summon-cost { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: bold; }
+        .summon-bg-glow { position: absolute; width: 100%; height: 100%; top:0; left:0; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); opacity: 0; transition: 0.3s; }
+        .btn-summon:hover .summon-bg-glow { opacity: 1; }
+
         .reward-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 300px; text-align: center; border: 2px solid var(--gold); box-shadow: 0 0 50px rgba(245, 158, 11, 0.3); animation: popIn 0.3s; }
         @keyframes popIn { from{transform:scale(0.5)} to{transform:scale(1)} }
         .reward-row { display: flex; justify-content: center; gap: 20px; margin: 20px 0; font-size: 1.2rem; }
@@ -171,6 +301,7 @@
 <body>
 
 <div id="app">
+    <div id="flash-layer"></div>
 
     <!-- TELA DE LOGIN -->
     <div id="login" class="screen active">
@@ -214,59 +345,105 @@
         </div>
     </div>
 
-    <!-- MODAL GACHA -->
-    <div id="m-gacha" class="modal">
-        <div class="gacha-box">
-            <div id="g-card" class="card">?</div>
-            <h2 id="g-res" style="color:var(--gold); margin-bottom:10px">???</h2>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px">
-                <button class="btn btn-blue" style="flex-direction:column; padding:10px" onclick="Core.spin('common')">
-                    <span style="font-size:0.8rem">INVOCAR COMUM</span>
-                    <div style="display:flex;align-items:center;gap:3px">⚪ x1</div>
-                </button>
-                <button class="btn btn-crystal" style="flex-direction:column; padding:10px" onclick="Core.spin('rare')">
-                    <span style="font-size:0.8rem">INVOCAR RARO</span>
-                    <div style="display:flex;align-items:center;gap:3px">🟡 x1</div>
-                </button>
+    <!-- MODAL RUNAS -->
+    <div id="m-rune" class="modal">
+        <div class="rune-box">
+            <h2 style="color:var(--gold); margin-bottom:5px">Gerir Runas</h2>
+            <div style="flex:1; overflow-y:auto; border:1px solid #444; border-radius:8px; padding:10px; text-align:left; margin-bottom:10px" id="rune-list">
+                <!-- Lista de Runas -->
             </div>
-            <div style="font-size:0.8rem; color:#888; margin-bottom:10px">
-                Possui: ⚪ <span id="g-tix">0</span> | 🟡 <span id="g-rare">0</span>
-            </div>
-
-            <button class="btn" style="width:100%; background:#333" onclick="UI.modal('m-gacha',0)">Sair</button>
+            <button class="btn" style="width:100%" onclick="UI.modal('m-rune',0)">Fechar</button>
         </div>
     </div>
 
-    <!-- MODAL LOJA -->
+    <!-- MODAL GACHA (REMASTERED) -->
+    <div id="m-gacha" class="modal">
+        <div class="gacha-box">
+            <div class="gacha-altar"></div>
+            <h2 style="color:var(--gold); margin-bottom:20px; position:relative; z-index:2; text-shadow:0 0 10px rgba(0,0,0,0.8)">ALTAR DE INVOCAÇÃO</h2>
+            
+            <div id="g-card" class="card unknown"></div>
+            <h3 id="g-res" style="color:#fff; margin-bottom:15px; position:relative; z-index:2; min-height:1.2em">...</h3>
+            
+            <div class="gacha-btns">
+                <div class="btn-summon common" onclick="Core.spin('common')">
+                    <div class="summon-bg-glow"></div>
+                    <h4>COMUM</h4>
+                    <div class="summon-cost"><span class="mana-icon">💠</span> x1</div>
+                </div>
+                <div class="btn-summon rare" onclick="Core.spin('rare')">
+                    <div class="summon-bg-glow"></div>
+                    <h4 style="color:var(--gold)">LENDÁRIO</h4>
+                    <div class="summon-cost">💎 x1</div>
+                </div>
+            </div>
+            
+            <div style="font-size:0.8rem; color:#888; margin-bottom:10px; position:relative; z-index:2">
+                Disponível: <span class="mana-icon">💠</span> <span id="g-tix">0</span> | 💎 <span id="g-rare">0</span>
+            </div>
+
+            <button class="btn" style="width:100%; background:rgba(0,0,0,0.5); position:relative; z-index:2" onclick="UI.modal('m-gacha',0)">Voltar</button>
+        </div>
+    </div>
+
+    <!-- MODAL LOJA (REMASTERED) -->
     <div id="m-shop" class="modal">
-        <div style="background:#1e293b; padding:20px; border-radius:10px; width:340px; text-align:center; border:1px solid #444">
-            <h2 style="color:var(--gold); margin-bottom:10px">Loja</h2>
-            <div style="margin-bottom:15px; font-size:0.9rem; display:flex; justify-content:center; gap:10px">
-                <span>💠 <span id="s-mana">0</span></span>
-                <span>💎 <span id="s-gems">0</span></span>
+        <div style="background:#1e293b; padding:20px; border-radius:15px; width:90%; max-width:600px; text-align:center; border:2px solid #475569; max-height:85vh; display:flex; flex-direction:column;">
+            <h2 style="color:var(--gold); margin-bottom:15px; letter-spacing:2px; text-transform:uppercase;">Mercado Negro</h2>
+            
+            <div style="margin-bottom:15px; font-size:0.9rem; display:flex; justify-content:center; gap:20px; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;">
+                <span>💠 <span id="s-mana" style="color:#fff">0</span></span>
+                <span>💎 <span id="s-gems" style="color:#fff">0</span></span>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
-                <button class="btn btn-shop-item" onclick="Core.buy('pot', 100)">
-                    <span>🧪 Poção</span> <span style="color:var(--gold)">100 💠</span>
-                </button>
-                <button class="btn btn-shop-item" onclick="Core.buy('xpboost', 50, 'gems')">
-                    <span>🚀 Booster XP (3x)</span> <span style="color:var(--accent)">50 💎</span>
-                </button>
-                <button class="btn btn-shop-item" onclick="Core.buy('tix', 1000)">
-                    <span>⚪ Cristal Comum</span> <span style="color:var(--gold)">1k 💠</span>
-                </button>
-                <button class="btn btn-shop-item" onclick="Core.buy('tix_pack', 10000)">
-                    <span>⚪ Pack Comum (11x)</span> <span style="color:var(--gold)">10k 💠</span>
-                </button>
-                <button class="btn btn-shop-item" onclick="Core.buy('rare', 100, 'gems')">
-                    <span>🟡 Cristal Raro</span> <span style="color:var(--accent)">100 💎</span>
-                </button>
-                <button class="btn btn-shop-item" onclick="Core.buy('grimoire', 500, 'gems')">
-                    <span>📚 Grimório</span> <span style="color:var(--accent)">500 💎</span>
-                </button>
+
+            <div class="shop-grid">
+                <!-- Consumíveis -->
+                <div class="shop-item">
+                    <div class="shop-icon">🧪</div>
+                    <div class="shop-name">Poção de XP</div>
+                    <div class="shop-desc">Sobe o nível dos seus monstros.</div>
+                    <button class="shop-price-btn" onclick="Core.buy('pot', 100)">100 💠</button>
+                </div>
+                <div class="shop-item">
+                    <div class="shop-icon">🚀</div>
+                    <div class="shop-name">Booster XP</div>
+                    <div class="shop-desc">3x XP de conta na próxima batalha.</div>
+                    <button class="shop-price-btn" onclick="Core.buy('xpboost', 50, 'gems')">50 💎</button>
+                </div>
+                <div class="shop-item">
+                    <div class="shop-icon">📚</div>
+                    <div class="shop-name">Grimório</div>
+                    <div class="shop-desc">Aprimora uma habilidade aleatória.</div>
+                    <button class="shop-price-btn" onclick="Core.buy('grimoire', 500, 'gems')">500 💎</button>
+                </div>
+                <!-- Invocação -->
+                <div class="shop-item">
+                    <div class="shop-icon">⚪</div>
+                    <div class="shop-name">Cristal Comum</div>
+                    <div class="shop-desc">Invoca monstros de 1 a 3 estrelas.</div>
+                    <button class="shop-price-btn" onclick="Core.buy('tix', 1000)">1k 💠</button>
+                </div>
+                 <div class="shop-item">
+                    <div class="shop-icon">📦</div>
+                    <div class="shop-name">Pack Comum</div>
+                    <div class="shop-desc">11 Cristais Comuns com desconto.</div>
+                    <button class="shop-price-btn" onclick="Core.buy('tix_pack', 10000)">10k 💠</button>
+                </div>
+                <div class="shop-item">
+                    <div class="shop-icon">🟡</div>
+                    <div class="shop-name">Cristal Raro</div>
+                    <div class="shop-desc">Invoca monstros de 3 a 5 estrelas.</div>
+                    <button class="shop-price-btn" onclick="Core.buy('rare', 100, 'gems')">100 💎</button>
+                </div>
+                <div class="shop-item">
+                    <div class="shop-icon">👑</div>
+                    <div class="shop-name">Pack Raro</div>
+                    <div class="shop-desc">11 Cristais Raros com desconto.</div>
+                    <button class="shop-price-btn" onclick="Core.buy('rare_pack', 1000, 'gems')">1k 💎</button>
+                </div>
             </div>
-            <button class="btn" style="margin-top:15px; background:#333; width:100%" onclick="UI.modal('m-shop',0)">Sair</button>
+            
+            <button class="btn" style="margin-top:15px; background:#334155; width:100%" onclick="UI.modal('m-shop',0)">Sair</button>
         </div>
     </div>
 
@@ -280,6 +457,7 @@
                 <div style="display:flex;align-items:center;flex-direction:column"><span id="end-item-icon" style="font-size:2rem">🧪</span><div id="end-xp">+1</div></div>
             </div>
             <div style="font-size:0.8rem; color:#aaa; margin-top:5px">XP Conta: <span id="end-acc-xp">+0</span></div>
+            <div id="rune-drop-msg" style="margin-top:10px; font-weight:bold; color:var(--purple)"></div>
             <button class="btn btn-gold" style="width:100%; margin-top:10px" onclick="Battle.close()">Continuar</button>
         </div>
     </div>
@@ -300,16 +478,16 @@
                 <span>🟡 <span id="h-rare">0</span></span>
                 <span>📚 <span id="h-grim">0</span></span>
                 <span>🚀 <span id="h-boost">0</span></span>
-                <span>📖 <span id="h-books">0</span></span>
             </div>
             <div class="xp-bar-container"><div id="p-xp-bar" class="xp-fill"></div></div>
         </div>
         
-        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2">
-            <div style="font-size:6rem; animation:float 3s infinite ease-in-out">👤</div>
-            <h1 style="color:var(--accent); margin-top:10px">Líder</h1>
-            <button class="btn" style="margin-top:10px; font-size:0.7rem; opacity:0.7" onclick="Game.logout()">Sair</button>
+        <div class="hub-avatar-container">
+            <div class="hub-emblem">⚔️</div>
+            <div class="hub-title">Comandante</div>
+            <button class="btn-logout" onclick="Game.logout()">Desconectar</button>
         </div>
+
         <div style="padding:20px; z-index:2; display:grid; grid-template-columns:1fr 1fr; gap:10px">
             <button class="btn btn-gold" onclick="UI.nav('expl')">🗺️ Explorar</button>
             <button class="btn btn-red" onclick="UI.nav('dung')">👹 Masmorra</button>
@@ -330,16 +508,16 @@
 
     <!-- MASMORRA -->
     <div id="dung" class="screen">
-        <div class="top-bar"><button class="btn" onclick="UI.nav('hub')">⬅</button><span>MASMORRA</span><span>📖 <span id="d-books">0</span></span></div>
+        <div class="top-bar"><button class="btn" onclick="UI.nav('hub')">⬅</button><span>MASMORRA</span><span></span></div>
         <div class="inv-container" style="flex-direction:column; background: linear-gradient(to bottom, #2e1065, #000);">
-            <div style="padding:15px; text-align:center; color:#fca5a5">Derrote os Chefes para ganhar Livros Antigos!</div>
+            <div style="padding:15px; text-align:center; color:#fca5a5">Derrote os Chefes para ganhar Runas!</div>
             <div id="dung-grid" class="stage-grid"></div>
         </div>
     </div>
 
     <!-- INVENTÁRIO -->
     <div id="inv" class="screen">
-        <div class="top-bar"><button class="btn" style="padding:5px 10px" onclick="UI.nav('hub')">⬅</button><span>BOX</span><span>📖 <span id="inv-books">0</span></span></div>
+        <div class="top-bar"><button class="btn" style="padding:5px 10px" onclick="UI.nav('hub')">⬅</button><span>BOX</span><span></span></div>
         <div class="inv-container">
             <div class="inv-list-panel"><div class="inv-filters">Total: <span id="inv-count">0</span></div><div id="inv-grid" class="mon-grid"></div></div>
             <div id="inv-detail" class="inv-detail-panel"><div style="color:#aaa; margin-top:50px">Selecione</div></div>
@@ -378,29 +556,23 @@
     const MAX_LVL = { 1:5, 2:10, 3:20, 4:30, 5:40, 6:50 };
     
     // --- BANCO DE DADOS (MONSTROS POR RARIDADE) ---
-    // ty: 'heal' = Cura aliado com menor HP. ty: 'turn' = Dá turno extra a aliado aleatório (exceto self).
     const DB = [
-        // --- 1 ESTRELA (COMUNS) ---
         { id:101, nat:1, n:'Slime', type:'Água', img:'', visual:'💧', s:[{n:'Pancada',m:1,cd:0}], hp:50, atk:10, color:'#3b82f6' },
         { id:102, nat:1, n:'Wisp', type:'Fogo', img:'', visual:'🔥', s:[{n:'Queimar',m:1,cd:0}], hp:45, atk:12, color:'#ef4444' },
         { id:103, nat:1, n:'Rat', type:'Terra', img:'', visual:'🐀', s:[{n:'Mordida',m:1,cd:0}], hp:55, atk:11, color:'#10b981' },
-        // --- 2 ESTRELAS (INCOMUNS) ---
         { id:201, nat:2, n:'Goblin', type:'Terra', img:'', visual:'👺', s:[{n:'Clava',m:1,cd:0},{n:'Fúria',m:1.3,cd:2}], hp:80, atk:18, color:'#10b981' },
         { id:202, nat:2, n:'Bat', type:'Vento', img:'', visual:'🦇', s:[{n:'Suga Sangue',m:1,cd:0},{n:'Sônico',m:1.2,cd:2}], hp:70, atk:20, color:'#a855f7' },
         { id:203, nat:2, n:'Wolf', type:'Água', img:'', visual:'🐺', s:[{n:'Mordida',m:1,cd:0},{n:'Uivo',m:1.3,cd:2}], hp:85, atk:19, color:'#3b82f6' },
         { id:204, nat:2, n:'Dryad', type:'Natureza', img:'', visual:'🧚', s:[{n:'Espinhos',m:1,cd:0},{n:'Curar',m:2,cd:3,ty:'heal'}], hp:90, atk:15, color:'#10b981' },
-        // --- 3 ESTRELAS (RAROS) ---
         { id:301, nat:3, n:'Golem', type:'Terra', img:'', visual:'🗿', s:[{n:'Esmagar',m:1,cd:0},{n:'Pedregulho',m:1.3,cd:2},{n:'Terremoto',m:2.8,cd:4}], hp:180, atk:25, color:'#10b981' },
         { id:302, nat:3, n:'Mage', type:'Trovão', img:'', visual:'🧙', s:[{n:'Raio',m:1,cd:0},{n:'Choque',m:1.5,cd:2},{n:'Trovão',m:3,cd:4}], hp:140, atk:35, color:'#f59e0b' },
         { id:303, nat:3, n:'Kraken', type:'Água', img:'', visual:'🐙', s:[{n:'Tentáculo',m:1,cd:0},{n:'Jato',m:1.4,cd:2},{n:'Tsunami',m:2.5,cd:4}], hp:160, atk:28, color:'#3b82f6' },
         { id:304, nat:3, n:'Oracle', type:'Luz', img:'', visual:'🔮', s:[{n:'Orbe',m:1,cd:0},{n:'Grande Cura',m:3,cd:3,ty:'heal'}], hp:150, atk:20, color:'#facc15' },
-        // --- 4 ESTRELAS (ÉPICOS) ---
         { id:401, nat:4, n:'Sylph', type:'Vento', img:'', visual:'🦅', s:[{n:'Bico',m:1,cd:0},{n:'Ventania',m:1.4,cd:2},{n:'Tornado',m:2.6,cd:4}], hp:250, atk:50, color:'#a855f7' },
         { id:402, nat:4, n:'Raijin', type:'Trovão', img:'', visual:'⚡', s:[{n:'Choque',m:1,cd:0},{n:'Raio',m:1.6,cd:2},{n:'Tempestade',m:3.2,cd:4}], hp:240, atk:55, color:'#f59e0b' },
         { id:403, nat:4, n:'Phoenix', type:'Fogo', img:'', visual:'🐦‍🔥', s:[{n:'Bico',m:1,cd:0},{n:'Chama',m:1.5,cd:2},{n:'Renascer',m:3,cd:4}], hp:230, atk:58, color:'#ef4444' },
         { id:404, nat:4, n:'TimeKeeper', type:'Trevas', img:'', visual:'⏳', s:[{n:'Tique',m:1,cd:0},{n:'Acelerar',m:0,cd:4,ty:'turn'}], hp:220, atk:45, color:'#a855f7' },
         { id:405, nat:4, n:'Paladin', type:'Luz', img:'', visual:'🛡️', s:[{n:'Golpe',m:1,cd:0},{n:'Impor Mãos',m:4,cd:4,ty:'heal'}], hp:300, atk:35, color:'#facc15' },
-        // --- 5 ESTRELAS (LENDÁRIOS) ---
         { id:501, nat:5, n:'Bahamut', type:'Fogo', img:'', visual:'🦖', s:[{n:'Garra',m:1.2,cd:0},{n:'Mega Flare',m:2,cd:3},{n:'Apocalipse',m:4,cd:5}], hp:600, atk:100, color:'#ef4444' },
         { id:502, nat:5, n:'Leviathan', type:'Água', img:'', visual:'🐉', s:[{n:'Mordida',m:1.2,cd:0},{n:'Tufão',m:2,cd:3},{n:'Dilúvio',m:4,cd:5}], hp:650, atk:90, color:'#3b82f6' },
         { id:503, nat:5, n:'Zeus', type:'Trovão', img:'', visual:'🌩️', s:[{n:'Martelo',m:1.2,cd:0},{n:'Relâmpago',m:2.2,cd:3},{n:'Ira Divina',m:4.5,cd:5}], hp:550, atk:110, color:'#f59e0b' },
@@ -408,21 +580,23 @@
     ];
 
     const DEFAULT_STATE = { 
-        mana:5000, gems:200, pot:10, books:2, 
+        mana:5000, gems:200, pot:10, 
         tix: 2, rare_tix: 1, xp_boosters: 0, grimoires: 0,
         xp: 0, max_xp: 100, p_lvl: 1, 
         maxStage: 1, cleared: [],
+        runes_inv: [], // Inventário de Runas desequipadas
         roster:[
-            {uid:1, id:101, lvl:1, star:1, skLvl:[1], bonus:{hp:0, atk:0}}, 
-            {uid:2, id:102, lvl:1, star:1, skLvl:[1], bonus:{hp:0, atk:0}}, 
-            {uid:3, id:201, lvl:1, star:2, skLvl:[1,1], bonus:{hp:0, atk:0}}
+            {uid:1, id:101, lvl:1, star:1, skLvl:[1], runes:[null,null,null,null]}, 
+            {uid:2, id:102, lvl:1, star:1, skLvl:[1], runes:[null,null,null,null]}, 
+            {uid:3, id:201, lvl:1, star:2, skLvl:[1,1], runes:[null,null,null,null]}
         ]
     };
     
     let s = {};
-    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1 };
+    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null };
     let b = { p:[], e:[], t:'p', idx:0, spd:1, target:null, auto: false };
     let uidCount = 4;
+    let runeIdCount = 1;
     let currentUser = null;
 
     const el = id => document.getElementById(id);
@@ -436,10 +610,20 @@
             const saved = localStorage.getItem(`g_legend_${user}`);
             if(saved) {
                 s = JSON.parse(saved);
-                if(!s.gems) s.gems = 0; if(!s.cleared) s.cleared = []; if(!s.tix) s.tix = 0;
-                if(!s.rare_tix) s.rare_tix = 0; if(!s.xp_boosters) s.xp_boosters = 0; if(!s.grimoires) s.grimoires = 0;
-                if(!s.xp) s.xp = 0; if(!s.max_xp) s.max_xp = 100; if(!s.p_lvl) s.p_lvl = 1;
+                // Migrações
+                if(!s.runes_inv) s.runes_inv = [];
+                s.roster.forEach(m => {
+                    if(!m.runes) m.runes = [null,null,null,null];
+                    delete m.bonus; // Remove sistema antigo de livros
+                });
                 uidCount = s.roster.reduce((max, r) => Math.max(max, r.uid), 0) + 1;
+                // Inicializa ID de runas se houver inventory
+                const maxRuneIdInv = s.runes_inv.reduce((max, r) => Math.max(max, r.id), 0);
+                let maxRuneIdEquip = 0;
+                s.roster.forEach(m => {
+                    m.runes.forEach(r => { if(r) maxRuneIdEquip = Math.max(maxRuneIdEquip, r.id); });
+                });
+                runeIdCount = Math.max(maxRuneIdInv, maxRuneIdEquip) + 1;
             } else {
                 s = JSON.parse(JSON.stringify(DEFAULT_STATE));
             }
@@ -468,7 +652,6 @@
             const safeSet = (id, val) => { const e = el(id); if(e) e.innerText = val; };
             safeSet('h-mana', s.mana); safeSet('s-mana', s.mana);
             safeSet('h-gems', s.gems); safeSet('s-gems', s.gems);
-            safeSet('h-books', s.books); safeSet('d-books', s.books); safeSet('inv-books', s.books);
             safeSet('h-tix', s.tix); safeSet('g-tix', s.tix);
             safeSet('h-rare', s.rare_tix); safeSet('g-rare', s.rare_tix);
             safeSet('h-boost', s.xp_boosters); safeSet('h-grim', s.grimoires); safeSet('sk-grim', s.grimoires);
@@ -483,7 +666,7 @@
         },
         getVis: (d) => d.img ? `<img src="${d.img}">` : d.visual,
         renMon: (m) => {
-            const d = DB.find(x=>x.id===m.id) || DB[0]; // Fallback
+            const d = DB.find(x=>x.id===m.id) || DB[0]; 
             return `${UI.renStars(m.star)}<div class="mon-visual">${UI.getVis(d)}</div><div class="mon-lvl">${m.lvl}</div>`;
         }
     };
@@ -515,6 +698,12 @@
             UI.upd(); 
 
             let c=0, cd=el('g-card');
+            
+            // RESET CARD
+            cd.innerHTML = '';
+            cd.className = 'card unknown'; // Reset class
+            cd.style.animation = 'none';
+
             const t = setInterval(()=>{
                 cd.style.transform=`rotateY(${++c*180}deg)`;
                 if(c>5) {
@@ -529,9 +718,22 @@
                     const pool = DB.filter(m => m.nat === targetNat);
                     const h = pool[Math.floor(Math.random()*pool.length)];
                     const initSkills = h.s.map(() => 1);
+                    
+                    // REVEAL
+                    cd.classList.remove('unknown'); // Remove '?'
                     cd.innerHTML=UI.getVis(h); 
                     el('g-res').innerText=`${h.n} ${h.nat}★`;
-                    s.roster.push({uid:uidCount++, id:h.id, lvl:1, star:h.nat, skLvl:initSkills, bonus:{hp:0, atk:0}});
+
+                    // 5-STAR ANIMATION
+                    if (h.nat === 5) {
+                        cd.classList.add('legendary-spawn');
+                        el('flash-layer').classList.add('flash-gold');
+                        setTimeout(() => el('flash-layer').classList.remove('flash-gold'), 1000);
+                        el('app').classList.add('shake-screen');
+                        setTimeout(() => el('app').classList.remove('shake-screen'), 500);
+                    }
+
+                    s.roster.push({uid:uidCount++, id:h.id, lvl:1, star:h.nat, skLvl:initSkills, runes:[null,null,null,null]});
                     Game.save(); UI.upd();
                 }
             }, 150);
@@ -553,15 +755,29 @@
             tmp.selInv = uid; Core.openInv(); 
             const m = s.roster.find(x=>x.uid===uid); const d = DB.find(x=>x.id===m.id) || DB[0];
             const max = MAX_LVL[m.star] || 50; const isMax = m.lvl>=max;
-            if(!m.skLvl) m.skLvl = d.s.map(()=>1); if(!m.bonus) m.bonus = {hp:0, atk:0};
+            if(!m.skLvl) m.skLvl = d.s.map(()=>1); 
 
             // Calculate cost: floor(lvl/5) + 1
             const pupCost = Math.floor(m.lvl / 5) + 1;
 
+            // Calculate total Rune Bonuses
+            let rHp = 0, rAtk = 0;
+            let runesHtml = '<div class="rune-container">';
+            m.runes.forEach((r, idx) => {
+                if(r) {
+                    if(r.type==='hp') rHp += r.val;
+                    if(r.type==='atk') rAtk += r.val;
+                    const rClass = r.rarity === 'Lendario' ? 'rune-legend' : r.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
+                    runesHtml += `<div class="rune-slot filled" onclick="Core.openRuneSelect(${idx})"><div class="rune-icon ${rClass}">${r.type==='hp'?'❤️':'⚔️'}</div></div>`;
+                } else {
+                    runesHtml += `<div class="rune-slot" onclick="Core.openRuneSelect(${idx})"></div>`;
+                }
+            });
+            runesHtml += '</div>';
+
             let btnPup = `<button class="btn btn-green" onclick="Core.pup(${uid})">Level Up (${pupCost}🧪)</button>`;
             let btnEvo = isMax && m.star<6 ? `<button class="btn btn-purple" onclick="Core.openEvo(${uid})">Evoluir</button>` : '';
             let btnSkl = `<button class="btn btn-blue" onclick="Core.openSkill(${uid})">Skill Up</button>`;
-            let btnBook = `<button class="btn btn-gold" onclick="Core.useBook(${uid})">Ler Livro (${s.books}📖)</button>`;
             
             el('inv-detail').innerHTML = `<div class="detail-model">${UI.getVis(d)}</div><h1 style="color:${d.color}">${d.n}</h1>
                 <div style="font-size:0.8rem; color:#aaa; margin-bottom:5px">Elemento: ${d.type} | Nat: ${d.nat}★</div>
@@ -569,23 +785,81 @@
                 <div class="detail-stats">
                     <div class="stat-row"><span>Lv</span> <b>${m.lvl}/${max}</b></div>
                     <div class="stat-row"><span>Skills</span> <b>${m.skLvl.join('/')}</b></div>
-                    <div class="stat-row"><span>Bônus</span> <span class="stat-bonus">+${m.bonus.atk} ATK / +${m.bonus.hp} HP</span></div>
+                    <div class="stat-row"><span>Runas</span> <span class="stat-bonus">+${rAtk} ATK / +${rHp} HP</span></div>
                 </div>
-                <div class="btn-grp">${btnPup} ${btnSkl} ${btnBook} ${btnEvo}</div>`;
+                ${runesHtml}
+                <div class="btn-grp">${btnPup} ${btnSkl} ${btnEvo}</div>`;
         },
         pup: (uid) => {
+            if(s.pot<1) return alert("Sem poções!");
             const m = s.roster.find(x=>x.uid===uid);
-            const cost = Math.floor(m.lvl / 5) + 1;
-            if(s.pot<cost) return alert(`Precisa de ${cost} poções!`);
             if(m.lvl >= (MAX_LVL[m.star]||50)) return alert("Max Lv!");
-            s.pot-=cost; m.lvl++; Game.save(); UI.upd(); Core.selInv(uid);
-        },
-        useBook: (uid) => {
-            if(s.books < 1) return alert("Sem Livros!");
-            const m = s.roster.find(x=>x.uid===uid); s.books--; m.bonus.hp += 20; m.bonus.atk += 5;
-            Game.save(); UI.upd(); Core.selInv(uid); alert("Livro lido! Status aumentados.");
+            s.pot--; m.lvl++; Game.save(); UI.upd(); Core.selInv(uid);
         },
         
+        // --- RUNE SYSTEM ---
+        openRuneSelect: (slotIdx) => {
+            tmp.selRuneSlot = slotIdx;
+            const m = s.roster.find(x=>x.uid===tmp.selInv);
+            const currentRune = m.runes[slotIdx];
+            
+            let html = '';
+            
+            // Unequip Option
+            if (currentRune) {
+                const rClass = currentRune.rarity === 'Lendario' ? 'rune-legend' : currentRune.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
+                html += `<div class="rune-list-item" onclick="Core.unequipRune()">
+                    <div style="color:#ef4444; font-weight:bold">DESEQUIPAR ATUAL</div>
+                    <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${currentRune.type==='hp'?'❤️':'⚔️'}</div>
+                </div><hr style="border-color:#444; margin:10px 0;">`;
+            }
+
+            // Available Runes
+            if (s.runes_inv.length === 0) {
+                html += '<div style="color:#aaa; text-align:center">Nenhuma runa no inventário.</div>';
+            } else {
+                s.runes_inv.forEach(r => {
+                    const rClass = r.rarity === 'Lendario' ? 'rune-legend' : r.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
+                    const color = r.rarity === 'Lendario' ? '#f59e0b' : r.rarity === 'Epico' ? '#a855f7' : '#3b82f6';
+                    html += `<div class="rune-list-item" onclick="Core.equipRune(${r.id})">
+                        <div>
+                            <span style="color:${color}; font-weight:bold">${r.rarity}</span> 
+                            <span>+${r.val} ${r.type.toUpperCase()}</span>
+                        </div>
+                        <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${r.type==='hp'?'❤️':'⚔️'}</div>
+                    </div>`;
+                });
+            }
+            
+            el('rune-list').innerHTML = html;
+            UI.modal('m-rune', 1);
+        },
+        equipRune: (runeId) => {
+            const m = s.roster.find(x=>x.uid===tmp.selInv);
+            const runeIdx = s.runes_inv.findIndex(r => r.id === runeId);
+            const newRune = s.runes_inv[runeIdx];
+            
+            // If slot has rune, unequip it first
+            if (m.runes[tmp.selRuneSlot]) {
+                s.runes_inv.push(m.runes[tmp.selRuneSlot]);
+            }
+            
+            // Equip new
+            m.runes[tmp.selRuneSlot] = newRune;
+            s.runes_inv.splice(runeIdx, 1);
+            
+            Game.save(); UI.modal('m-rune', 0); Core.selInv(tmp.selInv);
+        },
+        unequipRune: () => {
+            const m = s.roster.find(x=>x.uid===tmp.selInv);
+            const oldRune = m.runes[tmp.selRuneSlot];
+            if (oldRune) {
+                s.runes_inv.push(oldRune);
+                m.runes[tmp.selRuneSlot] = null;
+                Game.save(); UI.modal('m-rune', 0); Core.selInv(tmp.selInv);
+            }
+        },
+
         // --- MAPAS ---
         renExpl: () => {
             const grid = el('expl-grid'); grid.innerHTML = ''; const frag = document.createDocumentFragment();
@@ -609,7 +883,7 @@
                 div.className = `stage-btn boss`;
                 div.onclick = () => Core.prepFight('dungeon', i);
                 let badge = !cleared ? `<div class="first-clear-badge">50💎</div>` : '';
-                div.innerHTML = `👹 ${badge} <div style="font-size:0.6rem; color:#f87171">Andar ${i}</div>`;
+                div.innerHTML = `${badge} <div class="boss-floor-num">${i}</div><div class="boss-label">Andar</div>`;
                 frag.appendChild(div);
             }
             grid.appendChild(frag);
@@ -742,17 +1016,18 @@
             b.p = tmp.prep.map((uid,i) => {
                 const m = s.roster.find(x=>x.uid===uid); const d = DB.find(x=>x.id===m.id) || DB[0];
                 const sm = 1 + m.lvl*0.1 + (m.star * 0.3);
-                const finalHp = Math.floor((d.hp*sm) + m.bonus.hp);
-                const finalAtk = Math.floor((d.atk*sm) + m.bonus.atk);
+                // Calcula stats com Runas
+                let rHp = 0, rAtk = 0;
+                m.runes.forEach(r => { if(r) { if(r.type==='hp') rHp+=r.val; if(r.type==='atk') rAtk+=r.val; } });
+                
+                const finalHp = Math.floor((d.hp*sm) + rHp);
+                const finalAtk = Math.floor((d.atk*sm) + rAtk);
                 return {...d, max:finalHp, cur:finalHp, atk:finalAtk, idx:i, side:'p', dead:false, cds:d.s.map(()=>0), skLvl:m.skLvl};
             });
 
             if(tmp.mode === 'story') {
-                // CURVA DE DIFICULDADE (EXPONENCIAL SUAVE)
-                // Início (Nv 1): Fácil. Fim (Nv 12): Difícil.
                 const diff = 1 + (tmp.lvl * 0.5); 
                 b.e = Array(3).fill(0).map((_,i) => {
-                    // Pool restrita por nível (Fases iniciais só têm monstros fracos)
                     const maxNat = Math.min(3, Math.ceil(tmp.lvl/3));
                     const pool = DB.filter(x => x.nat <= maxNat);
                     const base = pool[Math.floor(Math.random()*pool.length)];
@@ -763,7 +1038,6 @@
                     };
                 });
             } else {
-                // CURVA MASMORRA (BOSS)
                 const diff = 1 + (tmp.lvl * 1.5);
                 const bossPool = DB.filter(x => x.nat >= 3);
                 const bossBase = bossPool[Math.floor(Math.random()*bossPool.length)];
@@ -917,6 +1191,7 @@
             el('stg').classList.remove('cinematic');
             setTimeout(() => {
                 let rewardMsg = "", itemIcon = "", itemQtd = "", gemsAwarded = 0, accXpGain = 0;
+                let runeDrop = "";
                 if(w) {
                     const stageKey = `${tmp.mode}-${tmp.lvl}`;
                     const firstClear = !s.cleared.includes(stageKey);
@@ -925,17 +1200,44 @@
                     let xpBase = 50; if(s.xp_boosters > 0) { xpBase *= 3; s.xp_boosters--; }
                     accXpGain = xpBase; s.xp += accXpGain;
                     if(s.xp >= s.max_xp) { s.p_lvl++; s.xp -= s.max_xp; s.max_xp = Math.floor(s.max_xp * 1.5); s.gems += 100; alert("LEVEL UP! +100 Cristais 💎"); }
+                    
                     if(tmp.mode === 'story') {
                         const rMana = 20 * tmp.lvl; const rPot = Math.floor(tmp.lvl / 2) + 1; s.mana += rMana; s.pot += rPot;
                         itemIcon = "🧪"; itemQtd = `+${rPot}`; el('end-mana').innerText = `+${rMana}`; rewardMsg = "VITÓRIA!";
                         if(tmp.lvl === s.maxStage) s.maxStage++;
-                    } else { s.books++; itemIcon = "📖"; itemQtd = "+1"; el('end-mana').innerText = "+0"; rewardMsg = "CHEFE DERROTADO!"; }
+                    } else { 
+                        // Dungeon Drop: Rune
+                        const rarities = ['Raro', 'Epico', 'Lendario'];
+                        // Chance based on floor
+                        let rIdx = 0;
+                        const rnd = Math.random() * 100;
+                        if (tmp.lvl <= 3) { if(rnd>90) rIdx=1; } // Early: mostly Rare
+                        else if (tmp.lvl <= 6) { if(rnd>70) rIdx=1; else if(rnd>95) rIdx=2; } // Mid
+                        else { if(rnd>50) rIdx=1; else if(rnd>80) rIdx=2; } // High: better chances
+
+                        const rarity = rarities[rIdx];
+                        const type = Math.random() > 0.5 ? 'hp' : 'atk';
+                        // Value based on rarity
+                        let val = 0;
+                        if(rarity==='Raro') val = 10 + Math.floor(Math.random()*10);
+                        if(rarity==='Epico') val = 25 + Math.floor(Math.random()*15);
+                        if(rarity==='Lendario') val = 50 + Math.floor(Math.random()*25);
+
+                        const newRune = { id: runeIdCount++, rarity, type, val };
+                        s.runes_inv.push(newRune);
+                        
+                        itemIcon = "📖"; itemQtd = "-"; el('end-mana').innerText = "+0"; rewardMsg = "CHEFE DERROTADO!";
+                        runeDrop = `${rarity} Runa (${type.toUpperCase()} +${val})`;
+                    }
                     Game.save();
                 } else { rewardMsg = "DERROTA"; itemIcon = "💀"; itemQtd = "-"; el('end-mana').innerText = "+0"; }
+                
                 el('end-title').innerText = rewardMsg; el('end-title').style.color = w ? "var(--gold)" : "var(--danger)";
                 el('end-item-icon').innerText = itemIcon; el('end-xp').innerText = itemQtd;
                 el('end-gems').innerText = w ? `+${gemsAwarded}` : "+0";
                 el('end-acc-xp').innerText = w ? `+${accXpGain}` : "+0";
+                el('rune-drop-msg').innerText = runeDrop;
+
                 UI.modal('m-end',1); UI.upd();
             }, 600);
         },
