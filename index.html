@@ -879,6 +879,10 @@
     const MAX_LVL = { 1:5, 2:10, 3:20, 4:30, 5:40, 6:50 };
     
     // --- ÁREA DE CONFIGURAÇÃO DE IMAGENS E ITENS (LOJA) ---
+    // Você pode editar a lista 'SHOP_DB' para adicionar novos itens na loja.
+    // Para adicionar imagens, preencha o campo 'img' com o caminho do arquivo (ex: 'img/ticket.png').
+    // Se 'img' estiver vazio (''), o jogo usará o 'icon' (emoji) como padrão.
+
     const SHOP_DB = [
         { id: 'pot', name: 'Poção de XP', desc: 'Sobe o nível dos seus monstros.', cost: 100, currency: 'mana', icon: '🧪', img: '' },
         { id: 'xpboost', name: 'Booster XP', desc: '3x XP de conta na próxima batalha.', cost: 50, currency: 'gems', icon: '🚀', img: '' },
@@ -890,6 +894,9 @@
     ];
 
     // --- BANCO DE DADOS (MONSTROS POR RARIDADE) ---
+    // Para adicionar a imagem do seu monstro, preencha o campo 'img' abaixo.
+    // Exemplo: img: 'img/meu_slime.png'
+    // 'ty: aoe' indica dano em área
     // ATRIBUTOS REDUZIDOS PARA BALANCEAMENTO (4* e 5*)
     const DB = [
         { id:101, nat:1, n:'Slime', type:'Água', img:'', visual:'💧', s:[{n:'Pancada',m:1,cd:0}], hp:50, atk:10, color:'#3b82f6' },
@@ -903,15 +910,15 @@
         { id:302, nat:3, n:'Mage', type:'Trovão', img:'', visual:'🧙', s:[{n:'Raio',m:1,cd:0},{n:'Choque',m:1.5,cd:2},{n:'Trovão',m:3,cd:4}], hp:100, atk:30, color:'#f59e0b' },
         { id:303, nat:3, n:'Kraken', type:'Água', img:'', visual:'🐙', s:[{n:'Tentáculo',m:1,cd:0},{n:'Jato',m:1.4,cd:2},{n:'Tsunami',m:2.5,cd:4}], hp:110, atk:24, color:'#3b82f6' },
         { id:304, nat:3, n:'Oracle', type:'Luz', img:'', visual:'🔮', s:[{n:'Orbe',m:1,cd:0},{n:'Grande Cura',m:3,cd:3,ty:'heal'}], hp:105, atk:18, color:'#facc15' },
-        { id:401, nat:4, n:'Sylph', type:'Vento', img:'', visual:'🦅', s:[{n:'Bico',m:1,cd:0},{n:'Ventania',m:1.4,cd:2},{n:'Tornado',m:2.6,cd:4, ty:'aoe'}], hp:180, atk:35, color:'#a855f7' },
-        { id:402, nat:4, n:'Raijin', type:'Trovão', img:'', visual:'⚡', s:[{n:'Choque',m:1,cd:0},{n:'Raio',m:1.6,cd:2},{n:'Tempestade',m:3.2,cd:4, ty:'aoe'}], hp:170, atk:38, color:'#f59e0b' },
-        { id:403, nat:4, n:'Phoenix', type:'Fogo', img:'', visual:'🐦‍🔥', s:[{n:'Bico',m:1,cd:0},{n:'Chama',m:1.5,cd:2, ty:'aoe'},{n:'Renascer',m:3,cd:4}], hp:165, atk:40, color:'#ef4444' },
-        { id:404, nat:4, n:'TimeKeeper', type:'Trevas', img:'', visual:'⏳', s:[{n:'Tique',m:1,cd:0},{n:'Acelerar',m:0,cd:4,ty:'turn'}], hp:160, atk:32, color:'#a855f7' },
-        { id:405, nat:4, n:'Paladin', type:'Luz', img:'', visual:'🛡️', s:[{n:'Golpe',m:1,cd:0},{n:'Impor Mãos',m:4,cd:4,ty:'heal'}], hp:220, atk:25, color:'#facc15' },
-        { id:501, nat:5, n:'Bahamut', type:'Fogo', img:'', visual:'🦖', s:[{n:'Garra',m:1.2,cd:0},{n:'Mega Flare',m:2,cd:3, ty:'aoe'},{n:'Apocalipse',m:4,cd:5, ty:'aoe'}], hp:260, atk:48, color:'#ef4444' },
-        { id:502, nat:5, n:'Leviathan', type:'Água', img:'', visual:'🐉', s:[{n:'Mordida',m:1.2,cd:0},{n:'Tufão',m:2,cd:3, ty:'aoe'},{n:'Dilúvio',m:4,cd:5, ty:'aoe'}], hp:280, atk:42, color:'#3b82f6' },
-        { id:503, nat:5, n:'Zeus', type:'Trovão', img:'', visual:'🌩️', s:[{n:'Martelo',m:1.2,cd:0},{n:'Relâmpago',m:2.2,cd:3, ty:'aoe'},{n:'Ira Divina',m:4.5,cd:5, ty:'aoe'}], hp:240, atk:52, color:'#f59e0b' },
-        { id:504, nat:5, n:'Seraphim', type:'Luz', img:'', visual:'👼', s:[{n:'Luz',m:1.2,cd:0},{n:'Redenção',m:4,cd:3,ty:'heal'},{n:'Milagre',m:0,cd:5,ty:'turn'}], hp:250, atk:40, color:'#facc15' }
+        { id:401, nat:4, n:'Sylph', type:'Vento', img:'', visual:'🦅', s:[{n:'Bico',m:1,cd:0},{n:'Ventania',m:1.4,cd:2},{n:'Tornado',m:1.3,cd:4, ty:'aoe'}], hp:160, atk:22, color:'#a855f7' },
+        { id:402, nat:4, n:'Raijin', type:'Trovão', img:'', visual:'⚡', s:[{n:'Choque',m:1,cd:0},{n:'Raio',m:1.6,cd:2},{n:'Tempestade',m:1.4,cd:4, ty:'aoe'}], hp:160, atk:24, color:'#f59e0b' },
+        { id:403, nat:4, n:'Phoenix', type:'Fogo', img:'', visual:'🐦‍🔥', s:[{n:'Bico',m:1,cd:0},{n:'Chama',m:1.1,cd:2, ty:'aoe'},{n:'Renascer',m:3,cd:4}], hp:140, atk:25, color:'#ef4444' },
+        { id:404, nat:4, n:'TimeKeeper', type:'Trevas', img:'', visual:'⏳', s:[{n:'Tique',m:1,cd:0},{n:'Acelerar',m:0,cd:4,ty:'turn'}], hp:140, atk:20, color:'#a855f7' },
+        { id:405, nat:4, n:'Paladin', type:'Luz', img:'', visual:'🛡️', s:[{n:'Golpe',m:1,cd:0},{n:'Impor Mãos',m:4,cd:4,ty:'heal'}], hp:180, atk:18, color:'#facc15' },
+        { id:501, nat:5, n:'Bahamut', type:'Fogo', img:'', visual:'🦖', s:[{n:'Garra',m:1.2,cd:0},{n:'Mega Flare',m:1.4,cd:3, ty:'aoe'},{n:'Apocalipse',m:1.8,cd:5, ty:'aoe'}], hp:180, atk:25, color:'#ef4444' },
+        { id:502, nat:5, n:'Leviathan', type:'Água', img:'', visual:'🐉', s:[{n:'Mordida',m:1.2,cd:0},{n:'Tufão',m:1.4,cd:3, ty:'aoe'},{n:'Dilúvio',m:1.8,cd:5, ty:'aoe'}], hp:200, atk:22, color:'#3b82f6' },
+        { id:503, nat:5, n:'Zeus', type:'Trovão', img:'', visual:'🌩️', s:[{n:'Martelo',m:1.2,cd:0},{n:'Relâmpago',m:1.4,cd:3, ty:'aoe'},{n:'Ira Divina',m:1.8,cd:5, ty:'aoe'}], hp:170, atk:28, color:'#f59e0b' },
+        { id:504, nat:5, n:'Seraphim', type:'Luz', img:'', visual:'👼', s:[{n:'Luz',m:1.2,cd:0},{n:'Redenção',m:4,cd:3,ty:'heal'},{n:'Milagre',m:0,cd:5,ty:'turn'}], hp:180, atk:22, color:'#facc15' }
     ];
 
     const DEFAULT_STATE = { 
