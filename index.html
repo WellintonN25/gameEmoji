@@ -312,6 +312,9 @@
             <div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-danger)" onclick="UI.nav('dung')">
                 <div style="font-size:2rem">🏰</div><div><h3>Masmorra</h3><small style="color:#666">Runas</small></div>
             </div>
+            <div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid #8b5cf6" onclick="UI.nav('tower')">
+                <div style="font-size:2rem">🗼</div><div><h3>Torre</h3><small style="color:#666">Ascensão</small></div>
+            </div>
             <div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-accent)" onclick="Core.openRuneBag()">
                 <div style="font-size:2rem">🎒</div><div><h3>Inventário</h3><small style="color:#666">Gerir</small></div>
             </div>
@@ -350,6 +353,13 @@
                 <button class="btn btn-white" onclick="Core.backToDungSelect()">Voltar</button>
                 <div id="dung-list-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px"></div>
             </div>
+        </div>
+    </div>
+
+    <div id="tower" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Torre</h3><div style="width:30px"></div></div>
+        <div class="scroll-y" style="padding:20px">
+             <div id="tower-list-container" style="display:flex; flex-direction:column; gap:10px"></div>
         </div>
     </div>
 
@@ -593,7 +603,7 @@
     };
 
     const DEFAULT_STATE = { 
-        mana:2000, gems:50, pot:5, tix:0, rare_tix:5, grimoires:0, xp:0, max_xp:100, p_lvl:1, maxStage:1, cleared:[], runes_inv:[], roster:[], xp_boost_end_time: 0, first_summon_done: false,
+        mana:2000, gems:50, pot:5, tix:0, rare_tix:5, grimoires:0, xp:0, max_xp:100, p_lvl:1, maxStage:1, maxTower: 1, cleared:[], runes_inv:[], roster:[], xp_boost_end_time: 0, first_summon_done: false,
         daily_missions: { last_reset: 0, progress: {}, claimed: [] }
     };
     let s = {}, tmp = { prep:[], selInv:null, mode:'story', lvl:1, selRuneSlot:null, dungType:null, upRune:null, evoFodder:[], skillFodder:[], invFilter: 'all' };
@@ -611,6 +621,7 @@
             if(!s.runes_inv) s.runes_inv=[];
             if(typeof s.xp_boost_end_time === 'undefined') s.xp_boost_end_time = 0;
             if(!s.daily_missions) s.daily_missions = { last_reset: 0, progress: {}, claimed: [] };
+            if(!s.maxTower) s.maxTower = 1;
 
             // Check Daily Reset
             const now = new Date();
@@ -648,7 +659,7 @@
     };
 
     const UI = {
-        nav: scn => { document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active')); el(scn).classList.add('active'); UI.upd(); if(scn==='expl') Core.renExpl(); if(scn==='dung') Core.renDung(); },
+        nav: scn => { document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active')); el(scn).classList.add('active'); UI.upd(); if(scn==='expl') Core.renExpl(); if(scn==='dung') Core.renDung(); if(scn==='tower') Core.renTower(); },
         modal: (id,o) => { 
             el(id).className = o ? 'modal open' : 'modal'; 
             if(o && id==='m-shop') Core.renShop(); 
@@ -970,6 +981,18 @@
                 c.appendChild(d);
             }
         },
+        renTower: () => {
+            const c=el('tower-list-container'); c.innerHTML='';
+            for(let i=1;i<=50;i++) {
+                 const locked = i > s.maxTower;
+                 const isBoss = i % 10 === 0;
+                 const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; 
+                 d.style.borderColor = isBoss ? 'var(--c-gold)' : '#e5e7eb';
+                 d.innerHTML=`<div style="display:flex;justify-content:space-between"><span>${isBoss?'👑 ':''}Andar ${i}</span><span>${locked?'🔒':'⚔️'}</span></div>`;
+                 if(!locked) d.onclick=()=>Core.prep('tower',i);
+                 c.appendChild(d);
+            }
+        },
         backToDungSelect: () => { el('dung-floors').style.display='none'; el('dung-select').style.display='block'; },
         prep: (m,l) => { tmp.mode=m; tmp.lvl=l; tmp.prep=[]; UI.nav('prep'); Prep.render(); },
         reqConfirm: (m,a) => { el('confirm-msg').innerText=m; pendingAction=a; UI.modal('m-confirm',1); },
@@ -1022,9 +1045,18 @@
                     if (tmp.dungType === 'golem') d = BOSS_DB.golem;
                     else d = BOSS_DB.dragon;
                     sm = 1 + (tmp.lvl * 0.5); // Escala agressiva masmorra
+                } else if (tmp.mode === 'tower') {
+                     // TOWER LOGIC
+                     if (tmp.lvl % 10 === 0) { // Boss Floor
+                        d = BOSS_DB.dragon; // Placeholder Boss
+                        sm = 1 + (tmp.lvl * 0.3);
+                     } else {
+                        const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902);
+                        d = commonDB[Math.floor(Math.random()*commonDB.length)];
+                        sm = 1 + (tmp.lvl * 0.15);
+                     }
                 } else {
                     // FILTRO DE SEGURANÇA: NUNCA SPAWNAR BOSS EM HISTÓRIA
-                    // Filtra DB removendo IDs 901 e 902
                     const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902);
                     d = commonDB[Math.floor(Math.random()*commonDB.length)]; 
                     sm = 1 + (tmp.lvl * 0.2); // Escala suave historia
@@ -1193,15 +1225,16 @@
                     const rMana = (300 + (gainScale * 50)) * (boostActive ? 1.5 : 1);
                     const rXP = (100 + (gainScale * 20)) * (boostActive ? 2 : 1);
                     
-                    // SAVE PROGRESS (CORRIGIDO)
                     const stageKey = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
                     const isFirst = !s.cleared.includes(stageKey);
                     if(isFirst) s.cleared.push(stageKey);
                     
-                    // UNLOCK NEXT STAGE STORY
                     if(tmp.mode === 'story' && tmp.lvl === s.maxStage) {
                         s.maxStage++;
                         UI.toast("Nova Fase Desbloqueada!");
+                    }
+                    if(tmp.mode === 'tower' && tmp.lvl === s.maxTower) {
+                         s.maxTower++;
                     }
 
                     const rGems = isFirst ? 50 : 5;
