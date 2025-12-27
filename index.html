@@ -170,10 +170,27 @@
         .rune-bag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 20px; overflow-y: auto; align-content: start; flex: 1; }
         .rune-bag-item { background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         .rune-bag-item:hover { transform: translateY(-3px); border-color: var(--gold); background: #334155; }
-        .rune-sell-btn { font-size: 0.75rem; background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; width: 100%; transition: 0.2s; border: 1px solid #b91c1c; margin-top: auto; }
-        .rune-sell-btn:hover { background: #dc2626; }
-        .rune-sell-btn:active { transform: scale(0.95); }
+        
+        .rune-level-badge { position: absolute; top: 5px; right: 5px; font-size: 0.7rem; background: #000; padding: 1px 4px; border-radius: 4px; border: 1px solid #666; }
+        
+        .rune-btn-group { display:flex; gap:5px; width:100%; margin-top:auto; }
+        .rune-action-btn { flex:1; font-size: 0.7rem; color: white; border: none; padding: 4px; border-radius: 6px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-sell { background: #ef4444; border-color: #b91c1c; }
+        .btn-sell:hover { background: #dc2626; }
+        .btn-up { background: #eab308; border-color: #a16207; color: black; font-weight: bold; }
+        .btn-up:hover { background: #ca8a04; }
 
+        /* MODAL DE POWER-UP */
+        .rune-up-box { background: #1e293b; border: 2px solid var(--gold); padding: 20px; border-radius: 15px; width: 90%; max-width: 350px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .rune-up-header { font-size: 1.2rem; font-weight: bold; color: var(--gold); }
+        .rune-up-stats { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; width: 100%; text-align: left; }
+        .rune-stat-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+        .substat { color: #94a3b8; font-size: 0.8rem; }
+        .substat.new { color: #4ade80; animation: pulse 1s infinite; }
+        
+        .up-animation { animation: up-bounce 0.5s ease-in-out; }
+        @keyframes up-bounce { 0% { transform: scale(1); } 50% { transform: scale(1.2); filter: brightness(1.5); } 100% { transform: scale(1); } }
+        
         /* --- MAPAS & ESTÁGIOS --- */
         .stage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; overflow-y: auto; }
         .stage-btn { aspect-ratio: 1; background: #222; border: 2px solid #555; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; position: relative; transition: 0.2s; }
@@ -446,6 +463,31 @@
         </div>
     </div>
 
+    <!-- NOVO MODAL POWER-UP RUNA -->
+    <div id="m-rune-up" class="modal">
+        <div class="rune-up-box" id="rune-up-content">
+            <div class="rune-up-header">Melhorar Runa</div>
+            <!-- Conteúdo dinâmico -->
+            <div id="rune-up-display" style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+                <div class="rune-icon" id="up-rune-icon">?</div>
+                <div style="font-weight:bold; font-size:1.1rem;" id="up-rune-main">ATK +10</div>
+            </div>
+            
+            <div class="rune-up-stats" id="up-rune-subs">
+                <!-- Subs -->
+            </div>
+
+            <div style="font-size:0.8rem; color:#aaa;">
+                Chance: <span id="up-chance" style="color:white">100%</span>
+            </div>
+
+            <button class="btn btn-gold" style="width:100%" onclick="Core.doUpgrade()">
+                Power-up (<span id="up-cost">1000</span> 💠)
+            </button>
+            <button class="btn" style="width:100%" onclick="UI.modal('m-rune-up',0)">Fechar</button>
+        </div>
+    </div>
+
     <!-- MODAL GACHA -->
     <div id="m-gacha" class="modal">
         <div class="gacha-box">
@@ -642,7 +684,7 @@
             </div>
         </div>
         <div class="inv-container" style="flex-direction:column; background: linear-gradient(to bottom, #1e1b4b, #000);">
-            <div style="padding:15px; text-align:center; color:#a5b4fc">Venda runas para ganhar Mana</div>
+            <div style="padding:15px; text-align:center; color:#a5b4fc">Venda ou Melhore suas runas</div>
             <div id="rune-bag-grid" class="rune-bag-grid">
                 <!-- Grid de Runas será renderizado aqui -->
             </div>
@@ -755,7 +797,7 @@
     };
     
     let s = {};
-    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null, dungType: null };
+    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null, dungType: null, upRune: null };
     let b = { p:[], e:[], t:'p', idx:0, spd:1, target:null, auto: false, farmRuns: 0, skillPending: null };
     let uidCount = 4;
     let runeIdCount = 1;
@@ -777,7 +819,19 @@
                 s.roster.forEach(m => {
                     if(!m.runes) m.runes = [null,null,null,null];
                     delete m.bonus; 
+                    // MIGRATION: Ensure runes have level and subs
+                    m.runes.forEach((r, i) => { 
+                        if(r) {
+                            if (typeof r.lvl === 'undefined') r.lvl = 0;
+                            if (!r.subs) r.subs = [];
+                        }
+                    });
                 });
+                s.runes_inv.forEach(r => {
+                    if (typeof r.lvl === 'undefined') r.lvl = 0;
+                    if (!r.subs) r.subs = [];
+                });
+
                 uidCount = s.roster.reduce((max, r) => Math.max(max, r.uid), 0) + 1;
                 const maxRuneIdInv = s.runes_inv.reduce((max, r) => Math.max(max, r.id), 0);
                 let maxRuneIdEquip = 0;
@@ -852,6 +906,27 @@
         renMon: (m) => {
             const d = DB.find(x=>x.id===m.id) || DB[0]; 
             return `${UI.renStars(m.star)}<div class="mon-visual">${UI.getVis(d)}</div><div class="mon-lvl">${m.lvl}</div>`;
+        },
+        
+        // Renderiza a visualização detalhada da runa
+        renRuneDetails: (r) => {
+            const rClass = r.rarity === 'Lendario' ? 'rune-legend' : r.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
+            let icon = '❓';
+            if(r.type==='hp') icon = '❤️'; else if(r.type==='atk') icon = '⚔️'; else if(r.type==='def') icon = '🛡️'; else if(r.type==='crit') icon = '💥';
+            
+            el('up-rune-icon').className = `rune-icon ${rClass}`;
+            el('up-rune-icon').innerText = icon;
+            el('up-rune-main').innerText = `${r.type.toUpperCase()} +${r.val} (Lv.${r.lvl})`;
+
+            let subsHtml = '';
+            if(r.subs && r.subs.length > 0) {
+                r.subs.forEach(sub => {
+                   subsHtml += `<div class="rune-stat-line"><span>${sub.type.toUpperCase()}</span><span>+${sub.val}</span></div>`; 
+                });
+            } else {
+                subsHtml = '<div style="color:#666; font-size:0.8rem">Sem substatus</div>';
+            }
+            el('up-rune-subs').innerHTML = subsHtml;
         }
     };
 
@@ -973,10 +1048,21 @@
             let runesHtml = '<div class="rune-container">';
             m.runes.forEach((r, idx) => {
                 if(r) {
-                    if(r.type==='hp') rHp += r.val;
-                    if(r.type==='atk') rAtk += r.val;
-                    if(r.type==='def') rDef += r.val;
-                    if(r.type==='crit') rCrit += r.val;
+                    if(r.type==='hp') rHp+=r.val; 
+                    if(r.type==='atk') rAtk+=r.val; 
+                    if(r.type==='def') rDef+=r.val; 
+                    if(r.type==='crit') rCrit+=r.val; 
+                    
+                    // Add Substats to Total
+                    if (r.subs) {
+                        r.subs.forEach(s => {
+                            if(s.type==='hp') rHp+=s.val; 
+                            if(s.type==='atk') rAtk+=s.val; 
+                            if(s.type==='def') rDef+=s.val; 
+                            if(s.type==='crit') rCrit+=s.val; 
+                        });
+                    }
+
                     const rClass = r.rarity === 'Lendario' ? 'rune-legend' : r.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
                     
                     let icon = '❓';
@@ -985,7 +1071,7 @@
                     else if(r.type==='def') icon = '🛡️';
                     else if(r.type==='crit') icon = '💥';
 
-                    runesHtml += `<div class="rune-slot filled" onclick="Core.openRuneSelect(${idx})"><div class="rune-icon ${rClass}">${icon}</div></div>`;
+                    runesHtml += `<div class="rune-slot filled" onclick="Core.openRuneSelect(${idx})"><div class="rune-icon ${rClass}">${icon}</div><div class="rune-level-badge">+${r.lvl}</div></div>`;
                 } else {
                     runesHtml += `<div class="rune-slot" onclick="Core.openRuneSelect(${idx})"></div>`;
                 }
@@ -1037,9 +1123,13 @@
 
                 itemDiv.innerHTML = `
                     <div class="rune-icon ${rClass}" style="margin-bottom:5px">${icon}</div>
+                    <div class="rune-level-badge" style="background:#000; border:1px solid #444;">+${r.lvl}</div>
                     <div style="font-size:0.7rem; color:${color}; font-weight:bold">${r.rarity}</div>
                     <div style="font-size:0.8rem">+${r.val} ${r.type.toUpperCase()}</div>
-                    <button class="rune-sell-btn" onclick="Core.sellRune(${r.id}, ${sellPrice}, event)">Vender (+${sellPrice}💠)</button>
+                    <div class="rune-btn-group">
+                        <button class="rune-action-btn btn-up" onclick="Core.openRuneUpgrade(${r.id}, event)">UP</button>
+                        <button class="rune-action-btn btn-sell" onclick="Core.sellRune(${r.id}, ${sellPrice}, event)">$</button>
+                    </div>
                 `;
                 grid.appendChild(itemDiv);
             });
@@ -1058,6 +1148,127 @@
                 }
             });
         },
+        
+        // --- POWER UP SYSTEM ---
+        openRuneUpgrade: (runeId, event) => {
+            if(event) event.stopPropagation();
+            
+            // Find rune in inventory OR equipped (not supported from bag view directly yet, assume inventory for now)
+            let r = s.runes_inv.find(x => x.id === runeId);
+            
+            // If called from openRuneSelect (equipped context), might need different logic, but let's stick to Bag for now.
+            // Or if passed explicitly.
+            
+            if(!r) {
+                // Check equipped runes if not found in inv
+                 s.roster.forEach(m => {
+                    m.runes.forEach(eqR => {
+                        if(eqR && eqR.id === runeId) r = eqR;
+                    });
+                 });
+            }
+
+            if(!r) return console.error("Runa não encontrada");
+
+            tmp.upRune = r;
+            UI.renRuneDetails(r);
+            
+            // Calculate Cost and Chance
+            const cost = 500 + (r.lvl * 1000);
+            let chance = 100;
+            if(r.lvl >= 3) chance = 70;
+            if(r.lvl >= 6) chance = 50;
+            if(r.lvl >= 9) chance = 30;
+            if(r.lvl >= 12) chance = 10;
+            if(r.lvl >= 15) { chance = 0; el('up-cost').parentElement.disabled = true; el('up-cost').innerText = "MAX"; }
+            else { el('up-cost').parentElement.disabled = false; el('up-cost').innerText = cost; }
+
+            el('up-chance').innerText = chance > 0 ? `${chance}%` : "MAX";
+            el('up-chance').style.color = chance >= 70 ? "#4ade80" : chance >= 30 ? "#fbbf24" : "#ef4444";
+
+            UI.modal('m-rune-up', 1);
+        },
+        
+        doUpgrade: () => {
+            const r = tmp.upRune;
+            if(r.lvl >= 15) return UI.toast("Nível Máximo!");
+            
+            const cost = 500 + (r.lvl * 1000);
+            if(s.mana < cost) return UI.toast("Mana Insuficiente!", 'error');
+            
+            s.mana -= cost;
+            UI.upd();
+            
+            // Chance Logic
+            let chance = 1; // 100%
+            if(r.lvl >= 3) chance = 0.7;
+            if(r.lvl >= 6) chance = 0.5;
+            if(r.lvl >= 9) chance = 0.3;
+            if(r.lvl >= 12) chance = 0.1;
+            
+            const success = Math.random() < chance;
+            
+            // Visual Effect
+            const box = el('rune-up-content');
+            box.classList.add('up-animation');
+            setTimeout(() => box.classList.remove('up-animation'), 500);
+
+            if(success) {
+                r.lvl++;
+                // Main Stat Increase (Simple +10% base or flat amount)
+                r.val = Math.ceil(r.val * 1.1); // +10% per level exponential-ish
+
+                // Substat Logic at +3, +6, +9, +12
+                if (r.lvl % 3 === 0) {
+                    const subTypes = ['hp', 'atk', 'def', 'crit'];
+                    // Max subs depends on rarity (Legendary starts with 3? Let's say max 4 slots for everyone eventually)
+                    // Simplified: Always try to add or upgrade.
+                    
+                    if (r.subs.length < 4) {
+                        // Add new sub
+                        const newType = subTypes[Math.floor(Math.random() * subTypes.length)];
+                        const newVal = Math.floor(Math.random() * 5) + 3; // 3-8
+                        r.subs.push({ type: newType, val: newVal });
+                        UI.toast(`Sucesso! +${r.lvl} (Novo Substatus!)`);
+                    } else {
+                        // Upgrade existing sub
+                        const subIdx = Math.floor(Math.random() * r.subs.length);
+                        r.subs[subIdx].val += Math.floor(Math.random() * 4) + 2; // +2-6
+                        UI.toast(`Sucesso! +${r.lvl} (Substatus Melhorado!)`);
+                    }
+                } else {
+                    UI.toast(`Sucesso! +${r.lvl}`);
+                }
+                
+                Game.save();
+                UI.renRuneDetails(r); // Refresh modal UI
+                
+                // Recalculate cost for next level
+                const nextCost = 500 + (r.lvl * 1000);
+                if(r.lvl < 15) {
+                    el('up-cost').innerText = nextCost;
+                    // Update chance display
+                    let nextChance = 100;
+                    if(r.lvl >= 3) nextChance = 70;
+                    if(r.lvl >= 6) nextChance = 50;
+                    if(r.lvl >= 9) nextChance = 30;
+                    if(r.lvl >= 12) nextChance = 10;
+                    el('up-chance').innerText = `${nextChance}%`;
+                    el('up-chance').style.color = nextChance >= 70 ? "#4ade80" : nextChance >= 30 ? "#fbbf24" : "#ef4444";
+                } else {
+                    el('up-cost').innerText = "MAX";
+                    el('up-cost').parentElement.disabled = true;
+                    el('up-chance').innerText = "MAX";
+                }
+                
+                // Update background lists if visible
+                if(el('rune_bag').classList.contains('active')) Core.openRuneBag();
+                if(el('inv').classList.contains('active')) Core.selInv(tmp.selInv); // Refresh inv view
+
+            } else {
+                UI.toast("Falhou...", 'error');
+            }
+        },
 
         openRuneSelect: (slotIdx) => {
             tmp.selRuneSlot = slotIdx;
@@ -1072,9 +1283,18 @@
                 else if(currentRune.type==='def') icon = '🛡️';
                 else if(currentRune.type==='crit') icon = '💥';
 
-                html += `<div class="rune-list-item" onclick="Core.unequipRune()">
-                    <div style="color:#ef4444; font-weight:bold">DESEQUIPAR ATUAL (-1000 💠)</div>
-                    <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${icon}</div>
+                html += `<div class="rune-list-item">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="rune-icon ${rClass}" style="width:30px;height:30px;font-size:0.8rem">${icon}</div>
+                        <div>
+                            <div style="font-size:0.8rem; font-weight:bold;">+${currentRune.lvl} ${currentRune.rarity}</div>
+                            <div style="font-size:0.7rem;">${currentRune.type.toUpperCase()} +${currentRune.val}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="rune-action-btn btn-up" style="width:40px;" onclick="Core.openRuneUpgrade(${currentRune.id}, event)">UP</button>
+                        <button class="rune-action-btn btn-sell" style="width:40px;" onclick="Core.unequipRune()">❌</button>
+                    </div>
                 </div><hr style="border-color:#444; margin:10px 0;">`;
             }
             if (s.runes_inv.length === 0) {
@@ -1092,7 +1312,7 @@
 
                     html += `<div class="rune-list-item" onclick="Core.equipRune(${r.id})">
                         <div>
-                            <span style="color:${color}; font-weight:bold">${r.rarity}</span> 
+                            <span style="color:${color}; font-weight:bold">+${r.lvl} ${r.rarity}</span> 
                             <span>+${r.val} ${r.type.toUpperCase()}</span>
                         </div>
                         <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${icon}</div>
@@ -1380,6 +1600,16 @@
                     if(r.type==='atk') rAtk+=r.val; 
                     if(r.type==='def') rDef+=r.val; 
                     if(r.type==='crit') rCrit+=r.val; 
+                    
+                    // Add Substats to Battle Stats
+                    if (r.subs) {
+                        r.subs.forEach(s => {
+                            if(s.type==='hp') rHp+=s.val; 
+                            if(s.type==='atk') rAtk+=s.val; 
+                            if(s.type==='def') rDef+=s.val; 
+                            if(s.type==='crit') rCrit+=s.val; 
+                        });
+                    }
                 }});
                 
                 const finalHp = Math.floor((d.hp*sm) + rHp);
@@ -1738,7 +1968,21 @@
                         // Crit é % e deve ser menor
                         if(type === 'crit') val = Math.ceil(val / 2.5);
 
-                        const newRune = { id: runeIdCount++, rarity, type, val };
+                        // Initial Substats Logic (New Rune)
+                        let initialSubs = [];
+                        let subCount = 0;
+                        if(rarity==='Raro') subCount = 1;
+                        if(rarity==='Epico') subCount = 2;
+                        if(rarity==='Lendario') subCount = 3;
+                        
+                        const subTypes = ['hp', 'atk', 'def', 'crit'];
+                        for(let i=0; i<subCount; i++) {
+                             const sType = subTypes[Math.floor(Math.random() * subTypes.length)];
+                             const sVal = Math.floor(Math.random() * 5) + 3; 
+                             initialSubs.push({ type: sType, val: sVal });
+                        }
+
+                        const newRune = { id: runeIdCount++, rarity, type, val, lvl: 0, subs: initialSubs };
                         s.runes_inv.push(newRune);
                         
                         itemIcon = "📖"; itemQtd = "-"; 
