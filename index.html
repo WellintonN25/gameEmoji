@@ -170,7 +170,6 @@
         .rune-bag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 20px; overflow-y: auto; align-content: start; flex: 1; }
         .rune-bag-item { background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         .rune-bag-item:hover { transform: translateY(-3px); border-color: var(--gold); background: #334155; }
-        
         .rune-level-badge { position: absolute; top: 5px; right: 5px; font-size: 0.7rem; background: #000; padding: 1px 4px; border-radius: 4px; border: 1px solid #666; }
         
         .rune-btn-group { display:flex; gap:5px; width:100%; margin-top:auto; }
@@ -260,6 +259,10 @@
         .star { font-size: 0.6rem; color: var(--gold); text-shadow: 0 1px 2px black; margin: 0 -1px; }
         .star.purple { color: var(--purple); }
 
+        /* CORREÇÃO DE ESPELHAMENTO: Remove do pai, aplica no filho */
+        .players .unit { cursor: default; } 
+        .players .unit .unit-sprite { transform: scaleX(-1); } 
+
         /* Estilo para aliados selecionáveis */
         .unit.selectable { 
             animation: pulse-select 1s infinite; 
@@ -309,8 +312,7 @@
         .players { top: 55%; z-index: 10; } 
         .unit { position: relative; width: 70px; height: 70px; text-align: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s; cursor: pointer; }
         .unit.boss-unit { width: 120px; height: 120px; z-index: 6; }
-        .players .unit { transform: scaleX(-1); cursor: default; }
-        .players .unit .hp-container { transform: scaleX(-1); }
+        .players .unit .hp-container { /* Não inverte mais */ }
         .unit-sprite { width: 100%; height: 100%; font-size: 3.5rem; filter: drop-shadow(0 10px 5px rgba(0,0,0,0.5)); transition: 0.2s; display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; overflow: hidden; }
         .boss-unit .unit-sprite { font-size: 6rem; }
         .unit-sprite img { width: 100%; height: 100%; object-fit: contain; }
@@ -323,9 +325,9 @@
         .stage.cinematic .unit { filter: blur(2px) brightness(0.4) grayscale(0.8); opacity: 0.7; transform: scale(0.9); }
         .stage.cinematic .players .unit { transform: scaleX(-1) scale(0.9); }
         .stage.cinematic .unit.actor { filter: brightness(1.2) drop-shadow(0 0 15px var(--gold)); transform: scale(1.2) translateY(-10px); z-index: 100; opacity: 1; }
-        .stage.cinematic .players .unit.actor { transform: scaleX(-1) scale(1.2) translateY(-10px); }
+        .stage.cinematic .players .unit.actor { transform: scale(1.2) translateY(-10px); } 
         .stage.cinematic .unit.target-focus { filter: brightness(1.2) drop-shadow(0 0 15px var(--danger)); transform: scale(1.1); z-index: 90; opacity: 1; }
-        .stage.cinematic .players .unit.target-focus { transform: scaleX(-1) scale(1.1); }
+        .stage.cinematic .players .unit.target-focus { transform: scale(1.1); }
         .target-marker { position: absolute; top: -45px; left: 50%; transform: translateX(-50%); color: var(--danger); font-size: 1.5rem; animation: bounce 0.5s infinite; text-shadow: 0 0 5px red; z-index: 100; pointer-events: none; }
         @keyframes bounce { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,-10px)} }
         .attacking-p .unit-sprite { animation: atk-p 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
@@ -1723,6 +1725,9 @@
                 if (b.auto) {
                     el('btl-ui').classList.remove('active');
                     setTimeout(() => {
+                        // AUTO MODE SAFETY CHECK
+                        // Ensure we have a valid attacker 'u' (already checked above)
+                        
                         let skillIdx = 0;
                         const hasS3 = u.s[2] && u.cds[2] === 0;
                         const hasS2 = u.s[1] && u.cds[1] === 0;
@@ -1732,15 +1737,33 @@
                         let target = null;
 
                         if (skill.ty === 'heal') {
+                            // Find ally with lowest % HP
                             target = b.p.filter(a => !a.dead).sort((a,b) => (a.cur/a.max) - (b.cur/b.max))[0];
                         } else if (skill.ty === 'turn') {
+                            // Find ally that isn't me, or me if solo
                             const allies = b.p.filter(a => !a.dead && a.idx !== u.idx);
                             target = allies.length ? allies[Math.floor(Math.random()*allies.length)] : u; 
                         } else {
+                            // Attack Enemy
                             const enemies = b.e.filter(e => !e.dead);
-                            target = enemies[Math.floor(Math.random() * enemies.length)];
+                            if(enemies.length > 0) {
+                                target = enemies[Math.floor(Math.random() * enemies.length)];
+                            }
                         }
                         
+                        // Fallback Safety: If logic failed to find target (rare but prevents freeze), target self or first enemy
+                        if (!target) {
+                            if (skill.ty === 'heal' || skill.ty === 'turn') target = u;
+                            else {
+                                const livingEnemies = b.e.filter(e => !e.dead);
+                                if(livingEnemies.length > 0) target = livingEnemies[0];
+                                else {
+                                    // No enemies alive? End battle should have triggered. Force check.
+                                    return Battle.turn();
+                                }
+                            }
+                        }
+
                         u.cds[skillIdx] = u.s[skillIdx].cd + 1;
                         Battle.hit(u, target, u.s[skillIdx].m, u.skLvl[skillIdx], u.s[skillIdx].ty);
                         
@@ -1847,6 +1870,10 @@
                                 return; 
                             }
                         }, 500/b.spd);
+                    } else if (def.side === 'p') {
+                        // Se for jogador e ganhou turno extra, chama Battle.turn SEM incrementar b.idx
+                        setTimeout(Battle.turn, 800/b.spd);
+                        return; // Sai da função para evitar o incremento padrão abaixo
                     }
                 } else if (type === 'aoe') {
                     const targets = atk.side === 'p' ? b.e : b.p;
@@ -1862,7 +1889,10 @@
                     el('app').classList.add('shake-screen'); setTimeout(()=>el('app').classList.remove('shake-screen'), 300);
                     Battle.applyDmg(atk, def, baseMult, skillLvl, false);
                 }
-                if (type !== 'turn') { b.idx++; setTimeout(Battle.turn, 800/b.spd); }
+                
+                // Padrão: Incrementa e próximo turno
+                b.idx++; 
+                setTimeout(Battle.turn, 800/b.spd);
             }, 300/b.spd);
         },
         
