@@ -150,7 +150,6 @@
             color: #fff;
         }
         
-        /* Brilho superior na gema */
         .rune-icon::after {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
             background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
@@ -158,7 +157,6 @@
             pointer-events: none;
         }
 
-        /* Cores baseadas na raridade (Estilo Joia) */
         .rune-rare { background: linear-gradient(135deg, #1e40af, #3b82f6); border-color: #60a5fa; box-shadow: 0 0 10px #3b82f6; }
         .rune-epic { background: linear-gradient(135deg, #6b21a8, #a855f7); border-color: #d8b4fe; box-shadow: 0 0 10px #a855f7; }
         .rune-legend { background: linear-gradient(135deg, #92400e, #f59e0b); border-color: #fcd34d; box-shadow: 0 0 15px #f59e0b; animation: rune-glow 2s infinite alternate; }
@@ -188,6 +186,49 @@
         .stage-btn:active { transform: scale(0.9); }
         .first-clear-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
+
+        /* --- ESTILOS NOVOS DA MASMORRA (SELEÇÃO E LISTA) --- */
+        .dungeon-selector { display:flex; flex-direction:column; gap:20px; padding:20px; flex:1; align-items:center; justify-content:center; }
+        .dungeon-card { 
+            width:100%; max-width:400px; height:150px; 
+            border:2px solid #444; border-radius:20px; 
+            display:flex; align-items:center; padding:0 30px; gap:20px; 
+            cursor:pointer; transition:0.3s; position:relative; overflow:hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .dungeon-card:hover { transform:scale(1.05); border-color:white; box-shadow:0 0 20px rgba(255,255,255,0.2); }
+        .dungeon-card::after { content:''; position:absolute; inset:0; z-index:0; opacity:0.3; transition:0.5s; background-size:cover; background-position:center; }
+        .dungeon-card:hover::after { transform:scale(1.1); opacity:0.5; }
+        
+        .dungeon-card.golem { background: linear-gradient(to right, #1a2e05, #365314); border-color:#65a30d; }
+        .dungeon-card.golem::after { background-image: url('https://images.unsplash.com/photo-1598556776374-27944747ebc6?w=500&q=60'); }
+        
+        .dungeon-card.dragon { background: linear-gradient(to right, #450a0a, #7f1d1d); border-color:#ef4444; }
+        .dungeon-card.dragon::after { background-image: url('https://images.unsplash.com/photo-1577493340887-b7bfff550145?w=500&q=60'); }
+
+        .dungeon-info { position:relative; z-index:2; text-shadow:0 2px 4px black; }
+        .dungeon-title { font-size:1.8rem; font-weight:800; text-transform:uppercase; line-height:1; }
+        .dungeon-drops { font-size:0.8rem; margin-top:5px; opacity:0.9; font-weight:bold; display:flex; gap:10px; }
+
+        /* LISTA ESTILO SUMMONERS WAR */
+        .sw-floor-list { width:100%; max-width:500px; display:flex; flex-direction:column; gap:10px; padding:20px; overflow-y:auto; flex:1; }
+        .sw-floor-btn {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #475569;
+            border-left: 5px solid #888;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: 0.2s;
+            position: relative;
+        }
+        .sw-floor-btn:hover { background:#334155; transform:translateX(5px); }
+        .sw-floor-btn.cleared { border-left-color: var(--success); }
+        .sw-floor-btn.locked { opacity:0.5; pointer-events:none; filter:grayscale(1); }
+        
+        .floor-idx { font-size: 1.5rem; font-weight: 800; color: #fff; width: 50px; }
+        .floor-name { font-size: 0.9rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; flex:1; }
+        .floor-drop-icon { font-size:1.2rem; }
 
         /* --- MONSTROS & MONSTER BOX --- */
         .mon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 5px; padding: 8px; overflow-y: auto; align-content: start; flex: 1; width: 100%; }
@@ -537,7 +578,7 @@
         </div>
     </div>
 
-    <!-- MASMORRA (REDESENHADA) -->
+    <!-- MASMORRA (REDESENHADA: SELEÇÃO E LISTA) -->
     <div id="dung" class="screen">
         <div class="top-bar" style="flex-direction: row; justify-content: flex-start; align-items: center;">
             <div class="sub-header">
@@ -545,26 +586,34 @@
                 <span class="screen-title">MASMORRAS</span>
             </div>
         </div>
-        <div class="inv-container" style="flex-direction:row; background: linear-gradient(to bottom, #2e1065, #000); overflow: hidden;">
+        
+        <div class="inv-container" style="flex-direction:column; background: linear-gradient(to bottom, #2e1065, #000); align-items:center; overflow:hidden;">
             
-            <!-- COLUNA GOLEM -->
-            <div style="flex:1; border-right:1px solid #444; display:flex; flex-direction:column;">
-                <div style="padding:10px; background:rgba(0,0,0,0.5); text-align:center; border-bottom:1px solid #444;">
-                    <div style="font-size:3rem;">🗿</div>
-                    <div style="font-weight:bold; color:#a3e635;">Fortaleza do Golem</div>
-                    <div style="font-size:0.7rem; color:#aaa;">Drops: ❤️ HP | 🛡️ DEF</div>
+            <!-- TELA 1: SELEÇÃO DE MASMORRA -->
+            <div id="dung-select" class="dungeon-selector">
+                <div class="dungeon-card golem" onclick="Core.selectDung('golem')">
+                    <div style="font-size:4rem; z-index:2;">🗿</div>
+                    <div class="dungeon-info">
+                        <div class="dungeon-title">Gigante</div>
+                        <div class="dungeon-drops"><span>❤️ HP</span><span>🛡️ DEF</span></div>
+                    </div>
                 </div>
-                <div id="dung-golem-grid" class="stage-grid" style="grid-template-columns: repeat(2, 1fr); padding:10px;"></div>
+                
+                <div class="dungeon-card dragon" onclick="Core.selectDung('dragon')">
+                    <div style="font-size:4rem; z-index:2;">🐉</div>
+                    <div class="dungeon-info">
+                        <div class="dungeon-title">Dragão</div>
+                        <div class="dungeon-drops"><span>⚔️ ATK</span><span>💥 CRIT</span></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- COLUNA DRAGÃO -->
-            <div style="flex:1; display:flex; flex-direction:column;">
-                <div style="padding:10px; background:rgba(0,0,0,0.5); text-align:center; border-bottom:1px solid #444;">
-                    <div style="font-size:3rem;">🐉</div>
-                    <div style="font-weight:bold; color:#f87171;">Covil do Dragão</div>
-                    <div style="font-size:0.7rem; color:#aaa;">Drops: ⚔️ ATK | 💥 CRIT</div>
+            <!-- TELA 2: LISTA DE ANDARES (ESTILO SW) -->
+            <div id="dung-floors" class="sw-floor-list" style="display:none;">
+                <button class="btn-back" style="margin-bottom:10px; width:40px; height:40px; align-self:flex-start;" onclick="Core.backToDungSelect()">❮</button>
+                <div id="dung-list-container" style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- Lista gerada via JS -->
                 </div>
-                <div id="dung-dragon-grid" class="stage-grid" style="grid-template-columns: repeat(2, 1fr); padding:10px;"></div>
             </div>
 
         </div>
@@ -692,7 +741,7 @@
     };
     
     let s = {};
-    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null };
+    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null, dungType: null };
     let b = { p:[], e:[], t:'p', idx:0, spd:1, target:null, auto: false, farmRuns: 0 };
     let uidCount = 4;
     let runeIdCount = 1;
@@ -743,7 +792,11 @@
         nav: scn => { 
             document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active')); 
             el(scn).classList.add('active'); UI.upd();
-            if(scn === 'expl') Core.renExpl(); if(scn === 'dung') Core.renDung();
+            if(scn === 'expl') Core.renExpl(); 
+            if(scn === 'dung') {
+                tmp.dungType = null; // Reseta seleção
+                Core.renDungSelect(); 
+            }
         },
         modal: (id,o) => { 
             el(id).className=o?'modal open':'modal'; 
@@ -1077,37 +1130,69 @@
             }
             grid.appendChild(frag);
         },
-        renDung: () => {
-            // Renderiza 10 andares de Golem
-            const gridG = el('dung-golem-grid'); gridG.innerHTML = ''; 
-            const fragG = document.createDocumentFragment();
-            for(let i=1; i<=10; i++) {
-                const cleared = s.cleared.includes(`golem-${i}`);
-                const div = document.createElement('div');
-                div.className = `stage-btn boss`;
-                div.style.borderColor = '#65a30d'; // Verde Golem
-                div.onclick = () => Core.prepFight('dungeon-golem', i);
-                let badge = !cleared ? `<div class="first-clear-badge">💎</div>` : '';
-                div.innerHTML = `${badge} <div class="boss-floor-num">B${i}</div>`;
-                fragG.appendChild(div);
-            }
-            gridG.appendChild(fragG);
-
-            // Renderiza 10 andares de Dragão
-            const gridD = el('dung-dragon-grid'); gridD.innerHTML = ''; 
-            const fragD = document.createDocumentFragment();
-            for(let i=1; i<=10; i++) {
-                const cleared = s.cleared.includes(`dragon-${i}`);
-                const div = document.createElement('div');
-                div.className = `stage-btn boss`;
-                div.style.borderColor = '#ef4444'; // Vermelho Dragão
-                div.onclick = () => Core.prepFight('dungeon-dragon', i);
-                let badge = !cleared ? `<div class="first-clear-badge">💎</div>` : '';
-                div.innerHTML = `${badge} <div class="boss-floor-num">B${i}</div>`;
-                fragD.appendChild(div);
-            }
-            gridD.appendChild(fragD);
+        
+        // --- NOVA LÓGICA DE MASMORRA SEPARADA ---
+        renDungSelect: () => {
+            // Garante que só o menu de seleção aparece
+            el('dung-select').style.display = 'flex';
+            el('dung-floors').style.display = 'none';
         },
+        selectDung: (type) => {
+            tmp.dungType = type;
+            el('dung-select').style.display = 'none';
+            el('dung-floors').style.display = 'flex';
+            Core.renDungFloors();
+        },
+        backToDungSelect: () => {
+            tmp.dungType = null;
+            Core.renDungSelect();
+        },
+        renDungFloors: () => {
+            const container = el('dung-list-container');
+            container.innerHTML = '';
+            
+            const type = tmp.dungType; // 'golem' ou 'dragon'
+            const color = type === 'golem' ? '#a3e635' : '#f87171';
+            const icon = type === 'golem' ? '🗿' : '🐉';
+            const title = type === 'golem' ? 'Fortaleza do Gigante' : 'Covil do Dragão';
+            
+            // Título da seção (opcional)
+            const header = document.createElement('div');
+            header.style.textAlign = 'center'; header.style.marginBottom = '10px';
+            header.innerHTML = `<h2 style="color:${color}; text-transform:uppercase;">${icon} ${title}</h2>`;
+            container.appendChild(header);
+
+            const frag = document.createDocumentFragment();
+            for(let i=1; i<=10; i++) {
+                const stageKey = type === 'golem' ? `golem-${i}` : `dragon-${i}`;
+                const cleared = s.cleared.includes(stageKey);
+                // Bloqueia se o anterior não foi limpo (opcional, aqui deixei aberto para teste, ou pode travar)
+                // Vamos travar: nivel 1 liberado, outros precisam do anterior
+                const prevKey = type === 'golem' ? `golem-${i-1}` : `dragon-${i-1}`;
+                const locked = i > 1 && !s.cleared.includes(prevKey);
+
+                const btn = document.createElement('div');
+                btn.className = `sw-floor-btn ${cleared?'cleared':''} ${locked?'locked':''}`;
+                btn.onclick = () => { if(!locked) Core.prepFight(`dungeon-${type}`, i); };
+                
+                // Configura drop icon
+                let drops = '';
+                if(type==='golem') drops = '❤️ 🛡️'; else drops = '⚔️ 💥';
+
+                btn.innerHTML = `
+                    <div class="floor-idx">B${i}</div>
+                    <div class="floor-name">Andar ${i}</div>
+                    <div class="floor-drop-icon" style="color:${color}">${drops}</div>
+                    ${!cleared && !locked ? '<div class="first-clear-badge" style="position:static; margin-left:10px;">💎</div>' : ''}
+                `;
+                frag.appendChild(btn);
+            }
+            container.appendChild(frag);
+        },
+
+        // --- LÓGICA DE DUNG ANTIGA REMOVIDA, AGORA USAMOS A NOVA ACIMA ---
+        renDung: () => { /* Deprecated by new structure */ },
+
         prepFight: (mode, level) => {
             tmp.mode = mode; tmp.lvl = level; tmp.prep = []; UI.nav('prep'); Prep.render();
         },
