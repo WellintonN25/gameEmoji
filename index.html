@@ -138,6 +138,45 @@
         }
         .toggle-btn.active { background: var(--c-success); border-color: #fff; box-shadow: 0 0 15px var(--c-success); transform: scale(1.1); }
         
+        /* RUNE BAG & SLOTS (SW STYLE) */
+        .rune-bag-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; padding: 15px; }
+        .rune-slot-bag {
+            width: 60px; height: 60px; background: #222; border-radius: 8px;
+            position: relative; cursor: pointer; border: 2px solid #444;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 10px #000;
+        }
+        .rune-slot-bag.filled { background: #333; }
+        .rune-slot-bag.rare { border-color: var(--c-primary); }
+        .rune-slot-bag.epic { border-color: var(--c-accent); }
+        .rune-slot-bag.legend { border-color: var(--c-gold); box-shadow: 0 0 5px var(--c-gold); }
+        
+        .rune-content { display: flex; flex-direction: column; align-items: center; }
+        .rune-lvl-tag { 
+            position: absolute; top: 2px; right: 2px; 
+            font-size: 0.6rem; background: #000; color: #fff; 
+            padding: 0 3px; border-radius: 4px; font-weight: bold;
+        }
+        .rune-img { font-size: 1.5rem; }
+        .rune-set-icon { position: absolute; bottom: 2px; left: 2px; font-size: 0.6rem; opacity: 0.7; }
+
+        /* RUNE UPGRADE MODAL (SW STYLE) */
+        .rune-up-view { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .rune-preview-large {
+            width: 100px; height: 100px; background: #222; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            border: 3px solid #666; font-size: 3rem; position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .rune-preview-large.legend { border-color: var(--c-gold); box-shadow: 0 0 15px var(--c-gold); }
+        .stats-comparison {
+            width: 100%; background: #f3f4f6; border-radius: 12px; padding: 15px;
+            font-size: 0.9rem; text-align: left;
+        }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .stat-arrow { color: var(--c-success); font-weight: bold; margin: 0 5px; }
+        .new-val { color: var(--c-success); font-weight: 800; }
+
         /* MONSTER DETAIL STYLES */
         #mon_detail { background: #f9fafb; z-index: 50; padding-bottom: 85px; }
         .mon-detail-header { background: #fff; padding: 30px 20px; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); position: relative; overflow: hidden; flex-shrink: 0; }
@@ -224,7 +263,7 @@
         @keyframes flashGold { 0%{opacity:0; background:#fff} 10%{opacity:1; background:#fff} 30%{background:#fbbf24} 100%{opacity:0} }
 
         /* GRIDS */
-        #inv-grid, #prep-grid, #rune-bag-grid, #evo-grid, #skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px; padding: 15px; align-content: flex-start; }
+        #inv-grid, #prep-grid, #evo-grid, #skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px; padding: 15px; align-content: flex-start; }
         #shop-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; padding: 10px; }
 
         /* MODALS */
@@ -385,7 +424,7 @@
 
     <div id="rune_bag" class="screen">
         <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Runas</h3><div style="width:30px"></div></div>
-        <div id="rune-bag-grid" class="scroll-y"></div>
+        <div id="rune-bag-grid" class="rune-bag-container scroll-y"></div>
     </div>
 
     <!-- BATTLE -->
@@ -436,9 +475,34 @@
 
     <div id="m-end" class="modal"><div class="modal-content"><h1 id="end-title">FIM</h1><div style="display:flex; justify-content:space-around; font-size:1.2rem; font-weight:bold"><div>💠 <span id="end-mana">0</span></div><div>💎 <span id="end-gems">0</span></div></div><div id="rune-drop-msg" style="color:var(--c-accent)"></div><button class="btn btn-primary" onclick="Battle.close()">Continuar</button></div></div>
 
+    <!-- RUNE SELECT -->
     <div id="m-rune" class="modal"><div class="modal-content" style="height:70vh"><h3>Runas</h3><div id="rune-list" class="scroll-y" style="display:flex; flex-direction:column; gap:10px"></div><button class="btn btn-white" onclick="UI.modal('m-rune',0)">Fechar</button></div></div>
     
-    <div id="m-rune-up" class="modal"><div class="modal-content"><h3>Power-up</h3><div style="font-size:3rem">💎</div><h4 id="up-rune-main" style="color:var(--c-primary)"></h4><div id="up-rune-subs" style="text-align:left; background:#f9fafb; padding:10px; border-radius:10px; font-size:0.8rem"></div><div style="margin:10px 0">Chance: <span id="up-chance"></span></div><div style="display:flex; gap:10px"><button class="btn btn-gold" style="flex:1" onclick="Core.doUpgrade()">Upar (<span id="up-cost">0</span>)</button><button class="btn btn-white" style="flex:1" onclick="UI.modal('m-rune-up',0)">Voltar</button></div></div></div>
+    <!-- RUNE POWER-UP (NEW DESIGN) -->
+    <div id="m-rune-up" class="modal">
+        <div class="modal-content" style="max-width:350px">
+            <h3>Melhorar Runa</h3>
+            
+            <!-- RUNE PREVIEW -->
+            <div class="rune-up-view">
+                <div class="rune-preview-large" id="up-rune-visual"></div>
+                <div style="text-align:center">
+                    <div id="up-rune-type" style="font-weight:800; color:var(--c-primary); text-transform:uppercase"></div>
+                    <div id="up-rune-lvl" style="font-size:0.8rem; background:#333; color:#fff; border-radius:10px; padding:2px 8px; display:inline-block; margin-top:5px"></div>
+                </div>
+            </div>
+
+            <!-- STATS COMPARISON -->
+            <div class="stats-comparison" id="up-stats-comp"></div>
+
+            <div style="margin:5px 0; font-size:0.9rem">Chance: <span id="up-chance" style="font-weight:bold"></span></div>
+            
+            <div style="display:flex; gap:10px; width:100%">
+                <button class="btn btn-white" style="flex:1" onclick="UI.modal('m-rune-up',0)">Voltar</button>
+                <button id="btn-do-up" class="btn btn-gold" style="flex:1" onclick="Core.doUpgrade()">Upar (<span id="up-cost">0</span>)</button>
+            </div>
+        </div>
+    </div>
 
     <div id="m-evo" class="modal"><div class="modal-content"><h3>Evolução</h3><p>Use <span id="evo-req-c">0</span> monstros <span id="evo-req-s">0</span>★</p><div id="evo-slots" style="display:flex; justify-content:center; gap:5px"></div><div id="evo-grid" class="scroll-y" style="height:200px; border:1px solid #eee; border-radius:10px"></div><button id="btn-do-evo" class="btn btn-purple" onclick="Core.doEvolution()" disabled>Evoluir</button><button class="btn btn-white" onclick="UI.modal('m-evo',0)">Fechar</button></div></div>
     
@@ -447,24 +511,6 @@
 </div>
 
 <script>
-    /*
-    COMO ADICIONAR UM NOVO PERSONAGEM:
-    1. Encontre a variável "DB" abaixo.
-    2. Adicione um novo objeto na lista seguindo o modelo:
-       {
-           id: 999,                   // ID único (use um número que não exista)
-           nat: 5,                    // Estrelas (1 a 5)
-           n: 'Nome do Heroi',        // Nome
-           type: 'Fogo',              // Elemento: 'Água', 'Fogo', 'Vento', 'Terra', 'Luz', 'Trevas'
-           img: 'URL_DA_IMAGEM.png',  // Link da imagem PNG (fundo transparente é melhor)
-           visual: '🤠',              // Emoji (usado se a imagem falhar)
-           s: [                       // Habilidades
-               {n:'Ataque 1', m:1, cd:0, ty:'atk'},     // ty: 'atk' (dano), 'aoe' (area), 'heal' (cura)
-               {n:'Ataque 2', m:1.5, cd:3, ty:'aoe'}
-           ],
-           hp: 100, atk: 50           // Status Base
-       }
-    */
     const MAX_LVL = {1:10, 2:20, 3:30, 4:40, 5:50, 6:50};
     const EXPL_REGIONS = [ { id: 1, name: "Floresta", icon: "🌲", color: "#10b981" }, { id: 2, name: "Vulcão", icon: "🌋", color: "#ef4444" }, { id: 3, name: "Ruínas", icon: "🏛️", color: "#fbbf24" }, { id: 4, name: "Pico", icon: "⚡", color: "#a855f7" } ];
     const SHOP_DB = [
@@ -485,7 +531,7 @@
         {id:901,nat:6,n:'Boss',type:'Terra',img:'',visual:'👹',s:[{n:'Smash',m:1,cd:0,ty:'atk'}],hp:500,atk:20}
     ];
 
-    const DEFAULT_STATE = { mana:5000, gems:200, pot:10, tix:5, rare_tix:1, grimoires:1, xp:0, max_xp:100, p_lvl:1, maxStage:1, cleared:[], runes_inv:[], roster:[{uid:1, id:101, lvl:1, star:1, skLvl:[1], runes:[null,null,null,null]}], xp_boost_end_time: 0 };
+    const DEFAULT_STATE = { mana:2000, gems:50, pot:5, tix:0, rare_tix:5, grimoires:0, xp:0, max_xp:100, p_lvl:1, maxStage:1, cleared:[], runes_inv:[], roster:[], xp_boost_end_time: 0 };
     let s = {}, tmp = { prep:[], selInv:null, mode:'story', lvl:1, selRuneSlot:null, dungType:null, upRune:null, evoFodder:[], skillFodder:[] };
     let b = { p:[], e:[], t:'p', idx:0, spd:1, auto:false, farmRuns:0, skillPending:null, target:null };
     let uidCount=2, runeIdCount=1, currentUser=null, pendingAction=null;
@@ -500,6 +546,9 @@
             s = sav ? JSON.parse(sav) : JSON.parse(JSON.stringify(DEFAULT_STATE));
             if(!s.runes_inv) s.runes_inv=[];
             if(typeof s.xp_boost_end_time === 'undefined') s.xp_boost_end_time = 0;
+            
+            // Fix Roster if corrupted
+            if(!Array.isArray(s.roster)) s.roster = [];
             
             uidCount = s.roster.reduce((m,r)=>Math.max(m,r.uid),0)+1;
             runeIdCount = Math.max((s.runes_inv.reduce((m,r)=>Math.max(m,r.id),0)),100)+1;
@@ -557,7 +606,6 @@
             el('mon_detail').style.setProperty('--elem-bg', elemColor);
             el('md-vis').innerHTML=UI.getVis(d); el('md-name').innerText=d.n;
             
-            // ELEMENT AND LEVEL
             let typeIcon = d.type === 'Fogo' ? '🔥' : (d.type === 'Água' ? '💧' : (d.type === 'Vento' ? '🍃' : (d.type === 'Terra' ? '⛰️' : (d.type === 'Luz' ? '☀️' : '🌙'))));
             let maxLvl = MAX_LVL[m.star] || 50;
             let isMax = m.lvl >= maxLvl;
@@ -568,7 +616,6 @@
             let stars = ''; for(let i=0;i<m.star;i++) stars+=`<div class="star" style="width:12px;height:12px"></div>`;
             el('md-stars').innerHTML=stars;
             
-            // STATUS CALC
             let sm = 1 + m.lvl*0.1;
             let bon = {hp:0, atk:0, def:0, crit:0};
             m.runes.forEach(r => { 
@@ -587,7 +634,6 @@
             el('st-def').innerText = baseDef; el('bn-def').innerText = `(+${bon.def})`;
             el('st-crit').innerText = 15;
 
-            // Runes Render
             [0,1,2,3].forEach(i=>{ 
                 const r=m.runes[i]; const rx=el(`rs-${i}`); 
                 if(r) { rx.className='rune-slot-fancy filled'; rx.style.setProperty('--rune-color',r.type==='hp'?'#ef4444':'#3b82f6'); rx.innerHTML=`<div class="icon" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div><div class="lvl">+${r.lvl}</div>`; } 
@@ -603,7 +649,7 @@
         backToInv: () => UI.nav('inv'),
         pup: () => { 
             const m=s.roster.find(x=>x.uid===tmp.selInv); 
-            if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||50)) return; 
+            if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||40)) return; 
             s.pot--; m.lvl++; Game.save(); Core.selInv(m.uid); UI.upd();
         },
         openEvo: () => { const m=s.roster.find(x=>x.uid===tmp.selInv); if(m.star>=6) return; tmp.evoTarget=tmp.selInv; tmp.evoFodder=[]; el('evo-req-c').innerText=m.star; el('evo-req-s').innerText=m.star; UI.modal('m-evo',1); Core.renEvo(); },
@@ -649,8 +695,16 @@
         openRuneBag: () => {
             UI.nav('rune_bag'); const g=el('rune-bag-grid'); g.innerHTML='';
             s.runes_inv.forEach(r=>{
-                const d=document.createElement('div'); d.className='panel'; d.style.padding='10px'; d.style.textAlign='center';
-                d.innerHTML=`<div style="font-size:1.5rem">⬢</div><div>+${r.lvl} ${r.type}</div><small>${r.rarity}</small><br><button class="btn btn-red" style="padding:2px 10px;font-size:0.7rem" onclick="Core.sellRune(${r.id},100)">$</button>`;
+                const rarityColor = r.rarity === 'Lendario' ? 'border-color:var(--c-gold); box-shadow:0 0 5px var(--c-gold)' : (r.rarity === 'Epico' ? 'border-color:var(--c-accent)' : 'border-color:var(--c-primary)');
+                const d=document.createElement('div'); d.className='rune-slot-bag'; d.style.cssText = rarityColor;
+                d.innerHTML=`
+                    <div class="rune-content">
+                        <div class="rune-img" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div>
+                    </div>
+                    <div class="rune-lvl-tag">+${r.lvl}</div>
+                    <div class="rune-set-icon">${r.type.toUpperCase()}</div>
+                `;
+                d.onclick = () => Core.popRuneUp(r.id);
                 g.appendChild(d);
             });
         },
@@ -678,6 +732,68 @@
             Game.save(); UI.modal('m-rune',0); Core.selInv(m.uid); UI.upd();
         },
         
+        // --- RUNE POWER UP (NEW) ---
+        popRuneUp: (rid) => {
+            let r = s.runes_inv.find(x=>x.id===rid);
+            if(!r) s.roster.forEach(m => m.runes.forEach(eq=>{if(eq&&eq.id===rid) r=eq}));
+            if(!r) return;
+            tmp.upRune = r;
+            
+            // Visuals
+            const rClass = r.rarity==='Lendario'?'legend':'';
+            const iconColor = r.type==='hp'?'#ef4444':'#3b82f6';
+            el('up-rune-visual').innerHTML = `<div style="color:${iconColor}">⬢</div>`;
+            el('up-rune-visual').className = `rune-preview-large ${rClass}`;
+            
+            el('up-rune-type').innerText = r.type;
+            el('up-rune-lvl').innerText = `+${r.lvl}`;
+            
+            // Stats Comparison
+            const nextVal = Math.ceil(r.val * 1.1);
+            let html = `
+                <div class="stat-line">
+                    <span>${r.type.toUpperCase()}</span>
+                    <div>${r.val} <span class="stat-arrow">➜</span> <span class="new-val">${nextVal}</span></div>
+                </div>`;
+            
+            // Subs
+            if(r.subs) {
+                r.subs.forEach(s => {
+                   html += `<div class="stat-line" style="color:#666; font-size:0.8rem"><span>${s.type}</span><span>+${s.val}</span></div>`; 
+                });
+            }
+            if(r.lvl % 3 === 0 && r.lvl < 15) {
+                html += `<div style="text-align:center; color:var(--c-accent); font-weight:bold; margin-top:5px">Próximo: Substat Bonus!</div>`;
+            }
+
+            el('up-stats-comp').innerHTML = html;
+
+            let cost = 500 + (r.lvl*500); el('up-cost').innerText = cost;
+            let chance = 100 - (r.lvl * 5); if(chance<5) chance=5;
+            el('up-chance').innerText = `${chance}%`;
+            
+            UI.modal('m-rune-up',1);
+        },
+        doUpgrade: () => {
+            const r = tmp.upRune; if(r.lvl>=15) return UI.toast("Max!");
+            const cost = 500 + (r.lvl*500); if(s.mana<cost) return UI.toast("Mana!");
+            s.mana-=cost; UI.upd();
+            
+            let chance = 100 - (r.lvl * 5); if(chance<5) chance=5;
+            
+            if(Math.random() * 100 < chance) {
+                r.lvl++; r.val = Math.ceil(r.val*1.1);
+                if(r.lvl%3===0) {
+                    if(!r.subs) r.subs=[];
+                    if(r.subs.length<4) r.subs.push({type:['atk','def','hp','crit'][Math.floor(Math.random()*4)], val:5}); 
+                    else r.subs[Math.floor(Math.random()*r.subs.length)].val+=5;
+                }
+                Game.save(); Core.popRuneUp(r.id); UI.toast("Sucesso!"); 
+                if(el('mon_detail').classList.contains('active')) Core.selInv(tmp.selInv);
+                if(el('rune_bag').classList.contains('active')) Core.openRuneBag();
+            } else UI.toast("Falha...");
+        },
+
         // --- LOJA CARTÕES ---
         renShop: () => {
             const c=el('shop-container'); c.innerHTML='';
@@ -795,7 +911,7 @@
             if(b.auto) Battle.turn(); 
         },
         start: (n) => {
-            if(!tmp.prep.length) return;
+            if(!tmp.prep.length) return UI.toast("Selecione monstros!");
             b.farmRuns=n; b.auto=n>0; b.spd=n>0?5:1; el('farm-ui').style.display=n>0?'block':'none';
             // INIT BATTLE STATE
             b.p = tmp.prep.map((uid,i) => {
@@ -805,7 +921,9 @@
                 return {...d, max:Math.floor(d.hp*sm+rs.hp), cur:Math.floor(d.hp*sm+rs.hp), atk:Math.floor(d.atk*sm+rs.atk), idx:i, side:'p', dead:false, cds:d.s.map(()=>0), skLvl:m.skLvl};
             });
             b.e = Array(tmp.mode==='story'?3:1).fill(0).map((_,i)=>{
-                const d=DB[Math.floor(Math.random()*DB.length)]; let sm=1+tmp.lvl*0.1;
+                // BALANCED ENEMY SCALING: 20% per level (was 50%)
+                const d=DB[Math.floor(Math.random()*DB.length)]; 
+                let sm=1+tmp.lvl*0.2; 
                 return {...d, max:Math.floor(d.hp*sm), cur:Math.floor(d.hp*sm), atk:Math.floor(d.atk*sm), idx:i, side:'e', dead:false, cds:d.s.map(()=>0), skLvl:[1]};
             });
             b.t='p'; b.idx=0; b.target=null; 
@@ -827,14 +945,8 @@
                     const d = el(`${u.side}${u.idx}`);
                     if(d) {
                         d.querySelector('.hp-fill').style.width = `${(u.cur/u.max)*100}%`;
-                        // Remove animations if dead
-                        if(u.dead) { 
-                            d.classList.add('dead'); 
-                            d.querySelector('.hp-bar-w').style.display='none'; 
-                        } else {
-                            d.classList.remove('dead');
-                            d.querySelector('.hp-bar-w').style.display='block';
-                        }
+                        if(u.dead) { d.classList.add('dead'); d.querySelector('.hp-bar-w').style.display='none'; } 
+                        else { d.classList.remove('dead'); d.querySelector('.hp-bar-w').style.display='block'; }
                     }
                     if(u.side==='e') el(`tgt-${u.idx}`).style.display = b.target===u.idx ? 'block' : 'none';
                 });
@@ -851,7 +963,6 @@
         turn: () => {
             if(b.e.every(x=>x.dead)) return Battle.end(1); if(b.p.every(x=>x.dead)) return Battle.end(0);
             
-            // Cleanup actors
             document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('actor'));
             document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('active-turn'));
             Battle.updateVisuals();
@@ -866,12 +977,12 @@
                 if(b.auto) {
                     el('btl-ui').classList.remove('active');
                     setTimeout(() => {
-                        let t = b.e.find(x=>!x.dead); // Simple AI
-                        Battle.execSkill(u, t, 0); // Use skill 1
+                        let t = b.e.find(x=>!x.dead); 
+                        Battle.execSkill(u, t, 0); 
                     }, 500/b.spd);
                 } else {
                     el('act-msg').innerText = `Turno de ${u.n}`;
-                    el(`${u.side}${u.idx}`).classList.add('active-turn'); // Highlight only
+                    el(`${u.side}${u.idx}`).classList.add('active-turn'); 
 
                     el('skill-list').innerHTML = u.s.map((s,i) => `
                         <div class="skill-btn-3d ${u.cds[i]>0?'cd':''}" onclick="${u.cds[i]>0?'':'Battle.act('+i+')'}">
@@ -895,12 +1006,11 @@
         },
         act: (si) => {
             const u = b.p[b.idx];
-            // Resolve Target
             let t = null;
             if(b.target !== null && !b.e[b.target].dead) t = b.e[b.target];
-            else t = b.e.find(x=>!x.dead); // Auto pick first if no target selected
+            else t = b.e.find(x=>!x.dead); 
 
-            if(!t) return; // No targets
+            if(!t) return; 
             
             el('btl-ui').classList.remove('active');
             Battle.execSkill(u, t, si);
@@ -909,12 +1019,10 @@
             const sk = atk.s[si];
             atk.cds[si] = sk.cd + 1;
             
-            // Anim Logic
             const aEl = el(`${atk.side}${atk.idx}`);
             aEl.classList.remove('active-turn');
-            if(aEl) aEl.classList.add('actor'); // Trigger attack anim
+            if(aEl) aEl.classList.add('actor'); 
 
-            // Apply Dmg Delay
             setTimeout(() => {
                 if(aEl) aEl.classList.remove('actor');
                 
@@ -925,12 +1033,10 @@
                         if(tEl) {
                             tEl.classList.add('hit'); setTimeout(()=>tEl.classList.remove('hit'), 300);
                             
-                            // ELEMENTAL ADVANTAGE
+                            // ELEMENTAL
                             let mult = 1;
                             let txtColor = '#fff';
                             let txtExtra = '';
-                            
-                            // Cycle: Água > Fogo > Vento > Terra > Água  | Luz <> Trevas
                             const at = atk.type; const dt = t.type;
                             if ((at=='Água' && dt=='Fogo') || (at=='Fogo' && dt=='Vento') || (at=='Vento' && dt=='Terra') || (at=='Terra' && dt=='Água') || (at=='Luz' && dt=='Trevas') || (at=='Trevas' && dt=='Luz')) {
                                 mult = 1.2; txtColor = '#facc15'; txtExtra = 'CRUSH! ';
@@ -960,17 +1066,10 @@
         end: (w) => {
             setTimeout(() => {
                 if(w) {
-                    // --- ECONOMY REWORK ---
                     const boostActive = s.xp_boost_end_time && Date.now() < s.xp_boost_end_time;
                     const gainScale = tmp.lvl || 1;
-                    
-                    // Mana Boosted
                     const rMana = (300 + (gainScale * 50)) * (boostActive ? 1.5 : 1);
-                    
-                    // XP Boosted
                     const rXP = (100 + (gainScale * 20)) * (boostActive ? 2 : 1);
-                    
-                    // Gems: 50 (First) / 5 (Repeat)
                     const stageKey = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
                     const isFirst = !s.cleared.includes(stageKey);
                     if(isFirst) s.cleared.push(stageKey);
@@ -980,7 +1079,6 @@
                     s.xp += rXP;
                     s.gems += rGems;
 
-                    // LEVEL UP ACCOUNT LOGIC
                     if (s.xp >= s.max_xp) {
                         s.xp -= s.max_xp;
                         s.p_lvl++;
@@ -991,26 +1089,14 @@
 
                     el('end-mana').innerText = `+${Math.floor(rMana)}`;
                     el('end-gems').innerText = `+${rGems}`;
-                    el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP Conta`;
+                    el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP`;
 
                     if(tmp.mode==='dung') {
-                        // DUNGEON DROP RATES
-                        // 1-3: 90% Rare, 10% Epic
-                        // 4-7: 60% Rare, 35% Epic, 5% Legend
-                        // 8-10: 40% Rare, 40% Epic, 20% Legend
                         let rType = 'Raro';
                         const roll = Math.random() * 100;
-                        
-                        if (tmp.lvl <= 3) {
-                            if (roll > 90) rType = 'Epico';
-                        } else if (tmp.lvl <= 7) {
-                            if (roll > 95) rType = 'Lendario';
-                            else if (roll > 60) rType = 'Epico';
-                        } else {
-                            if (roll > 80) rType = 'Lendario';
-                            else if (roll > 40) rType = 'Epico';
-                        }
-                        
+                        if (tmp.lvl <= 3) { if (roll > 90) rType = 'Epico'; } 
+                        else if (tmp.lvl <= 7) { if (roll > 95) rType = 'Lendario'; else if (roll > 60) rType = 'Epico'; } 
+                        else { if (roll > 80) rType = 'Lendario'; else if (roll > 40) rType = 'Epico'; }
                         const r = {id:runeIdCount++, type:['hp','atk','def'][Math.floor(Math.random()*3)], val:10 + (tmp.lvl * 2), lvl:0, rarity:rType};
                         s.runes_inv.push(r); el('rune-drop-msg').innerText += ` | ${r.type} ${r.rarity}`;
                     }
