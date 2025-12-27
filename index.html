@@ -226,7 +226,7 @@
         .dungeon-title { font-size:1.8rem; font-weight:800; text-transform:uppercase; line-height:1; }
         .dungeon-drops { font-size:0.8rem; margin-top:5px; opacity:0.9; font-weight:bold; display:flex; gap:10px; }
 
-        /* LISTA ESTILO SUMMONERS WAR */
+        /* LISTA ESTILO SUMMONERS WAR (USADO PARA MASMORRAS E AGORA EXPLORAÇÃO) */
         .sw-floor-list { width:100%; max-width:500px; display:flex; flex-direction:column; gap:10px; padding:20px; overflow-y:auto; flex:1; }
         .sw-floor-btn {
             background: rgba(30, 41, 59, 0.9);
@@ -245,6 +245,23 @@
         .floor-idx { font-size: 1.5rem; font-weight: 800; color: #fff; width: 50px; }
         .floor-name { font-size: 0.9rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; flex:1; }
         .floor-drop-icon { font-size:1.2rem; }
+
+        /* --- CARDS DE REGIÃO PARA EXPLORAÇÃO --- */
+        .region-card { 
+            width:100%; height:100px; 
+            border:1px solid #444; border-radius:12px; 
+            display:flex; align-items:center; padding:0 20px; gap:15px; 
+            cursor:pointer; transition:0.2s; position:relative; overflow:hidden; 
+            margin-bottom:10px;
+            background: #1e293b;
+        }
+        .region-card.locked { opacity:0.6; filter:grayscale(0.8); pointer-events:none; }
+        .region-card:hover { transform:scale(1.02); border-color:var(--gold); }
+        .region-thumb { width:60px; height:60px; background:#000; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2rem; z-index:2; }
+        .region-content { z-index:2; flex:1; }
+        .region-title { font-weight:800; text-transform:uppercase; font-size:1.1rem; color:#fff; }
+        .region-desc { font-size:0.75rem; color:#94a3b8; }
+        .region-progress { font-size:0.7rem; color:var(--success); font-weight:bold; }
 
         /* --- MONSTROS & MONSTER BOX --- */
         .mon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 5px; padding: 8px; overflow-y: auto; align-content: start; flex: 1; width: 100%; }
@@ -622,7 +639,7 @@
         </div>
     </div>
 
-    <!-- EXPLORAÇÃO -->
+    <!-- EXPLORAÇÃO (REDESENHADA) -->
     <div id="expl" class="screen">
         <div class="top-bar" style="flex-direction: row; justify-content: flex-start; align-items: center;">
             <div class="sub-header">
@@ -630,9 +647,22 @@
                 <span class="screen-title">MAPA MUNDI</span>
             </div>
         </div>
-        <div class="inv-container" style="flex-direction:column">
-            <div style="padding:15px; text-align:center; color:#aaa">Vença para desbloquear e ganhar Cristais!</div>
-            <div id="expl-grid" class="stage-grid"></div>
+        
+        <div class="inv-container" style="flex-direction:column; background: linear-gradient(to bottom, #0f172a, #000); align-items:center; overflow:hidden;">
+            
+            <!-- TELA 1: SELEÇÃO DE MAPAS (REGIÕES) -->
+            <div id="expl-regions" class="dungeon-selector">
+                 <!-- Regiões geradas via JS -->
+            </div>
+
+            <!-- TELA 2: LISTA DE FASES DA REGIÃO (ESTILO SW) -->
+            <div id="expl-stages-list" class="sw-floor-list" style="display:none;">
+                <button class="btn-back" style="margin-bottom:10px; width:40px; height:40px; align-self:flex-start;" onclick="Core.backToExplRegions()">❮</button>
+                <div id="expl-list-container" style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- Fases geradas via JS -->
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -748,6 +778,17 @@
 <script>
     const MAX_LVL = { 1:5, 2:10, 3:20, 4:30, 5:40, 6:50 };
     
+    // Configurações das Regiões de Exploração
+    const EXPL_REGIONS = [
+        { id: 1, name: "Floresta dos Slimes", icon: "🌲", color: "#10b981", type: "Natureza" },
+        { id: 2, name: "Caverna Vulcânica", icon: "🌋", color: "#ef4444", type: "Fogo" },
+        { id: 3, name: "Ruínas Antigas", icon: "🏛️", color: "#fbbf24", type: "Terra" },
+        { id: 4, name: "Pico da Tempestade", icon: "⚡", color: "#a855f7", type: "Vento" },
+        { id: 5, name: "Castelo Assombrado", icon: "👻", color: "#6b7280", type: "Trevas" },
+        { id: 6, name: "Santuário Celestial", icon: "✨", color: "#facc15", type: "Luz" },
+        { id: 7, name: "Fenda Dimensional", icon: "🌌", color: "#3b82f6", type: "Caos" }
+    ];
+
     const SHOP_DB = [
         { id: 'pot', name: 'Poção de XP', desc: 'Sobe o nível dos seus monstros.', cost: 100, currency: 'mana', icon: '🧪', img: '' },
         { id: 'xpboost', name: 'Booster XP', desc: '3x XP de conta na próxima batalha.', cost: 50, currency: 'gems', icon: '🚀', img: '' },
@@ -799,7 +840,7 @@
     };
     
     let s = {};
-    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null, dungType: null, upRune: null };
+    let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null, dungType: null, upRune: null, explRegion: null };
     let b = { p:[], e:[], t:'p', idx:0, spd:1, target:null, auto: false, farmRuns: 0, skillPending: null };
     let uidCount = 4;
     let runeIdCount = 1;
@@ -862,7 +903,10 @@
         nav: scn => { 
             document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active')); 
             el(scn).classList.add('active'); UI.upd();
-            if(scn === 'expl') Core.renExpl(); 
+            if(scn === 'expl') {
+                tmp.explRegion = null;
+                Core.renExplRegions();
+            }
             if(scn === 'dung') {
                 tmp.dungType = null; // Reseta seleção
                 Core.renDungSelect(); 
@@ -1158,9 +1202,6 @@
             // Find rune in inventory OR equipped (not supported from bag view directly yet, assume inventory for now)
             let r = s.runes_inv.find(x => x.id === runeId);
             
-            // If called from openRuneSelect (equipped context), might need different logic, but let's stick to Bag for now.
-            // Or if passed explicitly.
-            
             if(!r) {
                 // Check equipped runes if not found in inv
                  s.roster.forEach(m => {
@@ -1223,8 +1264,6 @@
                 // Substat Logic at +3, +6, +9, +12
                 if (r.lvl % 3 === 0) {
                     const subTypes = ['hp', 'atk', 'def', 'crit'];
-                    // Max subs depends on rarity (Legendary starts with 3? Let's say max 4 slots for everyone eventually)
-                    // Simplified: Always try to add or upgrade.
                     
                     if (r.subs.length < 4) {
                         // Add new sub
@@ -1352,24 +1391,94 @@
             });
         },
 
+        // --- NEW EXPLORATION UI LOGIC ---
         renExpl: () => {
-            const grid = el('expl-grid'); grid.innerHTML = ''; const frag = document.createDocumentFragment();
-            for(let i=1; i<=30; i++) {
-                const locked = i > s.maxStage;
-                const cleared = s.cleared.includes(`story-${i}`);
-                const div = document.createElement('div');
-                div.className = `stage-btn ${locked?'locked':''} ${i<s.maxStage?'cleared':''}`;
-                div.onclick = () => Core.prepFight('story', i);
-                let badge = !cleared && !locked ? `<div class="first-clear-badge">50💎</div>` : '';
-                div.innerHTML = `${i<s.maxStage ? '✔️' : i} ${badge} <div style="font-size:0.6rem; color:#888">Nível ${i}</div>`;
-                frag.appendChild(div);
+            // Reset state
+            el('expl-regions').style.display = 'flex';
+            el('expl-stages-list').style.display = 'none';
+            Core.renExplRegions();
+        },
+        renExplRegions: () => {
+            const container = el('expl-regions');
+            container.innerHTML = '';
+            
+            const frag = document.createDocumentFragment();
+            EXPL_REGIONS.forEach((region, i) => {
+                // Unlock logic: Region 1 always open. Region 2 needs stage 8 cleared (8 stages * 1 region).
+                // Region N needs (N-1)*8 stages cleared.
+                const stagesRequired = (region.id - 1) * 8;
+                // Check if the last stage of previous region is cleared
+                // s.maxStage > stagesRequired implies at least stage 1 of this region is reached.
+                // Actually, s.maxStage represents the next level to beat. 
+                // If s.maxStage is 9, it means 1-8 are beaten.
+                
+                const locked = s.maxStage <= stagesRequired;
+                const progress = locked ? "Bloqueado" : 
+                    (s.maxStage > region.id * 8 ? "Completo" : `${(s.maxStage - 1) % 8}/8`);
+
+                const card = document.createElement('div');
+                card.className = `region-card ${locked?'locked':''}`;
+                card.style.borderColor = locked ? '#444' : region.color;
+                if(!locked) card.onclick = () => Core.selectExplRegion(region.id);
+
+                card.innerHTML = `
+                    <div class="region-thumb" style="border:1px solid ${region.color}">${region.icon}</div>
+                    <div class="region-content">
+                        <div class="region-title" style="color:${region.color}">${region.name}</div>
+                        <div class="region-desc">Região ${region.id} - ${region.type}</div>
+                        <div class="region-progress">${progress}</div>
+                    </div>
+                `;
+                frag.appendChild(card);
+            });
+            container.appendChild(frag);
+        },
+        selectExplRegion: (regionId) => {
+            tmp.explRegion = regionId;
+            el('expl-regions').style.display = 'none';
+            el('expl-stages-list').style.display = 'flex';
+            Core.renExplStages(regionId);
+        },
+        backToExplRegions: () => {
+            tmp.explRegion = null;
+            el('expl-stages-list').style.display = 'none';
+            el('expl-regions').style.display = 'flex';
+        },
+        renExplStages: (regionId) => {
+            const container = el('expl-list-container');
+            container.innerHTML = '';
+            const region = EXPL_REGIONS.find(r => r.id === regionId);
+            
+            // Header
+            const header = document.createElement('div');
+            header.innerHTML = `<h2 style="color:${region.color}; text-align:center; margin-bottom:10px;">${region.name}</h2>`;
+            container.appendChild(header);
+
+            const frag = document.createDocumentFragment();
+            for(let i=1; i<=8; i++) {
+                const globalStageId = (regionId - 1) * 8 + i;
+                const isBoss = i === 8;
+                const locked = globalStageId > s.maxStage;
+                const cleared = globalStageId < s.maxStage;
+                
+                const btn = document.createElement('div');
+                btn.className = `sw-floor-btn ${cleared?'cleared':''} ${locked?'locked':''}`;
+                if(!locked) btn.onclick = () => Core.prepFight('story', globalStageId);
+                
+                let icon = isBoss ? '💀 BOSS' : `Fase ${i}`;
+                
+                btn.innerHTML = `
+                    <div class="floor-idx" style="font-size:1.2rem; width:80px;">${regionId}.${i}</div>
+                    <div class="floor-name" style="color:${isBoss ? '#ef4444' : '#cbd5e1'}">${icon}</div>
+                    ${!cleared && !locked ? '<div class="first-clear-badge" style="position:static;">💎</div>' : ''}
+                `;
+                frag.appendChild(btn);
             }
-            grid.appendChild(frag);
+            container.appendChild(frag);
         },
         
         // --- NOVA LÓGICA DE MASMORRA SEPARADA ---
         renDungSelect: () => {
-            // Garante que só o menu de seleção aparece
             el('dung-select').style.display = 'flex';
             el('dung-floors').style.display = 'none';
         },
@@ -1387,12 +1496,11 @@
             const container = el('dung-list-container');
             container.innerHTML = '';
             
-            const type = tmp.dungType; // 'golem' ou 'dragon'
+            const type = tmp.dungType; 
             const color = type === 'golem' ? '#a3e635' : '#f87171';
             const icon = type === 'golem' ? '🗿' : '🐉';
             const title = type === 'golem' ? 'Fortaleza do Gigante' : 'Covil do Dragão';
             
-            // Título da seção (opcional)
             const header = document.createElement('div');
             header.style.textAlign = 'center'; header.style.marginBottom = '10px';
             header.innerHTML = `<h2 style="color:${color}; text-transform:uppercase;">${icon} ${title}</h2>`;
@@ -1402,8 +1510,6 @@
             for(let i=1; i<=10; i++) {
                 const stageKey = type === 'golem' ? `golem-${i}` : `dragon-${i}`;
                 const cleared = s.cleared.includes(stageKey);
-                // Bloqueia se o anterior não foi limpo (opcional, aqui deixei aberto para teste, ou pode travar)
-                // Vamos travar: nivel 1 liberado, outros precisam do anterior
                 const prevKey = type === 'golem' ? `golem-${i-1}` : `dragon-${i-1}`;
                 const locked = i > 1 && !s.cleared.includes(prevKey);
 
@@ -1411,7 +1517,6 @@
                 btn.className = `sw-floor-btn ${cleared?'cleared':''} ${locked?'locked':''}`;
                 btn.onclick = () => { if(!locked) Core.prepFight(`dungeon-${type}`, i); };
                 
-                // Configura drop icon
                 let drops = '';
                 if(type==='golem') drops = '❤️ 🛡️'; else drops = '⚔️ 💥';
 
@@ -1426,8 +1531,7 @@
             container.appendChild(frag);
         },
 
-        // --- LÓGICA DE DUNG ANTIGA REMOVIDA, AGORA USAMOS A NOVA ACIMA ---
-        renDung: () => { /* Deprecated by new structure */ },
+        renDung: () => { }, // Deprecated
 
         prepFight: (mode, level) => {
             tmp.mode = mode; tmp.lvl = level; tmp.prep = []; UI.nav('prep'); Prep.render();
@@ -1526,7 +1630,15 @@
             
             el('btn-fight').disabled = tmp.prep.length===0;
 
-            const stageKey = tmp.mode === 'story' ? `story-${tmp.lvl}` : (tmp.mode === 'dungeon-golem' ? `golem-${tmp.lvl}` : `dragon-${tmp.lvl}`);
+            let stageKey;
+            if (tmp.mode === 'story') {
+                stageKey = `story-${tmp.lvl}`;
+            } else if (tmp.mode === 'dungeon-golem') {
+                stageKey = `golem-${tmp.lvl}`;
+            } else {
+                stageKey = `dragon-${tmp.lvl}`;
+            }
+            
             const isCleared = s.cleared.includes(stageKey);
             const farmBtn = el('btn-farm');
             if (isCleared && tmp.prep.length > 0) {
@@ -1621,16 +1733,35 @@
 
             if(tmp.mode === 'story') {
                 const diff = 1 + (tmp.lvl * 0.5); 
-                b.e = Array(3).fill(0).map((_,i) => {
-                    const maxNat = Math.min(3, Math.ceil(tmp.lvl/3));
-                    const pool = DB.filter(x => x.nat <= maxNat);
-                    const base = pool[Math.floor(Math.random()*pool.length)];
-                    return {
-                        ...base, 
-                        max: Math.floor(base.hp * diff), cur: Math.floor(base.hp * diff), atk: Math.floor(base.atk * diff), def:0, crit:0,
-                        idx:i, side:'e', dead:false, cds:base.s.map(()=>0), skLvl:base.s.map(()=>1), isBoss:false
-                    };
-                });
+                
+                // LÓGICA DE BOSS PARA MODO HISTÓRIA (Fase 8, 16, 24...)
+                // Mas a UI é "Região X . Fase Y". O 'tmp.lvl' aqui é um ID linear global (1 a 56).
+                // Cada região tem 8 fases. Então se (tmp.lvl % 8 === 0), é um Boss.
+                
+                const isStoryBoss = (tmp.lvl % 8 === 0);
+                
+                if (isStoryBoss) {
+                    // Gera um Boss mais forte
+                    const bossPool = DB.filter(x => x.nat >= 3 && x.nat <= 5); // Chefes da história
+                    const bossBase = bossPool[Math.floor(Math.random()*bossPool.length)] || DB[0];
+                    b.e = [{
+                        ...bossBase,
+                        max: Math.floor(bossBase.hp * 2.5 * diff), cur: Math.floor(bossBase.hp * 2.5 * diff), atk: Math.floor(bossBase.atk * 1.5 * diff), def: Math.floor(tmp.lvl * 2), crit: Math.floor(tmp.lvl * 1),
+                        idx:0, side:'e', dead:false, cds:bossBase.s.map(()=>0), skLvl:bossBase.s.map(()=>2), isBoss:true
+                    }];
+                } else {
+                    // Inimigos comuns (3 ondas ou 3 inimigos)
+                    b.e = Array(3).fill(0).map((_,i) => {
+                        const maxNat = Math.min(3, Math.ceil(tmp.lvl/8));
+                        const pool = DB.filter(x => x.nat <= maxNat);
+                        const base = pool[Math.floor(Math.random()*pool.length)];
+                        return {
+                            ...base, 
+                            max: Math.floor(base.hp * diff), cur: Math.floor(base.hp * diff), atk: Math.floor(base.atk * diff), def:0, crit:0,
+                            idx:i, side:'e', dead:false, cds:base.s.map(()=>0), skLvl:base.s.map(()=>1), isBoss:false
+                        };
+                    });
+                }
             } else {
                 // MASMORRA: CHEFE FIXO
                 const diff = 1 + (tmp.lvl * 0.8); 
