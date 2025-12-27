@@ -537,17 +537,36 @@
         </div>
     </div>
 
-    <!-- MASMORRA -->
+    <!-- MASMORRA (REDESENHADA) -->
     <div id="dung" class="screen">
         <div class="top-bar" style="flex-direction: row; justify-content: flex-start; align-items: center;">
             <div class="sub-header">
                 <button class="btn-back" onclick="UI.nav('hub')">❮</button>
-                <span class="screen-title">MASMORRA</span>
+                <span class="screen-title">MASMORRAS</span>
             </div>
         </div>
-        <div class="inv-container" style="flex-direction:column; background: linear-gradient(to bottom, #2e1065, #000);">
-            <div style="padding:15px; text-align:center; color:#fca5a5">Derrote os Chefes para ganhar Runas!</div>
-            <div id="dung-grid" class="stage-grid"></div>
+        <div class="inv-container" style="flex-direction:row; background: linear-gradient(to bottom, #2e1065, #000); overflow: hidden;">
+            
+            <!-- COLUNA GOLEM -->
+            <div style="flex:1; border-right:1px solid #444; display:flex; flex-direction:column;">
+                <div style="padding:10px; background:rgba(0,0,0,0.5); text-align:center; border-bottom:1px solid #444;">
+                    <div style="font-size:3rem;">🗿</div>
+                    <div style="font-weight:bold; color:#a3e635;">Fortaleza do Golem</div>
+                    <div style="font-size:0.7rem; color:#aaa;">Drops: ❤️ HP | 🛡️ DEF</div>
+                </div>
+                <div id="dung-golem-grid" class="stage-grid" style="grid-template-columns: repeat(2, 1fr); padding:10px;"></div>
+            </div>
+
+            <!-- COLUNA DRAGÃO -->
+            <div style="flex:1; display:flex; flex-direction:column;">
+                <div style="padding:10px; background:rgba(0,0,0,0.5); text-align:center; border-bottom:1px solid #444;">
+                    <div style="font-size:3rem;">🐉</div>
+                    <div style="font-weight:bold; color:#f87171;">Covil do Dragão</div>
+                    <div style="font-size:0.7rem; color:#aaa;">Drops: ⚔️ ATK | 💥 CRIT</div>
+                </div>
+                <div id="dung-dragon-grid" class="stage-grid" style="grid-template-columns: repeat(2, 1fr); padding:10px;"></div>
+            </div>
+
         </div>
     </div>
 
@@ -652,7 +671,11 @@
         { id:501, nat:5, n:'Bahamut', type:'Fogo', img:'', visual:'🦖', s:[{n:'Garra',m:1.2,cd:0},{n:'Mega Flare',m:1.4,cd:3, ty:'aoe'},{n:'Apocalipse',m:1.8,cd:5, ty:'aoe'}], hp:180, atk:25, color:'#ef4444' },
         { id:502, nat:5, n:'Leviathan', type:'Água', img:'', visual:'🐉', s:[{n:'Mordida',m:1.2,cd:0},{n:'Tufão',m:1.4,cd:3, ty:'aoe'},{n:'Dilúvio',m:1.8,cd:5, ty:'aoe'}], hp:200, atk:22, color:'#3b82f6' },
         { id:503, nat:5, n:'Zeus', type:'Trovão', img:'', visual:'🌩️', s:[{n:'Martelo',m:1.2,cd:0},{n:'Relâmpago',m:1.4,cd:3, ty:'aoe'},{n:'Ira Divina',m:1.8,cd:5, ty:'aoe'}], hp:170, atk:28, color:'#f59e0b' },
-        { id:504, nat:5, n:'Seraphim', type:'Luz', img:'', visual:'👼', s:[{n:'Luz',m:1.2,cd:0},{n:'Redenção',m:4,cd:3,ty:'heal'},{n:'Milagre',m:0,cd:5,ty:'turn'}], hp:180, atk:22, color:'#facc15' }
+        { id:504, nat:5, n:'Seraphim', type:'Luz', img:'', visual:'👼', s:[{n:'Luz',m:1.2,cd:0},{n:'Redenção',m:4,cd:3,ty:'heal'},{n:'Milagre',m:0,cd:5,ty:'turn'}], hp:180, atk:22, color:'#facc15' },
+        
+        // --- BOSS UNITS ---
+        { id:901, nat:6, n:'Golem Ancestral', type:'Terra', img:'', visual:'🗿', s:[{n:'Esmagar',m:1,cd:0},{n:'Pele de Pedra',m:0,cd:3,ty:'turn'}], hp:500, atk:15, color:'#a3e635' },
+        { id:902, nat:6, n:'Dragão do Caos', type:'Fogo', img:'', visual:'🐉', s:[{n:'Baforada',m:1.5,cd:0},{n:'Cataclismo',m:2.5,cd:4,ty:'aoe'}], hp:400, atk:40, color:'#f87171' }
     ];
 
     const DEFAULT_STATE = { 
@@ -674,7 +697,7 @@
     let uidCount = 4;
     let runeIdCount = 1;
     let currentUser = null;
-    let pendingAction = null; // Variável para armazenar ação pendente da confirmação
+    let pendingAction = null; 
 
     const el = id => document.getElementById(id);
 
@@ -767,7 +790,6 @@
 
     /* --- CORE LOGIC --- */
     const Core = {
-        // Nova Lógica de Confirmação Segura
         reqConfirm: (msg, action) => {
             el('confirm-msg').innerText = msg;
             pendingAction = action;
@@ -879,14 +901,24 @@
             if(!m.skLvl) m.skLvl = d.s.map(()=>1); 
 
             const pupCost = Math.floor(m.lvl / 5) + 1;
-            let rHp = 0, rAtk = 0;
+            // Cálculo de Stats com novas runas
+            let rHp = 0, rAtk = 0, rDef = 0, rCrit = 0;
             let runesHtml = '<div class="rune-container">';
             m.runes.forEach((r, idx) => {
                 if(r) {
                     if(r.type==='hp') rHp += r.val;
                     if(r.type==='atk') rAtk += r.val;
+                    if(r.type==='def') rDef += r.val;
+                    if(r.type==='crit') rCrit += r.val;
                     const rClass = r.rarity === 'Lendario' ? 'rune-legend' : r.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
-                    runesHtml += `<div class="rune-slot filled" onclick="Core.openRuneSelect(${idx})"><div class="rune-icon ${rClass}">${r.type==='hp'?'❤️':'⚔️'}</div></div>`;
+                    
+                    let icon = '❓';
+                    if(r.type==='hp') icon = '❤️';
+                    else if(r.type==='atk') icon = '⚔️';
+                    else if(r.type==='def') icon = '🛡️';
+                    else if(r.type==='crit') icon = '💥';
+
+                    runesHtml += `<div class="rune-slot filled" onclick="Core.openRuneSelect(${idx})"><div class="rune-icon ${rClass}">${icon}</div></div>`;
                 } else {
                     runesHtml += `<div class="rune-slot" onclick="Core.openRuneSelect(${idx})"></div>`;
                 }
@@ -903,7 +935,7 @@
                 <div class="detail-stats">
                     <div class="stat-row"><span>Lv</span> <b>${m.lvl}/${max}</b></div>
                     <div class="stat-row"><span>Skills</span> <b>${m.skLvl.join('/')}</b></div>
-                    <div class="stat-row"><span>Runas</span> <span class="stat-bonus">+${rAtk} ATK / +${rHp} HP</span></div>
+                    <div class="stat-row"><span>Runas</span> <span class="stat-bonus">+${rAtk} ATK / +${rHp} HP / +${rDef} DEF / +${rCrit}% CRIT</span></div>
                 </div>
                 ${runesHtml}
                 <div class="btn-grp">${btnPup} ${btnSkl} ${btnEvo}</div>`;
@@ -915,7 +947,6 @@
             s.pot--; m.lvl++; Game.save(); UI.upd(); Core.selInv(uid);
         },
         
-        // --- NOVO: SISTEMA DE INVENTÁRIO DE RUNAS SEPARADO ---
         openRuneBag: () => {
             UI.nav('rune_bag'); 
             const grid = el('rune-bag-grid');
@@ -930,8 +961,15 @@
                 const rClass = r.rarity === 'Lendario' ? 'rune-legend' : r.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
                 const color = r.rarity === 'Lendario' ? '#f59e0b' : r.rarity === 'Epico' ? '#a855f7' : '#3b82f6';
                 const sellPrice = r.rarity === 'Lendario' ? 500 : r.rarity === 'Epico' ? 200 : 50;
+                
+                let icon = '❓';
+                if(r.type==='hp') icon = '❤️';
+                else if(r.type==='atk') icon = '⚔️';
+                else if(r.type==='def') icon = '🛡️';
+                else if(r.type==='crit') icon = '💥';
+
                 itemDiv.innerHTML = `
-                    <div class="rune-icon ${rClass}" style="margin-bottom:5px">${r.type==='hp'?'❤️':'⚔️'}</div>
+                    <div class="rune-icon ${rClass}" style="margin-bottom:5px">${icon}</div>
                     <div style="font-size:0.7rem; color:${color}; font-weight:bold">${r.rarity}</div>
                     <div style="font-size:0.8rem">+${r.val} ${r.type.toUpperCase()}</div>
                     <button class="rune-sell-btn" onclick="Core.sellRune(${r.id}, ${sellPrice}, event)">Vender (+${sellPrice}💠)</button>
@@ -940,9 +978,9 @@
             });
         },
         sellRune: (runeId, price, event) => {
-            if(event) event.stopPropagation(); // Impede clique fantasma
+            if(event) event.stopPropagation(); 
             Core.reqConfirm(`Vender por ${price} Mana?`, () => {
-                const idx = s.runes_inv.findIndex(r => r.id == runeId); // Usa == para garantir match string/number
+                const idx = s.runes_inv.findIndex(r => r.id == runeId); 
                 if(idx > -1) {
                     s.runes_inv.splice(idx, 1);
                     s.mana += price;
@@ -954,7 +992,6 @@
             });
         },
 
-        // --- RUNE EQUIP SYSTEM ---
         openRuneSelect: (slotIdx) => {
             tmp.selRuneSlot = slotIdx;
             const m = s.roster.find(x=>x.uid===tmp.selInv);
@@ -962,9 +999,15 @@
             let html = '';
             if (currentRune) {
                 const rClass = currentRune.rarity === 'Lendario' ? 'rune-legend' : currentRune.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
+                let icon = '❓';
+                if(currentRune.type==='hp') icon = '❤️';
+                else if(currentRune.type==='atk') icon = '⚔️';
+                else if(currentRune.type==='def') icon = '🛡️';
+                else if(currentRune.type==='crit') icon = '💥';
+
                 html += `<div class="rune-list-item" onclick="Core.unequipRune()">
                     <div style="color:#ef4444; font-weight:bold">DESEQUIPAR ATUAL (-1000 💠)</div>
-                    <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${currentRune.type==='hp'?'❤️':'⚔️'}</div>
+                    <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${icon}</div>
                 </div><hr style="border-color:#444; margin:10px 0;">`;
             }
             if (s.runes_inv.length === 0) {
@@ -973,12 +1016,19 @@
                 s.runes_inv.forEach(r => {
                     const rClass = r.rarity === 'Lendario' ? 'rune-legend' : r.rarity === 'Epico' ? 'rune-epic' : 'rune-rare';
                     const color = r.rarity === 'Lendario' ? '#f59e0b' : r.rarity === 'Epico' ? '#a855f7' : '#3b82f6';
+                    
+                    let icon = '❓';
+                    if(r.type==='hp') icon = '❤️';
+                    else if(r.type==='atk') icon = '⚔️';
+                    else if(r.type==='def') icon = '🛡️';
+                    else if(r.type==='crit') icon = '💥';
+
                     html += `<div class="rune-list-item" onclick="Core.equipRune(${r.id})">
                         <div>
                             <span style="color:${color}; font-weight:bold">${r.rarity}</span> 
                             <span>+${r.val} ${r.type.toUpperCase()}</span>
                         </div>
-                        <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${r.type==='hp'?'❤️':'⚔️'}</div>
+                        <div class="rune-icon ${rClass}" style="width:25px;height:25px;font-size:0.6rem">${icon}</div>
                     </div>`;
                 });
             }
@@ -1013,7 +1063,6 @@
             });
         },
 
-        // --- MAPAS ---
         renExpl: () => {
             const grid = el('expl-grid'); grid.innerHTML = ''; const frag = document.createDocumentFragment();
             for(let i=1; i<=30; i++) {
@@ -1029,17 +1078,35 @@
             grid.appendChild(frag);
         },
         renDung: () => {
-            const grid = el('dung-grid'); grid.innerHTML = ''; const frag = document.createDocumentFragment();
-            for(let i=1; i<=12; i++) {
-                const cleared = s.cleared.includes(`dungeon-${i}`);
+            // Renderiza 10 andares de Golem
+            const gridG = el('dung-golem-grid'); gridG.innerHTML = ''; 
+            const fragG = document.createDocumentFragment();
+            for(let i=1; i<=10; i++) {
+                const cleared = s.cleared.includes(`golem-${i}`);
                 const div = document.createElement('div');
                 div.className = `stage-btn boss`;
-                div.onclick = () => Core.prepFight('dungeon', i);
-                let badge = !cleared ? `<div class="first-clear-badge">50💎</div>` : '';
-                div.innerHTML = `${badge} <div class="boss-floor-num">${i}</div><div class="boss-label">Andar</div>`;
-                frag.appendChild(div);
+                div.style.borderColor = '#65a30d'; // Verde Golem
+                div.onclick = () => Core.prepFight('dungeon-golem', i);
+                let badge = !cleared ? `<div class="first-clear-badge">💎</div>` : '';
+                div.innerHTML = `${badge} <div class="boss-floor-num">B${i}</div>`;
+                fragG.appendChild(div);
             }
-            grid.appendChild(frag);
+            gridG.appendChild(fragG);
+
+            // Renderiza 10 andares de Dragão
+            const gridD = el('dung-dragon-grid'); gridD.innerHTML = ''; 
+            const fragD = document.createDocumentFragment();
+            for(let i=1; i<=10; i++) {
+                const cleared = s.cleared.includes(`dragon-${i}`);
+                const div = document.createElement('div');
+                div.className = `stage-btn boss`;
+                div.style.borderColor = '#ef4444'; // Vermelho Dragão
+                div.onclick = () => Core.prepFight('dungeon-dragon', i);
+                let badge = !cleared ? `<div class="first-clear-badge">💎</div>` : '';
+                div.innerHTML = `${badge} <div class="boss-floor-num">B${i}</div>`;
+                fragD.appendChild(div);
+            }
+            gridD.appendChild(fragD);
         },
         prepFight: (mode, level) => {
             tmp.mode = mode; tmp.lvl = level; tmp.prep = []; UI.nav('prep'); Prep.render();
@@ -1138,7 +1205,7 @@
             
             el('btn-fight').disabled = tmp.prep.length===0;
 
-            const stageKey = `${tmp.mode}-${tmp.lvl}`;
+            const stageKey = tmp.mode === 'story' ? `story-${tmp.lvl}` : (tmp.mode === 'dungeon-golem' ? `golem-${tmp.lvl}` : `dragon-${tmp.lvl}`);
             const isCleared = s.cleared.includes(stageKey);
             const farmBtn = el('btn-farm');
             if (isCleared && tmp.prep.length > 0) {
@@ -1205,12 +1272,17 @@
             b.p = tmp.prep.map((uid,i) => {
                 const m = s.roster.find(x=>x.uid===uid); const d = DB.find(x=>x.id===m.id) || DB[0];
                 const sm = 1 + m.lvl*0.1 + (m.star * 0.3);
-                let rHp = 0, rAtk = 0;
-                m.runes.forEach(r => { if(r) { if(r.type==='hp') rHp+=r.val; if(r.type==='atk') rAtk+=r.val; } });
+                let rHp = 0, rAtk = 0, rDef = 0, rCrit = 0;
+                m.runes.forEach(r => { if(r) { 
+                    if(r.type==='hp') rHp+=r.val; 
+                    if(r.type==='atk') rAtk+=r.val; 
+                    if(r.type==='def') rDef+=r.val; 
+                    if(r.type==='crit') rCrit+=r.val; 
+                }});
                 
                 const finalHp = Math.floor((d.hp*sm) + rHp);
                 const finalAtk = Math.floor((d.atk*sm) + rAtk);
-                return {...d, max:finalHp, cur:finalHp, atk:finalAtk, idx:i, side:'p', dead:false, cds:d.s.map(()=>0), skLvl:m.skLvl};
+                return {...d, max:finalHp, cur:finalHp, atk:finalAtk, def:rDef, crit:rCrit, idx:i, side:'p', dead:false, cds:d.s.map(()=>0), skLvl:m.skLvl};
             });
 
             if(tmp.mode === 'story') {
@@ -1221,17 +1293,20 @@
                     const base = pool[Math.floor(Math.random()*pool.length)];
                     return {
                         ...base, 
-                        max: Math.floor(base.hp * diff), cur: Math.floor(base.hp * diff), atk: Math.floor(base.atk * diff), 
+                        max: Math.floor(base.hp * diff), cur: Math.floor(base.hp * diff), atk: Math.floor(base.atk * diff), def:0, crit:0,
                         idx:i, side:'e', dead:false, cds:base.s.map(()=>0), skLvl:base.s.map(()=>1), isBoss:false
                     };
                 });
             } else {
-                const diff = 1 + (tmp.lvl * 1.0); 
-                const bossPool = DB.filter(x => x.nat >= 3);
-                const bossBase = bossPool[Math.floor(Math.random()*bossPool.length)];
+                // MASMORRA: CHEFE FIXO
+                const diff = 1 + (tmp.lvl * 0.8); 
+                let bossBase;
+                if (tmp.mode === 'dungeon-golem') bossBase = DB.find(x=>x.id===901); // Golem
+                else bossBase = DB.find(x=>x.id===902); // Dragão
+
                 b.e = [{
                     ...bossBase,
-                    max: Math.floor(bossBase.hp * 5 * diff), cur: Math.floor(bossBase.hp * 5 * diff), atk: Math.floor(bossBase.atk * 1.5 * diff),
+                    max: Math.floor(bossBase.hp * 5 * diff), cur: Math.floor(bossBase.hp * 5 * diff), atk: Math.floor(bossBase.atk * 1.5 * diff), def: Math.floor(tmp.lvl * 5), crit: Math.floor(tmp.lvl * 2),
                     idx:0, side:'e', dead:false, cds:bossBase.s.map(()=>0), skLvl:bossBase.s.map(()=>3), isBoss:true
                 }];
             }
@@ -1366,56 +1441,69 @@
                     }, 500/b.spd);
                 } else if (type === 'aoe') {
                     const targets = atk.side === 'p' ? b.e : b.p;
-                    
                     el('app').classList.add('shake-screen');
                     setTimeout(()=>el('app').classList.remove('shake-screen'), 300);
 
                     targets.forEach(target => {
                         if (!target.dead) {
-                            const tEl = el(`${target.side}${target.idx}`);
-                            tEl.classList.add('hit-anim'); 
-                            
-                            const bonus = (skillLvl - 1) * 0.2; 
-                            const finalMult = baseMult + bonus; 
-                            const dmg = Math.floor(atk.atk * finalMult);
-                            
-                            target.cur = Math.max(0, target.cur - dmg);
-                            
-                            const txt = document.createElement('div'); 
-                            txt.className = 'dmg-txt'; 
-                            if(skillLvl > 1) txt.style.color = '#ffff00'; 
-                            txt.innerText = dmg; 
-                            tEl.appendChild(txt);
-                            setTimeout(()=>txt.remove(), 1000/b.spd);
-                            
-                            tEl.querySelector('.hp-fill').style.width = `${(target.cur/target.max)*100}%`;
-                            
-                            if(target.cur === 0) { 
-                                target.dead = true; 
-                                tEl.classList.remove('target-focus', 'hit-anim'); 
-                                tEl.classList.add('dead'); 
-                            }
+                            Battle.applyDmg(atk, target, baseMult, skillLvl, true);
                         }
                     });
                 } else {
-                    dEl.classList.add('hit-anim'); el('app').classList.add('shake-screen'); setTimeout(()=>el('app').classList.remove('shake-screen'), 300);
-                    const bonus = (skillLvl - 1) * 0.2; const finalMult = baseMult + bonus; const dmg = Math.floor(atk.atk * finalMult);
-                    def.cur = Math.max(0, def.cur-dmg); 
-                    const txt = document.createElement('div'); txt.className='dmg-txt'; if(skillLvl > 1) txt.style.color = '#ffff00'; txt.innerText=dmg; dEl.appendChild(txt);
-                    setTimeout(()=>txt.remove(), 1000/b.spd);
-                    dEl.querySelector('.hp-fill').style.width = `${(def.cur/def.max)*100}%`;
-                    if(def.cur===0) { def.dead=true; dEl.classList.remove('target-focus', 'hit-anim'); dEl.classList.add('dead'); }
+                    el('app').classList.add('shake-screen'); setTimeout(()=>el('app').classList.remove('shake-screen'), 300);
+                    Battle.applyDmg(atk, def, baseMult, skillLvl, false);
                 }
                 if (type !== 'turn') { b.idx++; setTimeout(Battle.turn, 800/b.spd); }
             }, 300/b.spd);
         },
+        
+        applyDmg: (atk, def, baseMult, skillLvl, isAoE) => {
+            const dEl = el(`${def.side}${def.idx}`);
+            dEl.classList.add('hit-anim'); 
+            
+            // Defesa reduz % de dano. Ex: 100 def = 50% de redução
+            const defRed = 100 / (100 + (def.def || 0));
+            const bonus = (skillLvl - 1) * 0.2; 
+            let finalMult = baseMult + bonus; 
+            
+            // Critico
+            let isCrit = false;
+            if (atk.crit && Math.random() * 100 < atk.crit) {
+                finalMult *= 1.5;
+                isCrit = true;
+            }
+
+            const rawDmg = atk.atk * finalMult;
+            const dmg = Math.floor(rawDmg * defRed);
+            
+            def.cur = Math.max(0, def.cur - dmg);
+            
+            const txt = document.createElement('div'); 
+            txt.className = 'dmg-txt'; 
+            if(isCrit) { txt.style.color = '#ef4444'; txt.style.fontSize = '4rem'; txt.innerText = "CRIT! " + dmg; }
+            else if(skillLvl > 1) { txt.style.color = '#ffff00'; txt.innerText = dmg; }
+            else { txt.innerText = dmg; }
+
+            dEl.appendChild(txt);
+            setTimeout(()=>txt.remove(), 1000/b.spd);
+            
+            dEl.querySelector('.hp-fill').style.width = `${(def.cur/def.max)*100}%`;
+            
+            if(def.cur === 0) { 
+                def.dead = true; 
+                dEl.classList.remove('target-focus', 'hit-anim'); 
+                dEl.classList.add('dead'); 
+            }
+        },
+
         end: (w) => {
             el('stg').classList.remove('cinematic');
             setTimeout(() => {
                 let rewardMsg = "", itemIcon = "", itemQtd = "", gemsAwarded = 0, accXpGain = 0;
                 let runeDrop = "";
                 if(w) {
-                    const stageKey = `${tmp.mode}-${tmp.lvl}`;
+                    const stageKey = tmp.mode === 'story' ? `story-${tmp.lvl}` : (tmp.mode === 'dungeon-golem' ? `golem-${tmp.lvl}` : `dragon-${tmp.lvl}`);
+                    
                     const firstClear = !s.cleared.includes(stageKey);
                     if(firstClear) { s.cleared.push(stageKey); gemsAwarded = 50; } else { gemsAwarded = 5; }
                     s.gems += gemsAwarded;
@@ -1435,24 +1523,41 @@
                         rewardMsg = "VITÓRIA!";
                         if(tmp.lvl === s.maxStage) s.maxStage++;
                     } else { 
-                        const rarities = ['Raro', 'Epico', 'Lendario'];
+                        // --- DROP SYSTEM SUMMONERS STYLE ---
+                        const rarities = ['Comum', 'Raro', 'Epico', 'Lendario'];
                         let rIdx = 0;
                         const rnd = Math.random() * 100;
                         
-                        if (tmp.lvl <= 4) { 
-                            if(rnd>90) rIdx=1; 
-                        } else if (tmp.lvl <= 8) { 
-                            if(rnd>60) rIdx=1; else if(rnd>90) rIdx=2; 
-                        } else { 
-                            if(rnd>30) rIdx=1; else if(rnd>60) rIdx=2; 
+                        // Escalonamento de Drop por Andar (1-10)
+                        if (tmp.lvl <= 3) {
+                            if(rnd>90) rIdx=1; // Mostly Common, 10% Rare
+                        } else if (tmp.lvl <= 6) {
+                            rIdx=1; if(rnd>80) rIdx=2; // Mostly Rare, 20% Epic
+                        } else if (tmp.lvl <= 9) {
+                            rIdx=1; if(rnd>50) rIdx=2; if(rnd>95) rIdx=3; // Rare/Epic split, 5% Leg
+                        } else {
+                            rIdx=2; if(rnd>90) rIdx=3; // Mostly Epic, 10% Leg
                         }
 
                         const rarity = rarities[rIdx];
-                        const type = Math.random() > 0.5 ? 'hp' : 'atk';
+                        
+                        // Tipo de Runa Baseado na Dungeon
+                        let type = 'hp';
+                        if (tmp.mode === 'dungeon-golem') {
+                            type = Math.random() > 0.5 ? 'hp' : 'def';
+                        } else {
+                            type = Math.random() > 0.5 ? 'atk' : 'crit';
+                        }
+
+                        // Valor Base
                         let val = 0;
+                        if(rarity==='Comum') val = 5 + Math.floor(Math.random()*5);
                         if(rarity==='Raro') val = 10 + Math.floor(Math.random()*10);
                         if(rarity==='Epico') val = 25 + Math.floor(Math.random()*15);
                         if(rarity==='Lendario') val = 50 + Math.floor(Math.random()*25);
+                        
+                        // Crit é % e deve ser menor
+                        if(type === 'crit') val = Math.ceil(val / 2.5);
 
                         const newRune = { id: runeIdCount++, rarity, type, val };
                         s.runes_inv.push(newRune);
@@ -1467,19 +1572,16 @@
                     if (b.farmRuns > 1) {
                         b.farmRuns--;
                         el('farm-count').innerText = b.farmRuns;
-                        
                         const toast = document.createElement('div');
                         toast.style.cssText = `position:absolute; top:20%; left:50%; transform:translate(-50%, -50%); background:rgba(16, 185, 129, 0.9); color:white; padding:10px 20px; border-radius:10px; z-index:999; font-weight:bold; font-size:1.2rem; pointer-events:none; box-shadow: 0 0 10px #000; animation: fadeUp 1s forwards;`;
                         toast.innerHTML = `Vitória! Reiniciando... (${b.farmRuns})`;
                         el('battle').appendChild(toast);
-                        
                         if (!document.getElementById('anim-style')) {
                             const style = document.createElement('style');
                             style.id = 'anim-style';
                             style.innerHTML = `@keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, 0); } 20% { opacity: 1; transform: translate(-50%, -20px); } 80% { opacity: 1; transform: translate(-50%, -20px); } 100% { opacity: 0; transform: translate(-50%, -40px); } }`;
                             document.head.appendChild(style);
                         }
-                        
                         setTimeout(() => {
                             toast.remove();
                             Battle.start(b.farmRuns); 
