@@ -18,6 +18,8 @@
             --c-text: #1f2937; 
             --c-text-dim: #6b7280;
             --c-border: #e5e7eb;
+
+            --s-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --dock-height: 80px;
         }
 
@@ -108,6 +110,7 @@
         .hero-slot.legendary-glow { box-shadow: 0 0 10px var(--c-gold), inset 0 0 5px var(--c-gold); border-color: var(--c-gold); }
         .stars { display: flex; gap: 1px; justify-content: center; }
         .star { width: 8px; height: 8px; background: var(--c-gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+        .star.p { background: var(--c-accent); }
 
         /* LOJA CARDS */
         .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; padding: 10px; }
@@ -138,6 +141,8 @@
         .big-model { font-size: 6rem; position: relative; z-index: 2; margin-bottom: 10px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15)); animation: float 3s infinite ease-in-out; }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         .mon-info-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); padding: 6px 14px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-weight: 700; font-size: 0.85rem; color: #444; margin-top: 10px; position: relative; z-index: 2; border: 1px solid rgba(0,0,0,0.05); }
+        .mon-info-badge.max-lvl { color: #f59e0b; border-color: #f59e0b; background: #fffbeb; }
+
         .tab-bar { display: flex; justify-content: center; gap: 10px; margin: 20px 0 10px; flex-shrink: 0; position: relative; z-index: 2; }
         .tab-btn { padding: 8px 20px; border-radius: 25px; background: #fff; color: #6b7280; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.85rem; border: 1px solid #e5e7eb; }
         .tab-btn.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
@@ -156,7 +161,7 @@
         .skill-card-detail { background: #fff; border-radius: 16px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #f0f0f0; display: flex; gap: 15px; align-items: center; }
         .action-dock { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; justify-content: space-between; position: absolute; bottom: 0; width: 100%; z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); padding-bottom: max(15px, env(safe-area-inset-bottom)); }
 
-        /* --- BATTLE --- */
+        /* --- BATTLE (REALISTIC ARENA) --- */
         #battle { background: radial-gradient(circle at 50% 20%, #0f172a 0%, #000 100%); overflow: hidden; padding-bottom: 0; }
         .arena-floor { 
             position: absolute; bottom: -10%; left: -50%; right: -50%; height: 75%;
@@ -216,13 +221,16 @@
 
         /* GRIDS */
         #inv-grid, #prep-grid, #rune-bag-grid, #evo-grid, #skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px; padding: 15px; align-content: flex-start; }
-        #shop-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; padding: 10px; }
+        #shop-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; padding: 10px; }
 
         /* MODALS */
         .modal { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal.open { display: flex; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         .modal-content { width: 90%; max-width: 350px; background: #fff; border-radius: 20px; padding: 25px; text-align: center; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Prep Buttons Centered */
+        .prep-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
 
     </style>
 </head>
@@ -317,7 +325,7 @@
                 <div id="md-vis" class="big-model">🐲</div>
                 <h2 id="md-name" style="margin-bottom:5px">Dragon</h2>
                 <div id="md-stars" class="stars" style="position:relative; margin-bottom:5px; width:auto; justify-content:center"></div>
-                <div class="mon-info-badge">Nv. <span id="md-lvl">1</span></div>
+                <div class="mon-info-badge" id="md-badge">Nv. <span id="md-lvl">1</span></div>
             </div>
             <div class="tab-bar">
                 <div id="tab-stat" class="tab-btn active" onclick="UI.tab('stat')">Status</div>
@@ -359,10 +367,15 @@
             <div id="s1" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(1)"></div>
             <div id="s2" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(2)"></div>
         </div>
-        <div style="text-align:center; padding:10px; background:#f9fafb; border-bottom:1px solid #eee">
-            <button id="btn-fight" class="btn btn-primary" onclick="Battle.start(0)" style="width:150px">LUTAR</button>
-            <div id="btn-farm" style="display:none; margin-top:5px"><button class="btn btn-gold" onclick="Battle.start(5)">⚡ Auto x5</button></div>
+        
+        <!-- BOTOES CENTRALIZADOS -->
+        <div class="prep-actions">
+            <button id="btn-fight" class="btn btn-primary" onclick="Battle.start(0)" style="width:200px; height:50px; font-size:1rem; box-shadow:0 5px 15px rgba(59,130,246,0.4)">⚔️ LUTAR</button>
+            <div id="btn-farm" style="display:none; width:100%; text-align:center">
+                <button class="btn btn-gold" onclick="Battle.start(5)" style="width:200px; height:40px; font-size:0.8rem">⚡ AUTO x5</button>
+            </div>
         </div>
+
         <div id="prep-grid" class="scroll-y"></div>
     </div>
 
@@ -389,7 +402,7 @@
 
         <div id="btl-ui" class="battle-hud">
             <div style="position:absolute; top:-40px; color:#fff; text-shadow:0 1px 3px #000; font-weight:800" id="act-msg"></div>
-            <div id="skill-list" style="display:flex; gap:20px"></div>
+            <div id="skill-list" style="display:flex; gap:15px"></div>
         </div>
     </div>
 
@@ -415,7 +428,6 @@
         <div style="margin-top:10px; font-size:0.8rem; color:#888">🎫 <span id="g-tix">0</span> | 🎟️ <span id="g-rare">0</span></div>
         <button class="btn btn-white" style="background:rgba(255,255,255,0.1); color:#fff; border:none; margin-top:10px" onclick="UI.modal('m-gacha',0)">Sair</button>
     </div></div>
-    
     <div id="m-gacha-results" class="modal"><div class="modal-content"><h3>Invocado!</h3><div id="gacha-result-grid" style="display:flex; justify-content:center; flex-wrap:wrap; gap:10px; padding:10px"></div><button class="btn btn-primary" onclick="UI.modal('m-gacha-results',0)">Confirmar</button></div></div>
 
     <div id="m-end" class="modal"><div class="modal-content"><h1 id="end-title">FIM</h1><div style="display:flex; justify-content:space-around; font-size:1.2rem; font-weight:bold"><div>💠 <span id="end-mana">0</span></div><div>💎 <span id="end-gems">0</span></div></div><div id="rune-drop-msg" style="color:var(--c-accent)"></div><button class="btn btn-primary" onclick="Battle.close()">Continuar</button></div></div>
@@ -431,7 +443,7 @@
 </div>
 
 <script>
-    const MAX_LVL = {1:15, 2:20, 3:25, 4:30, 5:35, 6:40};
+    const MAX_LVL = {1:10, 2:20, 3:30, 4:40, 5:50, 6:50};
     const EXPL_REGIONS = [ { id: 1, name: "Floresta", icon: "🌲", color: "#10b981" }, { id: 2, name: "Vulcão", icon: "🌋", color: "#ef4444" }, { id: 3, name: "Ruínas", icon: "🏛️", color: "#fbbf24" }, { id: 4, name: "Pico", icon: "⚡", color: "#a855f7" } ];
     const SHOP_DB = [
         {id:'pot',name:'Poção XP',cost:100,currency:'mana',icon:'🧪'},
@@ -465,14 +477,12 @@
             const sav = localStorage.getItem(`gl_fix_${u}`);
             s = sav ? JSON.parse(sav) : JSON.parse(JSON.stringify(DEFAULT_STATE));
             if(!s.runes_inv) s.runes_inv=[];
-            // Migration for booster
             if(typeof s.xp_boost_end_time === 'undefined') s.xp_boost_end_time = 0;
             
             uidCount = s.roster.reduce((m,r)=>Math.max(m,r.uid),0)+1;
             runeIdCount = Math.max((s.runes_inv.reduce((m,r)=>Math.max(m,r.id),0)),100)+1;
             el('p-name').innerText=u; UI.upd(); UI.nav('hub');
             
-            // Boost check loop
             setInterval(() => {
                 const now = Date.now();
                 if (s.xp_boost_end_time > now) {
@@ -495,7 +505,6 @@
             el(id).className = o ? 'modal open' : 'modal'; 
             if(o && id==='m-shop') Core.renShop(); 
             if(o && id==='m-gacha') {
-                 // Check if can 10x
                  el('btn-g-10').style.display = s.rare_tix >= 10 ? 'block' : 'none';
             }
         },
@@ -523,16 +532,39 @@
             tmp.selInv=uid; const m=s.roster.find(x=>x.uid===uid); const d=DB.find(x=>x.id===m.id); UI.nav('mon_detail');
             let elemColor = d.type==='Fogo'?'#ef4444':d.type==='Água'?'#3b82f6':'#10b981';
             el('mon_detail').style.setProperty('--elem-bg', elemColor);
-            el('md-vis').innerHTML=d.visual; el('md-name').innerText=d.n; el('md-lvl').innerText=m.lvl;
+            el('md-vis').innerHTML=d.visual; el('md-name').innerText=d.n;
+            
+            // ELEMENT AND LEVEL
+            let typeIcon = d.type === 'Fogo' ? '🔥' : (d.type === 'Água' ? '💧' : (d.type === 'Vento' ? '🍃' : (d.type === 'Terra' ? '⛰️' : (d.type === 'Luz' ? '☀️' : '🌙'))));
+            let maxLvl = MAX_LVL[m.star] || 50;
+            let isMax = m.lvl >= maxLvl;
+            
+            el('md-badge').innerHTML = `${typeIcon} Nv. ${m.lvl} ${isMax ? '<span style="color:#f59e0b; font-weight:800">(MAX)</span>' : ''}`;
+            if (isMax) el('md-badge').classList.add('max-lvl'); else el('md-badge').classList.remove('max-lvl');
+
             let stars = ''; for(let i=0;i<m.star;i++) stars+=`<div class="star" style="width:12px;height:12px"></div>`;
             el('md-stars').innerHTML=stars;
-            let sm=1+m.lvl*0.1;
-            let bon={hp:0,atk:0,def:0,crit:0};
-            m.runes.forEach(r=>{if(r){bon[r.type]+=r.val;if(r.subs)r.subs.forEach(s=>bon[s.type]+=s.val)}});
-            el('st-hp').innerText=Math.floor(d.hp*sm); el('bn-hp').innerText=`(+${bon.hp})`;
-            el('st-atk').innerText=Math.floor(d.atk*sm); el('bn-atk').innerText=`(+${bon.atk})`;
-            el('st-def').innerText=Math.floor(10); el('bn-def').innerText=`(+${bon.def})`;
-            el('st-crit').innerText=15;
+            
+            // STATUS CALC
+            let sm = 1 + m.lvl*0.1;
+            let bon = {hp:0, atk:0, def:0, crit:0};
+            m.runes.forEach(r => { 
+                if(r) { 
+                    bon[r.type] += r.val; 
+                    if(r.subs) r.subs.forEach(s => bon[s.type] += s.val); 
+                } 
+            });
+
+            const baseHp = Math.floor(d.hp * sm);
+            const baseAtk = Math.floor(d.atk * sm);
+            const baseDef = Math.floor(10 + (m.lvl)); // Base Def Logic
+            
+            el('st-hp').innerText = baseHp; el('bn-hp').innerText = `(+${bon.hp})`;
+            el('st-atk').innerText = baseAtk; el('bn-atk').innerText = `(+${bon.atk})`;
+            el('st-def').innerText = baseDef; el('bn-def').innerText = `(+${bon.def})`;
+            el('st-crit').innerText = 15;
+
+            // Runes Render
             [0,1,2,3].forEach(i=>{ 
                 const r=m.runes[i]; const rx=el(`rs-${i}`); 
                 if(r) { rx.className='rune-slot-fancy filled'; rx.style.setProperty('--rune-color',r.type==='hp'?'#ef4444':'#3b82f6'); rx.innerHTML=`<div class="icon" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div><div class="lvl">+${r.lvl}</div>`; } 
@@ -728,8 +760,14 @@
     };
 
     const Battle = {
-        spd: () => { b.spd=b.spd===1?2:1; el('btn-spd').innerText='x'+b.spd; },
+        spd: () => { 
+            let next = b.spd === 1 ? 2 : (b.spd === 2 ? 3 : 1);
+            if (next === 3 && s.p_lvl < 5) { UI.toast("3x libera no Nv. 5"); next = 1; }
+            b.spd = next;
+            el('btn-spd').innerText = 'x' + b.spd;
+        },
         toggleAuto: () => { 
+            if (s.p_lvl < 2) return UI.toast("Auto libera no Nv. 2");
             b.auto=!b.auto; 
             if(b.auto) el('btn-auto').classList.add('active'); else el('btn-auto').classList.remove('active');
             if(b.auto) Battle.turn(); 
@@ -864,11 +902,29 @@
                         const tEl = el(`${t.side}${t.idx}`);
                         if(tEl) {
                             tEl.classList.add('hit'); setTimeout(()=>tEl.classList.remove('hit'), 300);
-                            const dmg = Math.floor(atk.atk * sk.m);
+                            
+                            // ELEMENTAL ADVANTAGE
+                            let mult = 1;
+                            let txtColor = '#fff';
+                            let txtExtra = '';
+                            
+                            // Cycle: Água > Fogo > Vento > Terra > Água  | Luz <> Trevas
+                            const at = atk.type; const dt = t.type;
+                            if ((at=='Água' && dt=='Fogo') || (at=='Fogo' && dt=='Vento') || (at=='Vento' && dt=='Terra') || (at=='Terra' && dt=='Água') || (at=='Luz' && dt=='Trevas') || (at=='Trevas' && dt=='Luz')) {
+                                mult = 1.2; txtColor = '#facc15'; txtExtra = 'CRUSH! ';
+                            } else if ((at=='Fogo' && dt=='Água') || (at=='Vento' && dt=='Fogo') || (at=='Terra' && dt=='Vento') || (at=='Água' && dt=='Terra')) {
+                                mult = 0.8; txtColor = '#9ca3af'; txtExtra = 'Glance... ';
+                            }
+
+                            const dmg = Math.floor(atk.atk * sk.m * mult);
                             t.cur = Math.max(0, t.cur - dmg);
                             if(t.cur===0) t.dead = true;
                             
-                            const popup = document.createElement('div'); popup.className='dmg-popup'; popup.innerText=dmg;
+                            const popup = document.createElement('div'); 
+                            popup.className='dmg-popup'; 
+                            popup.innerHTML = `<span style="font-size:0.5em">${txtExtra}</span>${dmg}`;
+                            popup.style.color = txtColor;
+                            
                             tEl.appendChild(popup); setTimeout(()=>popup.remove(), 800);
                         }
                     }
@@ -913,7 +969,7 @@
 
                     el('end-mana').innerText = `+${Math.floor(rMana)}`;
                     el('end-gems').innerText = `+${rGems}`;
-                    el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP`;
+                    el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP Conta`;
 
                     if(tmp.mode==='dung') {
                         // DUNGEON DROP RATES
