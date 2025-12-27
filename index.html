@@ -111,6 +111,9 @@
         .stars { display: flex; gap: 1px; justify-content: center; }
         .star { width: 8px; height: 8px; background: var(--c-gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
         .star.p { background: var(--c-accent); }
+        
+        /* SUPORTE PARA IMAGENS CUSTOMIZADAS */
+        .hero-slot img, .custom-img, .visual img { width: 100%; height: 100%; object-fit: contain; }
 
         /* LOJA CARDS */
         .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; padding: 10px; }
@@ -193,8 +196,8 @@
         .b-unit.active-turn { z-index: 100; }
         .b-unit.active-turn .visual { transform: scale(1.2); filter: brightness(1.2) drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
         .b-unit.actor { z-index: 100 !important; }
-        .player .b-unit.actor .visual { animation: lungeP 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        .enemy .b-unit.actor .visual { animation: lungeE 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .player .b-unit.actor .visual { animation: lungeP 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .enemy .b-unit.actor .visual { animation: lungeE 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         @keyframes lungeP { 0%{transform:translateY(0)} 40%{transform:translateY(-80px) scale(1.3)} 100%{transform:translateY(0) scale(1)} }
         @keyframes lungeE { 0%{transform:translateY(0)} 40%{transform:translateY(80px) scale(1.3)} 100%{transform:translateY(0) scale(1)} }
         .b-unit.hit .visual { animation: hit 0.4s; filter: brightness(2) sepia(1) hue-rotate(-50deg); }
@@ -216,7 +219,8 @@
         @keyframes popUp { 0%{opacity:0; transform:translate(-50%,0)} 20%{opacity:1; transform:translate(-50%,-50px) scale(1.5)} 100%{opacity:0; transform:translate(-50%,-80px)} }
 
         /* FLUSH LEGENDARY */
-        .flash-legendary { position: fixed; inset: 0; background: #fff; z-index: 400; animation: flashGold 1.5s ease-out forwards; pointer-events: none; opacity: 0; }
+        .flash-legendary { position: fixed; inset: 0; background: #fff; z-index: 400; animation: flashGold 0.8s ease-out forwards; pointer-events: none; opacity: 0; display: none; }
+        .flash-legendary.active { display: block; }
         @keyframes flashGold { 0%{opacity:0; background:#fff} 10%{opacity:1; background:#fff} 30%{background:#fbbf24} 100%{opacity:0} }
 
         /* GRIDS */
@@ -443,6 +447,24 @@
 </div>
 
 <script>
+    /*
+    COMO ADICIONAR UM NOVO PERSONAGEM:
+    1. Encontre a variável "DB" abaixo.
+    2. Adicione um novo objeto na lista seguindo o modelo:
+       {
+           id: 999,                   // ID único (use um número que não exista)
+           nat: 5,                    // Estrelas (1 a 5)
+           n: 'Nome do Heroi',        // Nome
+           type: 'Fogo',              // Elemento: 'Água', 'Fogo', 'Vento', 'Terra', 'Luz', 'Trevas'
+           img: 'URL_DA_IMAGEM.png',  // Link da imagem PNG (fundo transparente é melhor)
+           visual: '🤠',              // Emoji (usado se a imagem falhar)
+           s: [                       // Habilidades
+               {n:'Ataque 1', m:1, cd:0, ty:'atk'},     // ty: 'atk' (dano), 'aoe' (area), 'heal' (cura)
+               {n:'Ataque 2', m:1.5, cd:3, ty:'aoe'}
+           ],
+           hp: 100, atk: 50           // Status Base
+       }
+    */
     const MAX_LVL = {1:10, 2:20, 3:30, 4:40, 5:50, 6:50};
     const EXPL_REGIONS = [ { id: 1, name: "Floresta", icon: "🌲", color: "#10b981" }, { id: 2, name: "Vulcão", icon: "🌋", color: "#ef4444" }, { id: 3, name: "Ruínas", icon: "🏛️", color: "#fbbf24" }, { id: 4, name: "Pico", icon: "⚡", color: "#a855f7" } ];
     const SHOP_DB = [
@@ -515,10 +537,11 @@
         },
         toast: (m) => { const d=document.createElement('div'); d.style.cssText=`position:fixed;top:10%;left:50%;transform:translate(-50%,-50%);background:#333;color:#fff;padding:10px;border-radius:10px;z-index:999`; d.innerText=m; document.body.appendChild(d); setTimeout(()=>d.remove(),1500); },
         upd: () => { el('h-mana').innerText=s.mana; el('h-gems').innerText=s.gems; el('p-lvl').innerText=s.p_lvl; el('g-tix').innerText=s.tix; el('g-rare').innerText=s.rare_tix; el('sk-grim').innerText=s.grimoires; },
+        getVis: (d) => d.img ? `<img src="${d.img}">` : d.visual,
         renMon: (m) => {
             const d = DB.find(x=>x.id===m.id)||DB[0];
             let stars = ''; for(let i=0;i<m.star;i++) stars+=`<div class="star"></div>`;
-            return `<div class="stars" style="position:absolute;top:2px;width:100%">${stars}</div><div style="font-size:2rem;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.1))">${d.visual}</div><div class="lvl-badge">${m.lvl}</div>`;
+            return `<div class="stars" style="position:absolute;top:2px;width:100%">${stars}</div><div style="font-size:2rem;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.1))">${UI.getVis(d)}</div><div class="lvl-badge">${m.lvl}</div>`;
         }
     };
 
@@ -532,7 +555,7 @@
             tmp.selInv=uid; const m=s.roster.find(x=>x.uid===uid); const d=DB.find(x=>x.id===m.id); UI.nav('mon_detail');
             let elemColor = d.type==='Fogo'?'#ef4444':d.type==='Água'?'#3b82f6':'#10b981';
             el('mon_detail').style.setProperty('--elem-bg', elemColor);
-            el('md-vis').innerHTML=d.visual; el('md-name').innerText=d.n;
+            el('md-vis').innerHTML=UI.getVis(d); el('md-name').innerText=d.n;
             
             // ELEMENT AND LEVEL
             let typeIcon = d.type === 'Fogo' ? '🔥' : (d.type === 'Água' ? '💧' : (d.type === 'Vento' ? '🍃' : (d.type === 'Terra' ? '⛰️' : (d.type === 'Luz' ? '☀️' : '🌙'))));
@@ -557,7 +580,7 @@
 
             const baseHp = Math.floor(d.hp * sm);
             const baseAtk = Math.floor(d.atk * sm);
-            const baseDef = Math.floor(10 + (m.lvl)); // Base Def Logic
+            const baseDef = Math.floor(10 + (m.lvl)); 
             
             el('st-hp').innerText = baseHp; el('bn-hp').innerText = `(+${bon.hp})`;
             el('st-atk').innerText = baseAtk; el('bn-atk').innerText = `(+${bon.atk})`;
@@ -580,7 +603,7 @@
         backToInv: () => UI.nav('inv'),
         pup: () => { 
             const m=s.roster.find(x=>x.uid===tmp.selInv); 
-            if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||40)) return; 
+            if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||50)) return; 
             s.pot--; m.lvl++; Game.save(); Core.selInv(m.uid); UI.upd();
         },
         openEvo: () => { const m=s.roster.find(x=>x.uid===tmp.selInv); if(m.star>=6) return; tmp.evoTarget=tmp.selInv; tmp.evoFodder=[]; el('evo-req-c').innerText=m.star; el('evo-req-s').innerText=m.star; UI.modal('m-evo',1); Core.renEvo(); },
@@ -701,15 +724,14 @@
                 }
                 
                 if(hasLegend) {
-                    el('flash-fx').style.animation = 'none';
-                    el('flash-fx').offsetHeight; /* trigger reflow */
-                    el('flash-fx').style.animation = 'flashGold 1.5s ease-out forwards';
+                    el('flash-fx').classList.add('active');
+                    setTimeout(() => el('flash-fx').classList.remove('active'), 1500);
                 }
 
                 Game.save(); const g=el('gacha-result-grid'); g.innerHTML='';
                 res.forEach(r=>{ const d=document.createElement('div'); d.className='hero-slot'; if(r.star===5) d.classList.add('legendary-glow'); d.innerHTML=UI.renMon(r); g.appendChild(d); });
                 UI.modal('m-gacha-results',1);
-            }, 1000);
+            }, 400);
         },
         renExpl: () => {
             const c=el('expl-regions'); c.innerHTML='';
@@ -793,7 +815,7 @@
             const ren = (u) => `
                 <div id="${u.side}${u.idx}" class="b-unit" onclick="Battle.clk('${u.side}',${u.idx})">
                     <div class="hp-bar-w"><div class="hp-fill" style="width:100%"></div></div>
-                    <div class="visual">${u.visual}</div>
+                    <div class="visual">${UI.getVis(u)}</div>
                     ${u.side==='e'?'<div id="tgt-'+u.idx+'" class="target-marker" style="display:none">▼</div>':''}
                 </div>`;
             el('r-pla').innerHTML = b.p.map(ren).join('');
