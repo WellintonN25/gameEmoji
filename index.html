@@ -243,6 +243,20 @@
         .star { font-size: 0.6rem; color: var(--gold); text-shadow: 0 1px 2px black; margin: 0 -1px; }
         .star.purple { color: var(--purple); }
 
+        /* Estilo para aliados selecionáveis */
+        .unit.selectable { 
+            animation: pulse-select 1s infinite; 
+            border: 2px solid #4ade80; 
+            border-radius: 50%; 
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+            cursor: pointer;
+        }
+        @keyframes pulse-select { 
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 
+            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } 
+        }
+
         /* --- INVENTÁRIO --- */
         .inv-container { flex: 1; display: flex; position: relative; z-index: 2; overflow: hidden; }
         .inv-list-panel { width: 45%; background: rgba(0,0,0,0.85); border-right: 1px solid #444; display: flex; flex-direction: column; }
@@ -742,7 +756,7 @@
     
     let s = {};
     let tmp = { prep:[], selInv:null, evoTarget:null, evoFodder:[], skillFodder:[], mode:'story', lvl:1, selRuneSlot:null, dungType: null };
-    let b = { p:[], e:[], t:'p', idx:0, spd:1, target:null, auto: false, farmRuns: 0 };
+    let b = { p:[], e:[], t:'p', idx:0, spd:1, target:null, auto: false, farmRuns: 0, skillPending: null };
     let uidCount = 4;
     let runeIdCount = 1;
     let currentUser = null;
@@ -1332,6 +1346,9 @@
         start: (farmRuns = 0) => {
             if(tmp.prep.length===0) return;
             
+            // Initializing skillPending for support selection
+            b.skillPending = null;
+
             b.farmRuns = farmRuns;
             if (farmRuns > 0) {
                 b.spd = 5; 
@@ -1406,14 +1423,55 @@
         renUnit: (u) => {
             const isAct = !u.dead && ((b.t==='p' && u.side==='p' && b.idx===u.idx) || (b.t==='e' && u.side==='e' && b.idx===u.idx));
             const isTgt = !u.dead && b.target===u.idx && u.side==='e';
+            
+            // Add visual cue if selecting ally
+            const isSelectable = b.skillPending !== null && u.side === 'p' && !u.dead;
+            
             return `
-                <div id="${u.side}${u.idx}" class="unit ${u.isBoss?'boss-unit':''} ${u.dead?'dead':''} ${isAct?'actor':''} ${isTgt?'targeted':''}" onclick="Battle.target(${u.idx})">
+                <div id="${u.side}${u.idx}" class="unit ${u.isBoss?'boss-unit':''} ${u.dead?'dead':''} ${isAct?'actor':''} ${isTgt?'targeted':''} ${isSelectable?'selectable':''}" 
+                     onclick="Battle.clickUnit('${u.side}', ${u.idx})">
                     ${isTgt ? '<div class="target-marker">🎯</div>' : ''}
                     <div class="hp-container"><div class="hp-bar"><div class="hp-fill" style="width:${(u.cur/u.max)*100}%; background:${u.side==='e'?'var(--danger)':'var(--success)'}"></div></div></div>
                     <div class="unit-sprite">${UI.getVis(u)}</div>
                 </div>`;
         },
-        target: (i) => { if(b.t==='p' && !b.e[i].dead) { b.target = b.target===i ? null : i; Battle.draw(); } },
+        clickUnit: (side, idx) => {
+            if (b.t !== 'p') return; // Not player turn
+
+            // Mode 1: Selecting Ally for Support Skill
+            if (b.skillPending !== null) {
+                if (side === 'p') {
+                    // Execute Skill
+                    const u = b.p[b.idx];
+                    const skill = u.s[b.skillPending];
+                    
+                    // Cleanup UI
+                    const skillIdx = b.skillPending;
+                    b.skillPending = null;
+                    el('btl-ui').classList.remove('active');
+                    Battle.draw(); // Remove selectable classes
+
+                    // Execute Hit
+                    u.cds[skillIdx] = skill.cd + 1;
+                    Battle.hit(u, b.p[idx], skill.m, u.skLvl[skillIdx], skill.ty);
+                    
+                    // Reset target var just in case
+                    b.target = null; 
+                }
+                return;
+            }
+
+            // Mode 2: Selecting Enemy for Attack (Default behavior)
+            // Original target logic adapted
+            if (side === 'e' && !b.e[idx].dead) {
+                b.target = b.target === idx ? null : idx;
+                Battle.draw();
+            }
+        },
+        target: (i) => { 
+            // Deprecated, replaced by clickUnit
+            Battle.clickUnit('e', i);
+        },
         turn: () => {
             if(b.e.every(x=>x.dead)) return Battle.end(1); if(b.p.every(x=>x.dead)) return Battle.end(0);
             el('stg').classList.remove('cinematic');
@@ -1421,6 +1479,10 @@
                 u.classList.remove('actor', 'target-focus', 'hit-anim', 'attacking-p', 'attacking-e');
                 if(u.classList.contains('dead')) { u.style.pointerEvents='none'; }
             });
+            
+            // Ensure skillPending is cleared on turn start just in case
+            b.skillPending = null;
+            
             Battle.draw();
             
             if(b.t==='p') {
@@ -1456,7 +1518,11 @@
                     return;
                 }
 
-                el('act-name').innerText=u.n; el('btl-ui').classList.add('active');
+                el('act-name').innerText=u.n; 
+                el('act-target').innerText = "Sua Vez - Selecione Alvo";
+                el('act-target').style.color = ""; // Reset color
+                el('btl-ui').classList.add('active');
+                
                 el('skill-list').innerHTML = u.s.map((sk,i) => {
                     const cd = u.cds[i]>0;
                     let typeText = 'ATQ'; let typeColor = '#f87171';
@@ -1488,42 +1554,70 @@
             }
         },
         act: (i) => { 
-            const u = b.p[b.idx]; u.cds[i] = u.s[i].cd + 1; el('btl-ui').classList.remove('active');
-            let t = null; const skill = u.s[i];
+            const u = b.p[b.idx]; 
+            const skill = u.s[i];
+
+            // Check if skill targets allies (heal/turn)
             if (skill.ty === 'heal' || skill.ty === 'turn') {
-                t = b.p.filter(a => !a.dead).sort((a,b) => (a.cur/a.max) - (b.cur/b.max))[0];
-            } else {
-                if(b.target!==null && !b.e[b.target].dead) t = b.e[b.target]; 
-                else { const l = b.e.filter(x=>!x.dead); if(l.length) t=l[0]; }
+                b.skillPending = i;
+                // Update UI to tell user what to do
+                el('act-target').innerText = "Selecione um Aliado";
+                el('act-target').style.color = "#4ade80"; // Green
+                Battle.draw(); // Re-render to show selectable allies
+                return; // Stop here, wait for clickUnit
             }
-            if(t) Battle.hit(u,t,skill.m, u.skLvl[i], skill.ty); else { b.idx++; Battle.turn(); }
+
+            // Normal Offensive Skill Logic
+            u.cds[i] = skill.cd + 1; 
+            el('btl-ui').classList.remove('active');
+            let t = null;
+            
+            if(b.target!==null && !b.e[b.target].dead) t = b.e[b.target]; 
+            else { const l = b.e.filter(x=>!x.dead); if(l.length) t=l[0]; }
+            
+            if(t || skill.ty === 'aoe') Battle.hit(u,t,skill.m, u.skLvl[i], skill.ty); else { b.idx++; Battle.turn(); }
             b.target=null; 
         },
         hit: (atk, def, baseMult, skillLvl, type) => {
             el('stg').classList.add('cinematic');
-            const aEl = el(`${atk.side}${atk.idx}`); const dEl = el(`${def.side}${def.idx}`);
-            aEl.classList.add('actor', atk.side==='p'?'attacking-p':'attacking-e'); dEl.classList.add('target-focus');
+            const aEl = el(`${atk.side}${atk.idx}`); 
+            // If AoE, def might be undefined/first enemy, but hit logic iterates all. 
+            // For single target, highlight defender.
+            if(def) {
+                const dEl = el(`${def.side}${def.idx}`);
+                dEl.classList.add('target-focus');
+            }
+            
+            aEl.classList.add('actor', atk.side==='p'?'attacking-p':'attacking-e'); 
+            
             setTimeout(() => {
                 aEl.classList.remove('attacking-p','attacking-e'); 
                 if (type === 'heal') {
                     const healAmount = Math.floor(atk.atk * baseMult * (1 + (skillLvl-1)*0.2));
                     def.cur = Math.min(def.max, def.cur + healAmount);
+                    
+                    const dEl = el(`${def.side}${def.idx}`);
                     const txt = document.createElement('div'); txt.className='dmg-txt'; 
                     txt.style.color = '#10b981'; txt.innerText = `+${healAmount}`;
                     dEl.appendChild(txt); setTimeout(()=>txt.remove(), 1000/b.spd);
                     dEl.querySelector('.hp-fill').style.width = `${(def.cur/def.max)*100}%`;
                 } else if (type === 'turn') {
+                    const dEl = el(`${def.side}${def.idx}`);
                     const txt = document.createElement('div'); txt.className='dmg-txt'; 
                     txt.style.color = '#3b82f6'; txt.style.fontSize = '1.5rem'; txt.innerText = "TURNO EXTRA!";
                     dEl.appendChild(txt); setTimeout(()=>txt.remove(), 1000/b.spd);
-                    setTimeout(() => {
-                        const enemies = b.e.filter(e => !e.dead);
-                        if(enemies.length) {
-                            const target = enemies[Math.floor(Math.random()*enemies.length)];
-                            Battle.hit(def, target, def.s[0].m, def.skLvl[0]);
-                            return; 
-                        }
-                    }, 500/b.spd);
+                    
+                    // Simple turn logic for enemy (player already manually plays)
+                    if (def.side === 'e') {
+                        setTimeout(() => {
+                            const enemies = b.e.filter(e => !e.dead);
+                            if(enemies.length) {
+                                const target = enemies[Math.floor(Math.random()*enemies.length)];
+                                Battle.hit(def, target, def.s[0].m, def.skLvl[0]);
+                                return; 
+                            }
+                        }, 500/b.spd);
+                    }
                 } else if (type === 'aoe') {
                     const targets = atk.side === 'p' ? b.e : b.p;
                     el('app').classList.add('shake-screen');
