@@ -67,10 +67,48 @@
         .btn-red { background: var(--danger); border: none; box-shadow: 0 0 10px var(--danger); }
         .btn-crystal { background: #0ea5e9; border: none; box-shadow: 0 0 15px #0ea5e9; }
         
+        /* --- ESTILO NOVO DO BOTÃO DE VOLTAR --- */
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            margin-right: 15px; /* Espaço entre botão e título */
+        }
+        .btn-back:hover {
+            background: var(--gold);
+            color: #000;
+            transform: scale(1.1) translateX(-3px);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+            border-color: var(--gold);
+        }
+        .btn-back:active { transform: scale(0.9); }
+
+        /* Ajuste para cabeçalhos das telas internas */
+        .sub-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .screen-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
         /* --- LOJA REDESIGN --- */
         .shop-grid { 
             display: grid; 
-            /* Mudança: auto-fit para melhor responsividade e evitar esticar */
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
             gap: 15px; 
             max-height: 400px; 
@@ -82,16 +120,15 @@
             border: 1px solid #334155; border-radius: 16px;
             padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
             text-align: center; transition: 0.2s; position: relative; overflow: hidden;
-            min-height: 220px; /* Altura fixa mínima para uniformidade */
+            min-height: 220px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .shop-item:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         
         .shop-icon { 
-            font-size: 3.5rem; /* Aumentado */
+            font-size: 3.5rem; 
             margin-bottom: 10px; 
             filter: drop-shadow(0 0 8px rgba(255,255,255,0.1));
-            /* Novo estilo de fundo para o ícone */
             background: rgba(255, 255, 255, 0.05);
             width: 80px; height: 80px;
             display: flex; align-items: center; justify-content: center;
@@ -106,7 +143,7 @@
             background: #334155; border: 1px solid #475569; border-radius: 8px;
             padding: 8px 10px; font-size: 0.9rem; width: 100%; font-weight: bold; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
-            margin-top: auto; /* Garante que fique no fundo */
+            margin-top: auto; 
         }
         .shop-price-btn:hover { background: var(--success); border-color: var(--success); color: #000; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
 
@@ -157,8 +194,15 @@
         .first-clear-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
 
-        /* --- MONSTROS & MONSTER BOX RESPONSIVO --- */
-        .mon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 5px; padding: 8px; overflow-y: auto; align-content: start; }
+        /* --- MONSTROS & MONSTER BOX RESPONSIVO CORRIGIDO --- */
+        .mon-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); 
+            gap: 5px; padding: 8px; 
+            overflow-y: auto; align-content: start; 
+            flex: 1; /* Garante que a grade ocupe o espaço restante */
+            width: 100%;
+        }
         .mon-slot { width: 50px; height: 50px; background: #222; border: 2px solid #555; border-radius: 6px; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; overflow: hidden; }
         .mon-slot.selected { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); background: #333; }
         .mon-slot.fodder { border-color: var(--danger); opacity: 0.5; filter: grayscale(1); }
@@ -170,19 +214,37 @@
         .star { font-size: 0.6rem; color: var(--gold); text-shadow: 0 1px 2px black; margin: 0 -1px; }
         .star.purple { color: var(--purple); }
 
-        /* CSS RESPONSIVO PARA MONSTER BOX */
-        @media (max-width: 768px) {
+        /* --- INVENTÁRIO & RESPONSIVIDADE CORRIGIDA --- */
+        .inv-container { flex: 1; display: flex; position: relative; z-index: 2; overflow: hidden; }
+        
+        .inv-list-panel { 
+            width: 45%; 
+            background: rgba(0,0,0,0.85); 
+            border-right: 1px solid #444; 
+            display: flex; flex-direction: column; 
+        }
+        
+        .inv-filters {
+            padding: 8px; 
+            background: rgba(0,0,0,0.5); 
+            border-bottom: 1px solid #444; 
+            font-size: 0.8rem;
+            color: #ccc;
+            flex-shrink: 0; /* Impede que o cabeçalho seja esmagado */
+        }
+        
+        .inv-detail-panel { width: 55%; padding: 15px; display: flex; flex-direction: column; align-items: center; background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9), rgba(0,0,0,0.95)); overflow-y: auto; }
+        
+        /* BREAKPOINT AUMENTADO PARA 1024px PARA COBRIR MAIS CELULARES */
+        @media (max-width: 1024px) {
             .inv-container { flex-direction: column; }
-            .inv-list-panel { width: 100%; height: 40%; border-right: none; border-bottom: 2px solid #444; }
-            .inv-detail-panel { width: 100%; height: 60%; }
-            .mon-grid { padding: 5px; gap: 3px; }
-            .mon-slot { width: 45px; height: 45px; } /* Ligeiramente menor no mobile */
+            .inv-list-panel { width: 100%; height: 50%; border-right: none; border-bottom: 2px solid #444; }
+            .inv-detail-panel { width: 100%; height: 50%; }
+            .mon-grid { padding: 5px; gap: 4px; }
+            /* Garante que o mon-slot não fique minúsculo */
+            .mon-slot { width: 50px; height: 50px; } 
         }
 
-        /* --- INVENTÁRIO --- */
-        .inv-container { flex: 1; display: flex; position: relative; z-index: 2; overflow: hidden; }
-        .inv-list-panel { width: 45%; background: rgba(0,0,0,0.85); border-right: 1px solid #444; display: flex; flex-direction: column; }
-        .inv-detail-panel { width: 55%; padding: 15px; display: flex; flex-direction: column; align-items: center; background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9), rgba(0,0,0,0.95)); overflow-y: auto; }
         .detail-model { width: 120px; height: 120px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 5rem; animation: float 3s infinite ease-in-out; border-radius: 10px; border: 2px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); overflow: hidden; }
         .detail-model img { width: 100%; height: 100%; object-fit: cover; }
         .detail-stats { width: 100%; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
@@ -499,7 +561,12 @@
 
     <!-- EXPLORAÇÃO -->
     <div id="expl" class="screen">
-        <div class="top-bar"><button class="btn" onclick="UI.nav('hub')">⬅</button><span>MAPA MUNDI</span><span></span></div>
+        <div class="top-bar" style="flex-direction: row; justify-content: flex-start; align-items: center;">
+            <div class="sub-header">
+                <button class="btn-back" onclick="UI.nav('hub')">❮</button>
+                <span class="screen-title">MAPA MUNDI</span>
+            </div>
+        </div>
         <div class="inv-container" style="flex-direction:column">
             <div style="padding:15px; text-align:center; color:#aaa">Vença para desbloquear e ganhar Cristais!</div>
             <div id="expl-grid" class="stage-grid"></div>
@@ -508,7 +575,12 @@
 
     <!-- MASMORRA -->
     <div id="dung" class="screen">
-        <div class="top-bar"><button class="btn" onclick="UI.nav('hub')">⬅</button><span>MASMORRA</span><span></span></div>
+        <div class="top-bar" style="flex-direction: row; justify-content: flex-start; align-items: center;">
+            <div class="sub-header">
+                <button class="btn-back" onclick="UI.nav('hub')">❮</button>
+                <span class="screen-title">MASMORRA</span>
+            </div>
+        </div>
         <div class="inv-container" style="flex-direction:column; background: linear-gradient(to bottom, #2e1065, #000);">
             <div style="padding:15px; text-align:center; color:#fca5a5">Derrote os Chefes para ganhar Runas!</div>
             <div id="dung-grid" class="stage-grid"></div>
@@ -517,7 +589,12 @@
 
     <!-- INVENTÁRIO -->
     <div id="inv" class="screen">
-        <div class="top-bar"><button class="btn" style="padding:5px 10px" onclick="UI.nav('hub')">⬅</button><span>BOX</span><span></span></div>
+        <div class="top-bar" style="flex-direction: row; justify-content: flex-start; align-items: center;">
+            <div class="sub-header">
+                <button class="btn-back" onclick="UI.nav('hub')">❮</button>
+                <span class="screen-title">BOX</span>
+            </div>
+        </div>
         <div class="inv-container">
             <div class="inv-list-panel"><div class="inv-filters">Total: <span id="inv-count">0</span></div><div id="inv-grid" class="mon-grid"></div></div>
             <div id="inv-detail" class="inv-detail-panel"><div style="color:#aaa; margin-top:50px">Selecione</div></div>
@@ -526,7 +603,13 @@
 
     <!-- PREPARAÇÃO -->
     <div id="prep" class="screen">
-        <div class="top-bar"><button class="btn" onclick="UI.nav('hub')">⬅</button><span>TIME</span><button id="btn-fight" class="btn btn-gold" onclick="Battle.start()">LUTAR</button></div>
+        <div class="top-bar" style="flex-direction: row; justify-content: space-between; align-items: center;">
+            <div class="sub-header">
+                <button class="btn-back" onclick="UI.nav('hub')">❮</button>
+                <span class="screen-title">TIME</span>
+            </div>
+            <button id="btn-fight" class="btn btn-gold" onclick="Battle.start()">LUTAR</button>
+        </div>
         <div class="prep-stage"><div id="s0" class="prep-slot" onclick="Prep.rem(0)"></div><div id="s1" class="prep-slot" onclick="Prep.rem(1)"></div><div id="s2" class="prep-slot" onclick="Prep.rem(2)"></div></div>
         <div class="prep-list"><div id="prep-grid" class="mon-grid"></div></div>
     </div>
@@ -1246,4 +1329,5 @@
 </script>
 </body>
 </html>
+
 
