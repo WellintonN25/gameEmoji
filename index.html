@@ -64,8 +64,6 @@
             background: var(--c-panel); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--c-border); border-radius: 20px; box-shadow: var(--s-shadow);
         }
-        
-        .panel.locked { opacity: 0.6; filter: grayscale(1); pointer-events: none; position: relative; }
 
         .btn {
             border: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;
@@ -590,7 +588,6 @@
         {id:304,nat:3,n:'Fairy',type:'Luz',img:'',visual:'🧚',s:[{n:'Beam',m:1,cd:0,ty:'atk'},{n:'Heal',m:2.5,cd:3,ty:'heal'}],hp:90,atk:15},
         {id:401,nat:4,n:'Valk',type:'Vento',img:'',visual:'🦅',s:[{n:'Cut',m:1,cd:0,ty:'atk'},{n:'Storm',m:1.5,cd:3,ty:'aoe'}],hp:150,atk:25},
         {id:502,nat:5,n:'Dragon',type:'Água',img:'',visual:'🐉',s:[{n:'Bite',m:1.2,cd:0,ty:'atk'},{n:'Tsunami',m:1.8,cd:4,ty:'aoe'}],hp:200,atk:30},
-{id:503,nat:3,n:'Guarda',type:'Fogo',img:'',visual:'👮',s:[{n:'Bite',m:1.2,cd:0,ty:'atk'},{n:'Tiro',m:1.8,cd:4,ty:'aoe'}],hp:150,atk:30},
         
         // BOSSES FIXOS E FORTES (APENAS PARA MASMORRA)
         {id:901,nat:6,n:'Golem Ancestral',type:'Terra',img:'',visual:'🗿',s:[{n:'Esmagar',m:1.5,cd:0,ty:'atk'},{n:'Terremoto',m:2.5,cd:4,ty:'aoe'}],hp:5000,atk:100},
@@ -1084,6 +1081,7 @@
                     const d = el(`${u.side}${u.idx}`);
                     if(d) {
                         d.querySelector('.hp-fill').style.width = `${(u.cur/u.max)*100}%`;
+                        // Remove animations if dead
                         if(u.dead) { 
                             d.classList.add('dead'); 
                             d.querySelector('.hp-bar-w').style.display='none'; 
@@ -1226,10 +1224,12 @@
                     const rMana = (300 + (gainScale * 50)) * (boostActive ? 1.5 : 1);
                     const rXP = (100 + (gainScale * 20)) * (boostActive ? 2 : 1);
                     
+                    // SAVE PROGRESS (CORRIGIDO)
                     const stageKey = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
                     const isFirst = !s.cleared.includes(stageKey);
                     if(isFirst) s.cleared.push(stageKey);
                     
+                    // UNLOCK NEXT STAGE STORY
                     if(tmp.mode === 'story' && tmp.lvl === s.maxStage) {
                         s.maxStage++;
                         UI.toast("Nova Fase Desbloqueada!");
@@ -1256,13 +1256,33 @@
                         const r = {id:runeIdCount++, type:['hp','atk','def'][Math.floor(Math.random()*3)], val:10 + (tmp.lvl * 2), lvl:0, rarity:rType};
                         s.runes_inv.push(r); el('rune-drop-msg').innerText += ` | ${r.type} ${r.rarity}`;
                     }
+                    
                     if(b.farmRuns>1) { b.farmRuns--; el('farm-count').innerText=b.farmRuns; setTimeout(()=>Battle.start(b.farmRuns), 1000); return; }
                 }
                 el('end-title').innerText = w ? "VITÓRIA" : "DERROTA";
                 UI.modal('m-end',1); Game.save(); UI.upd();
             }, 1000);
         },
-        close: () => { UI.modal('m-end',0); UI.nav('hub'); }
+        close: () => { 
+            UI.modal('m-end',0); 
+            if(tmp.mode === 'story') {
+                UI.nav('expl');
+                const rid = Math.ceil(tmp.lvl/8);
+                // Force view to stages
+                el('expl-regions').style.display='none';
+                el('expl-stages-list').style.display='flex';
+                Core.renStageList(rid);
+            } else if (tmp.mode === 'dung') {
+                UI.nav('dung');
+                // Force view to floors
+                // Note: UI.nav('dung') calls renDung() which resets to select. We override immediately.
+                Core.selectDung(tmp.dungType);
+            } else if (tmp.mode === 'tower') {
+                 UI.nav('tower'); // renTower handles list
+            } else {
+                UI.nav('hub');
+            }
+        }
     };
 </script>
 </body>
