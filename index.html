@@ -100,7 +100,7 @@
         .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--c-text-dim); font-size: 0.6rem; font-weight: 700; width: 20%; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: var(--c-primary); }
         .nav-btn .icon { font-size: 1.4rem; transition: 0.2s; }
-        .nav-btn.active { transform: translateY(-5px); color: var(--c-primary); }
+        .nav-btn.active .icon { transform: translateY(-5px); color: var(--c-primary); }
         .nav-btn.summon .icon { font-size: 1.8rem; color: var(--c-gold); filter: drop-shadow(0 4px 4px rgba(245, 158, 11, 0.3)); }
 
         /* ELEMENTOS VISUAIS */
@@ -1157,14 +1157,7 @@
         },
         act: (si) => {
             const u = b.p[b.idx];
-            const sk = u.s[si];
-            if (sk.ty === 'heal') {
-                b.skillPending = { sIdx: si };
-                el('act-msg').innerText = "Selecione um Aliado";
-                document.querySelectorAll('#r-pla .b-unit').forEach(e => { if (!e.classList.contains('dead')) e.classList.add('selectable'); });
-                return;
-            }
-            if (sk.ty === 'heal_aoe') { el('btl-ui').classList.remove('active'); Battle.execSkill(u, u, si); return; }
+            // Resolve Target
             let t = null;
             if(b.target !== null && !b.e[b.target].dead) t = b.e[b.target];
             else t = b.e.find(x=>!x.dead); // Auto pick first if no target selected
