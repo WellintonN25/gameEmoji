@@ -18,6 +18,8 @@
             --c-text: #1f2937; 
             --c-text-dim: #6b7280;
             --c-border: #e5e7eb;
+
+            --s-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --dock-height: 80px;
         }
 
@@ -34,23 +36,40 @@
             display: flex; flex-direction: column; overflow: hidden; 
         }
         
+        /* BACKGROUND */
         #app::before {
             content:''; position:absolute; inset:0; 
             background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05), transparent 60%);
             z-index: 0; pointer-events: none;
         }
 
+        /* TIPOGRAFIA */
         h1, h2, h3 { font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.5px; color: #111827; margin: 0; }
         .text-gold { color: var(--c-gold); }
 
-        .screen { position: absolute; inset: 0; display: none; flex-direction: column; z-index: 10; padding-bottom: calc(var(--dock-height) + env(safe-area-inset-bottom)); opacity: 0; transition: opacity 0.3s; background: var(--c-bg); overflow: hidden; }
+        /* UI GERAL */
+        .screen { 
+            position: absolute; inset: 0; 
+            display: none; flex-direction: column; z-index: 10; 
+            padding-bottom: calc(var(--dock-height) + env(safe-area-inset-bottom)); 
+            opacity: 0; transition: opacity 0.3s; background: var(--c-bg); 
+            overflow: hidden;
+        }
         .screen.active { display: flex; opacity: 1; z-index: 20; }
+        
+        /* Containers de Scroll */
         .scroll-y { overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
 
-        .panel { background: var(--c-panel); backdrop-filter: blur(12px); border: 1px solid var(--c-border); border-radius: 20px; box-shadow: var(--s-shadow); }
-        .panel.locked { opacity: 0.6; filter: grayscale(1); pointer-events: none; }
+        .panel {
+            background: var(--c-panel); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--c-border); border-radius: 20px; box-shadow: var(--s-shadow);
+        }
 
-        .btn { border: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn {
+            border: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; position: relative; overflow: hidden;
+            color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); white-space: nowrap;
+        }
         .btn:active { transform: scale(0.96); }
         .btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
         
@@ -61,32 +80,55 @@
         .btn-white { background: #fff; color: var(--c-text); border: 1px solid #ddd; }
         .btn-icon { width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 1.2rem; background: #fff; color: #333; border: 1px solid #ddd; box-shadow: var(--s-shadow); flex-shrink: 0; }
 
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; padding-top: max(15px, env(safe-area-inset-top)); z-index: 50; background: rgba(255,255,255,0.95); border-bottom: 1px solid var(--c-border); height: 70px; flex-shrink: 0; }
+        /* HEADER & NAV */
+        .top-bar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 20px; padding-top: max(15px, env(safe-area-inset-top));
+            z-index: 50; background: rgba(255,255,255,0.95); 
+            border-bottom: 1px solid var(--c-border); 
+            height: 70px; flex-shrink: 0;
+        }
         .currency-tag { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--c-border); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        .nav-dock { position: absolute; bottom: 0; left: 0; width: 100%; height: calc(var(--dock-height) + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--c-border); display: flex; justify-content: space-around; align-items: flex-start; padding-top: 10px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+        .nav-dock { 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            height: calc(var(--dock-height) + env(safe-area-inset-bottom));
+            background: #fff; border-top: 1px solid var(--c-border); 
+            display: flex; justify-content: space-around; align-items: flex-start; 
+            padding-top: 10px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); 
+        }
         .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--c-text-dim); font-size: 0.6rem; font-weight: 700; width: 20%; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: var(--c-primary); }
         .nav-btn .icon { font-size: 1.4rem; transition: 0.2s; }
         .nav-btn.active .icon { transform: translateY(-5px); color: var(--c-primary); }
         .nav-btn.summon .icon { font-size: 1.8rem; color: var(--c-gold); filter: drop-shadow(0 4px 4px rgba(245, 158, 11, 0.3)); }
 
+        /* ELEMENTOS VISUAIS */
         .hero-slot { width: 60px; height: 60px; position: relative; background: #fff; border-radius: 12px; border: 2px solid #eee; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--s-shadow); flex-shrink: 0; }
         .hero-slot.selected { border-color: var(--c-primary); transform: scale(1.05); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
         .hero-slot .lvl-badge { position: absolute; bottom: 0; right:0; background: #000; color:#fff; font-size:0.6rem; padding:1px 4px; border-top-left-radius:6px; font-weight:bold; }
         .hero-slot.legendary-glow { box-shadow: 0 0 10px var(--c-gold), inset 0 0 5px var(--c-gold); border-color: var(--c-gold); }
-        .hero-slot img, .custom-img, .visual img { width: 100%; height: 100%; object-fit: contain; }
-        
         .stars { display: flex; gap: 1px; justify-content: center; }
         .star { width: 8px; height: 8px; background: var(--c-gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+        .star.p { background: var(--c-accent); }
+        
+        /* SUPORTE PARA IMAGENS CUSTOMIZADAS */
+        .hero-slot img, .custom-img, .visual img { width: 100%; height: 100%; object-fit: contain; }
 
+        /* LOJA CARDS */
         .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; padding: 10px; }
-        .shop-card { background: #fff; border-radius: 16px; padding: 15px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center; transition: 0.2s; position: relative; overflow: hidden; }
+        .shop-card {
+            background: #fff; border-radius: 16px; padding: 15px; border: 1px solid #eee;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center;
+            transition: 0.2s; position: relative; overflow: hidden;
+        }
         .shop-card:active { transform: scale(0.98); border-color: var(--c-primary); }
         .shop-icon { font-size: 2.2rem; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1)); }
         .shop-name { font-weight: 800; font-size: 0.8rem; color: var(--c-text); }
         .shop-price { font-size: 0.75rem; color: #666; background: #f3f4f6; padding: 3px 8px; border-radius: 10px; font-weight: bold; width: 100%; }
 
+        /* MISSION CARDS */
         .mission-row { background: #fff; padding: 12px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .mission-info { display: flex; flex-direction: column; gap: 2px; }
         .mission-desc { font-weight: 700; font-size: 0.9rem; color: #333; }
@@ -95,11 +137,25 @@
         .btn-claim { background: var(--c-success); padding: 5px 12px; border-radius: 15px; font-size: 0.75rem; color: #fff; font-weight: 800; border: none; cursor: pointer; }
         .btn-claim:disabled { background: #ddd; color: #999; cursor: default; }
 
-        .toggle-btn { width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.4); color: #fff; border: 2px solid rgba(255,255,255,0.2); font-weight: 800; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: 0.2s; }
+        /* BATTLE TOGGLES */
+        .toggle-btn {
+            width: 45px; height: 45px; border-radius: 50%;
+            background: rgba(0,0,0,0.4); color: #fff; border: 2px solid rgba(255,255,255,0.2);
+            font-weight: 800; font-size: 0.7rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px); transition: 0.2s;
+        }
         .toggle-btn.active { background: var(--c-success); border-color: #fff; box-shadow: 0 0 15px var(--c-success); transform: scale(1.1); }
         
+        /* RUNE BAG & SLOTS */
         .rune-bag-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; padding: 15px; }
-        .rune-slot-bag { width: 60px; height: 60px; background: #222; border-radius: 8px; position: relative; cursor: pointer; border: 2px solid #444; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px #000; }
+        .rune-slot-bag {
+            width: 60px; height: 60px; background: #222; border-radius: 8px;
+            position: relative; cursor: pointer; border: 2px solid #444;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 10px #000;
+        }
+        .rune-slot-bag.filled { background: #333; }
         .rune-slot-bag.rare { border-color: var(--c-primary); }
         .rune-slot-bag.epic { border-color: var(--c-accent); }
         .rune-slot-bag.legend { border-color: var(--c-gold); box-shadow: 0 0 5px var(--c-gold); }
@@ -112,6 +168,7 @@
         .stat-line { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .new-val { color: var(--c-success); font-weight: 800; }
 
+        /* MONSTER DETAIL STYLES */
         #mon_detail { background: #f9fafb; z-index: 50; padding-bottom: 85px; }
         .mon-detail-header { background: #fff; padding: 30px 20px; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); position: relative; overflow: hidden; flex-shrink: 0; }
         .big-model { font-size: 6rem; position: relative; z-index: 2; margin-bottom: 10px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15)); animation: float 3s infinite ease-in-out; }
@@ -124,6 +181,7 @@
         .tab-btn.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
         .detail-content { flex: 1; overflow-y: auto; padding: 0 20px 20px 20px; display: none; }
         .detail-content.active { display: block; animation: slideUp 0.3s; }
+        @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
         .stat-box { background: #fff; padding: 15px; border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 5px; }
         .stat-val-group { display: flex; align-items: baseline; gap: 5px; }
@@ -140,8 +198,31 @@
         .filter-btn { padding: 10px; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; font-weight: 700; color: #666; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .filter-btn.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
 
+        /* --- MONSTRODEX STYLES --- */
+        #dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px; padding: 15px; align-content: flex-start; }
+        .dex-slot { 
+            width: 65px; height: 65px; position: relative; background: #fff; 
+            border-radius: 12px; border: 2px solid #eee; overflow: hidden; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .dex-slot.unknown { filter: grayscale(1); opacity: 0.6; }
+        .dex-slot.unknown::after { 
+            content:'?'; position:absolute; inset:0; display:flex; 
+            align-items:center; justify-content:center; 
+            font-size:2rem; color:rgba(0,0,0,0.3); font-weight:900; 
+        }
+
+        /* --- BATTLE (REALISTIC ARENA) --- */
         #battle { background: radial-gradient(circle at 50% 20%, #0f172a 0%, #000 100%); overflow: hidden; padding-bottom: 0; }
-        .arena-floor { position: absolute; bottom: -10%; left: -50%; right: -50%; height: 75%; background: radial-gradient(ellipse at center, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 60%, #000 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 50px), repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 50px); transform: perspective(600px) rotateX(60deg); box-shadow: 0 -50px 100px #000 inset; border-top: 2px solid rgba(255,255,255,0.1); z-index: 0; }
+        .arena-floor { 
+            position: absolute; bottom: -10%; left: -50%; right: -50%; height: 75%;
+            background: 
+                radial-gradient(ellipse at center, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 60%, #000 100%),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 50px),
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 50px);
+            transform: perspective(600px) rotateX(60deg); box-shadow: 0 -50px 100px #000 inset; border-top: 2px solid rgba(255,255,255,0.1); z-index: 0;
+        }
         .clouds { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.4; }
         .battle-scene { flex: 1; position: relative; z-index: 5; display: flex; flex-direction: column; justify-content: center; perspective: 800px; padding-bottom: 160px; gap: 40px; }
         .team-row { display: flex; justify-content: center; gap: 10px; min-height: 100px; position: relative; z-index: 5; align-items: flex-end; }
@@ -193,16 +274,23 @@
         .dk-badge { position: absolute; bottom: -10px; font-size: 0.6rem; background: #000; padding: 2px 6px; border-radius: 4px; border: 1px solid #444; }
         .dmg-popup { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); font-family: 'Titan One', cursive; font-size: 2.5rem; color: #fbbf24; text-shadow: 2px 2px 0 #000; z-index: 100; pointer-events: none; animation: popUp 0.8s forwards; white-space: nowrap; -webkit-text-stroke: 1px #000; }
         @keyframes popUp { 0%{opacity:0; transform:translate(-50%,0)} 20%{opacity:1; transform:translate(-50%,-50px) scale(1.5)} 100%{opacity:0; transform:translate(-50%,-80px)} }
+
+        /* FLUSH LEGENDARY */
         .flash-legendary { position: fixed; inset: 0; background: #fff; z-index: 400; animation: flashGold 0.8s ease-out forwards; pointer-events: none; opacity: 0; display: none; }
         .flash-legendary.active { display: block; }
         @keyframes flashGold { 0%{opacity:0; background:#fff} 10%{opacity:1; background:#fff} 30%{background:#fbbf24} 100%{opacity:0} }
 
+        /* GRIDS */
         #inv-grid, #prep-grid, #rune-bag-grid, #evo-grid, #skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px; padding: 15px; align-content: flex-start; }
         #shop-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; padding: 10px; }
+
+        /* MODALS */
         .modal { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal.open { display: flex; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         .modal-content { width: 90%; max-width: 350px; background: #fff; border-radius: 20px; padding: 25px; text-align: center; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Prep Buttons Centered */
         .prep-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
 
     </style>
@@ -211,37 +299,329 @@
 
 <div id="app">
     <div id="flash-fx" class="flash-legendary"></div>
-    <div id="login" class="screen active" style="align-items:center; justify-content:center"><div class="modal-content"><h1 class="text-gold" style="font-size:2rem; margin-bottom:5px">GUARDIÕES</h1><h3 style="color:var(--c-primary); font-size:0.9rem; margin-bottom:30px; letter-spacing:3px">LEGENDS</h3><input type="text" id="inp-user" style="width:100%; padding:12px; border:2px solid #eee; border-radius:10px; text-align:center; outline:none" placeholder="Nome do Jogador" maxlength="12"><button class="btn btn-primary" style="width:100%; margin-top:20px" onclick="Game.login()">JOGAR</button></div></div>
-    <div id="hub" class="screen">
-        <div class="top-bar"><div style="display:flex; gap:10px; align-items:center"><div style="width:40px;height:40px;background:#eee;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🧙‍♂️</div><div><div style="font-weight:800; font-size:0.9rem" id="p-name">Player</div><div style="font-size:0.7rem; color:#666">Lv. <span id="p-lvl">1</span></div></div></div><div style="text-align:right"><div class="currency-tag" style="color:var(--c-primary)">💠 <span id="h-mana">0</span></div><div class="currency-tag" style="margin-top:4px; color:var(--c-gold)">💎 <span id="h-gems">0</span></div></div></div>
-        <div class="scroll-y" style="padding:20px; display:flex; flex-direction:column; gap:15px"><button class="btn btn-gold" onclick="UI.modal('m-missions',1)" style="width:100%">📜 Missões Diárias</button><div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-primary)" onclick="UI.nav('expl')"><div style="font-size:2rem">🗺️</div><div><h3>Aventura</h3><small style="color:#666">História</small></div></div><div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-danger)" onclick="UI.nav('dung')"><div style="font-size:2rem">🏰</div><div><h3>Masmorra</h3><small style="color:#666">Runas</small></div></div><div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid #8b5cf6" onclick="UI.nav('tower')"><div style="font-size:2rem">🗼</div><div><h3>Torre</h3><small style="color:#666">Ascensão</small></div></div><div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-accent)" onclick="Core.openRuneBag()"><div style="font-size:2rem">🎒</div><div><h3>Inventário</h3><small style="color:#666">Gerir</small></div></div><div class="panel" style="padding:15px; text-align:center; font-size:0.8rem; color:#666" id="boost-status">Booster Inativo</div></div>
-        <div class="nav-dock"><div class="nav-btn active" onclick="UI.nav('hub')"><div class="icon">🏠</div>Início</div><div class="nav-btn" onclick="Core.openInv()"><div class="icon">🐺</div>Box</div><div class="nav-btn summon" onclick="UI.modal('m-gacha',1)"><div class="icon">✨</div></div><div class="nav-btn" onclick="UI.modal('m-shop',1)"><div class="icon">🛒</div>Loja</div><div class="nav-btn" onclick="Game.logout()"><div class="icon">🚪</div>Sair</div></div>
+    
+    <!-- LOGIN -->
+    <div id="login" class="screen active" style="align-items:center; justify-content:center">
+        <div class="modal-content">
+            <h1 class="text-gold" style="font-size:2rem; margin-bottom:5px">GUARDIÕES</h1>
+            <h3 style="color:var(--c-primary); font-size:0.9rem; margin-bottom:30px; letter-spacing:3px">LEGENDS</h3>
+            <input type="text" id="inp-user" style="width:100%; padding:12px; border:2px solid #eee; border-radius:10px; text-align:center; outline:none" placeholder="Nome do Jogador" maxlength="12">
+            <button class="btn btn-primary" style="width:100%; margin-top:20px" onclick="Game.login()">JOGAR</button>
+        </div>
     </div>
-    <div id="expl" class="screen"><div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Mundos</h3><div style="width:30px"></div></div><div class="scroll-y"><div id="expl-regions" style="padding:20px; display:flex; flex-direction:column; gap:10px"></div><div id="expl-stages-list" style="padding:20px; display:none; flex-direction:column; gap:10px"><button class="btn btn-white" onclick="Core.backToExplRegions()">Voltar</button><div id="expl-list-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px"></div></div></div></div>
-    <div id="dung" class="screen"><div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Masmorras</h3><div style="width:30px"></div></div><div class="scroll-y" style="padding:20px"><div id="dung-select"><div class="panel" style="padding:20px; margin-bottom:10px; display:flex; align-items:center; gap:15px; border-left:4px solid #84cc16" onclick="Core.selectDung('golem')"><div style="font-size:2rem">🗿</div><div><h3>Gigante</h3><small>Vida/Defesa</small></div></div><div class="panel" style="padding:20px; display:flex; align-items:center; gap:15px; border-left:4px solid #ef4444" onclick="Core.selectDung('dragon')"><div style="font-size:2rem">🐉</div><div><h3>Dragão</h3><small>Atk/Crit</small></div></div></div><div id="dung-floors" style="display:none; flex-direction:column; gap:10px"><button class="btn btn-white" onclick="Core.backToDungSelect()">Voltar</button><div id="dung-list-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px"></div></div></div></div>
-    <div id="tower" class="screen"><div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Torre</h3><div style="width:30px"></div></div><div class="scroll-y" style="padding:20px"><div id="tower-list-container" style="display:flex; flex-direction:column; gap:10px"></div></div></div>
-    <div id="inv" class="screen"><div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Monstros</h3><button class="btn-white" style="font-size:0.8rem; padding:5px 10px; border-radius:15px" onclick="UI.modal('m-filter',1)">🌪️ Filtro</button></div><div id="inv-grid" class="scroll-y"></div></div>
-    <div id="mon_detail" class="screen"><div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="Core.backToInv()">❮</button><h3>Detalhes</h3><div style="width:30px"></div></div><div class="scroll-y" style="padding:0 20px 100px 20px"><div class="mon-detail-header"><div id="md-vis" class="big-model">🐲</div><h2 id="md-name" style="margin-bottom:5px">Dragon</h2><div id="md-stars" class="stars" style="position:relative; margin-bottom:5px; width:auto; justify-content:center"></div><div class="mon-info-badge" id="md-badge">Nv. <span id="md-lvl">1</span></div></div><div class="tab-bar"><div id="tab-stat" class="tab-btn active" onclick="UI.tab('stat')">Status</div><div id="tab-rune" class="tab-btn" onclick="UI.tab('rune')">Runas</div><div id="tab-skill" class="tab-btn" onclick="UI.tab('skill')">Skills</div></div><div id="cont-stat" class="detail-content active"><div class="stat-grid"><div class="stat-box"><span class="stat-label">HP</span><div class="stat-val-group"><span id="st-hp" class="stat-value">1000</span> <span id="bn-hp" class="stat-bonus">(+0)</span></div></div><div class="stat-box"><span class="stat-label">ATK</span><div class="stat-val-group"><span id="st-atk" class="stat-value">100</span> <span id="bn-atk" class="stat-bonus">(+0)</span></div></div><div class="stat-box"><span class="stat-label">DEF</span><div class="stat-val-group"><span id="st-def" class="stat-value">50</span> <span id="bn-def" class="stat-bonus">(+0)</span></div></div><div class="stat-box"><span class="stat-label">CRIT</span><div class="stat-val-group"><span id="st-crit" class="stat-value">15</span>%</div></div></div></div><div id="cont-rune" class="detail-content"><div class="rune-layout-fancy"><div id="rs-0" onclick="Core.openRuneSelect(0)" class="rune-slot-fancy"></div><div id="rs-1" onclick="Core.openRuneSelect(1)" class="rune-slot-fancy"></div><div id="rs-2" onclick="Core.openRuneSelect(2)" class="rune-slot-fancy"></div><div id="rs-3" onclick="Core.openRuneSelect(3)" class="rune-slot-fancy"></div></div><p style="text-align:center; font-size:0.75rem; color:#9ca3af; margin-top:20px">Toque no slot para gerenciar</p></div><div id="cont-skill" class="detail-content"><div id="skill-desc-list" class="skill-list-container"></div></div></div><div class="action-dock"><button class="btn btn-primary" style="flex:1" onclick="Core.pup()">Level Up</button><button class="btn btn-purple" style="flex:1" onclick="Core.openEvo()">Evoluir</button><button class="btn btn-gold" style="flex:1" onclick="Core.openSkill()">Skill</button></div></div>
-    <div id="prep" class="screen"><div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Seleção</h3><div style="width:30px"></div></div><div style="padding:20px; display:flex; justify-content:center; gap:10px; background:#fff"><div id="s0" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(0)"></div><div id="s1" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(1)"></div><div id="s2" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(2)"></div></div><div class="prep-actions"><button id="btn-fight" class="btn btn-primary" onclick="Battle.start(0)" style="width:200px; height:50px; font-size:1rem; box-shadow:0 5px 15px rgba(59,130,246,0.4)">⚔️ LUTAR</button><div id="btn-farm" style="display:none; width:100%; text-align:center"><button class="btn btn-gold" onclick="Battle.start(5)" style="width:200px; height:40px; font-size:0.8rem">⚡ AUTO x5</button></div></div><div id="prep-grid" class="scroll-y"></div></div>
-    <div id="rune_bag" class="screen"><div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Runas</h3><div style="width:30px"></div></div><div id="rune-bag-grid" class="rune-bag-container scroll-y"></div></div>
-    <div id="battle" class="screen"><div class="arena-floor"></div><div class="clouds"></div><div style="position:absolute; top:20px; right:20px; z-index:50; display:flex; gap:10px"><button id="btn-spd" class="toggle-btn" onclick="Battle.spd()">x1</button><button id="btn-auto" class="toggle-btn" onclick="Battle.toggleAuto()">A</button></div><div id="farm-ui" style="position:absolute; top:20px; left:20px; color:#fff; font-weight:bold; text-shadow:0 1px 2px #000; display:none; z-index:50">Auto: <span id="farm-count">0</span></div><div class="battle-scene" id="stg"><div class="team-row enemy" id="r-ene"></div><div class="team-row player" id="r-pla"></div></div><div id="btl-ui" class="battle-hud"><div style="position:absolute; top:-40px; color:#fff; text-shadow:0 1px 3px #000; font-weight:800" id="act-msg"></div><div id="skill-list" style="display:flex; gap:15px"></div></div></div>
+
+    <!-- HUB -->
+    <div id="hub" class="screen">
+        <div class="top-bar">
+            <div style="display:flex; gap:10px; align-items:center">
+                <div style="width:40px;height:40px;background:#eee;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🧙‍♂️</div>
+                <div>
+                    <div style="font-weight:800; font-size:0.9rem" id="p-name">Player</div>
+                    <div style="font-size:0.7rem; color:#666">Lv. <span id="p-lvl">1</span></div>
+                </div>
+            </div>
+            <div style="text-align:right">
+                <div class="currency-tag" style="color:var(--c-primary)">💠 <span id="h-mana">0</span></div>
+                <div class="currency-tag" style="margin-top:4px; color:var(--c-gold)">💎 <span id="h-gems">0</span></div>
+            </div>
+        </div>
+
+        <div class="scroll-y" style="padding:20px; display:flex; flex-direction:column; gap:15px">
+            <div style="display:flex; gap:10px">
+                 <button class="btn btn-gold" onclick="UI.modal('m-missions',1)" style="flex:1">📜 Missões</button>
+                 <button class="btn btn-purple" onclick="Core.openDex()" style="flex:1">📖 Monstrodex</button>
+            </div>
+            <div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-primary)" onclick="UI.nav('expl')">
+                <div style="font-size:2rem">🗺️</div><div><h3>Aventura</h3><small style="color:#666">História</small></div>
+            </div>
+            <div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-danger)" onclick="UI.nav('dung')">
+                <div style="font-size:2rem">🏰</div><div><h3>Masmorra</h3><small style="color:#666">Runas</small></div>
+            </div>
+            <div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid #8b5cf6" onclick="UI.nav('tower')">
+                <div style="font-size:2rem">🗼</div><div><h3>Torre</h3><small style="color:#666">Ascensão</small></div>
+            </div>
+            <div class="panel" style="padding:20px; display:flex; align-items:center; gap:20px; cursor:pointer; border-left:5px solid var(--c-accent)" onclick="Core.openRuneBag()">
+                <div style="font-size:2rem">🎒</div><div><h3>Inventário</h3><small style="color:#666">Gerir</small></div>
+            </div>
+            <div class="panel" style="padding:15px; text-align:center; font-size:0.8rem; color:#666" id="boost-status">Booster Inativo</div>
+        </div>
+
+        <div class="nav-dock">
+            <div class="nav-btn active" onclick="UI.nav('hub')"><div class="icon">🏠</div>Início</div>
+            <div class="nav-btn" onclick="Core.openInv()"><div class="icon">🐺</div>Box</div>
+            <div class="nav-btn summon" onclick="UI.modal('m-gacha',1)"><div class="icon">✨</div></div>
+            <div class="nav-btn" onclick="UI.modal('m-shop',1)"><div class="icon">🛒</div>Loja</div>
+            <div class="nav-btn" onclick="Game.logout()"><div class="icon">🚪</div>Sair</div>
+        </div>
+    </div>
+
+    <!-- SCREENS -->
+    <div id="dex" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Monstrodex</h3><div style="width:30px"></div></div>
+        <div id="dex-grid" class="scroll-y"></div>
+    </div>
+
+    <div id="expl" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Mundos</h3><div style="width:30px"></div></div>
+        <div class="scroll-y">
+            <div id="expl-regions" style="padding:20px; display:flex; flex-direction:column; gap:10px"></div>
+            <div id="expl-stages-list" style="padding:20px; display:none; flex-direction:column; gap:10px">
+                <button class="btn btn-white" onclick="Core.backToExplRegions()">Voltar</button>
+                <div id="expl-list-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dung" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Masmorras</h3><div style="width:30px"></div></div>
+        <div class="scroll-y" style="padding:20px">
+            <div id="dung-select">
+                <div class="panel" style="padding:20px; margin-bottom:10px; display:flex; align-items:center; gap:15px; border-left:4px solid #84cc16" onclick="Core.selectDung('golem')"><div style="font-size:2rem">🗿</div><div><h3>Gigante</h3><small>Vida/Defesa</small></div></div>
+                <div class="panel" style="padding:20px; display:flex; align-items:center; gap:15px; border-left:4px solid #ef4444" onclick="Core.selectDung('dragon')"><div style="font-size:2rem">🐉</div><div><h3>Dragão</h3><small>Atk/Crit</small></div></div>
+            </div>
+            <div id="dung-floors" style="display:none; flex-direction:column; gap:10px">
+                <button class="btn btn-white" onclick="Core.backToDungSelect()">Voltar</button>
+                <div id="dung-list-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tower" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Torre</h3><div style="width:30px"></div></div>
+        <div class="scroll-y" style="padding:20px">
+             <div id="tower-list-container" style="display:flex; flex-direction:column; gap:10px"></div>
+        </div>
+    </div>
+
+    <div id="inv" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Monstros</h3><button class="btn-white" style="font-size:0.8rem; padding:5px 10px; border-radius:15px" onclick="UI.modal('m-filter',1)">🌪️ Filtro</button></div>
+        <div id="inv-grid" class="scroll-y"></div>
+    </div>
+
+    <div id="mon_detail" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="Core.backToInv()">❮</button><h3>Detalhes</h3><div style="width:30px"></div></div>
+        <div class="scroll-y" style="padding:0 20px 100px 20px">
+            <div class="mon-detail-header">
+                <div id="md-vis" class="big-model">🐲</div>
+                <h2 id="md-name" style="margin-bottom:5px">Dragon</h2>
+                <div id="md-stars" class="stars" style="position:relative; margin-bottom:5px; width:auto; justify-content:center"></div>
+                <div class="mon-info-badge" id="md-badge">Nv. <span id="md-lvl">1</span></div>
+            </div>
+            <div class="tab-bar">
+                <div id="tab-stat" class="tab-btn active" onclick="UI.tab('stat')">Status</div>
+                <div id="tab-rune" class="tab-btn" onclick="UI.tab('rune')">Runas</div>
+                <div id="tab-skill" class="tab-btn" onclick="UI.tab('skill')">Skills</div>
+            </div>
+            <div id="cont-stat" class="detail-content active">
+                <div class="stat-grid">
+                    <div class="stat-box"><span class="stat-label">HP</span><div class="stat-val-group"><span id="st-hp" class="stat-value">1000</span> <span id="bn-hp" class="stat-bonus">(+0)</span></div></div>
+                    <div class="stat-box"><span class="stat-label">ATK</span><div class="stat-val-group"><span id="st-atk" class="stat-value">100</span> <span id="bn-atk" class="stat-bonus">(+0)</span></div></div>
+                    <div class="stat-box"><span class="stat-label">DEF</span><div class="stat-val-group"><span id="st-def" class="stat-value">50</span> <span id="bn-def" class="stat-bonus">(+0)</span></div></div>
+                    <div class="stat-box"><span class="stat-label">CRIT</span><div class="stat-val-group"><span id="st-crit" class="stat-value">15</span>%</div></div>
+                </div>
+            </div>
+            <div id="cont-rune" class="detail-content">
+                <div class="rune-layout-fancy">
+                    <div id="rs-0" onclick="Core.openRuneSelect(0)" class="rune-slot-fancy"></div>
+                    <div id="rs-1" onclick="Core.openRuneSelect(1)" class="rune-slot-fancy"></div>
+                    <div id="rs-2" onclick="Core.openRuneSelect(2)" class="rune-slot-fancy"></div>
+                    <div id="rs-3" onclick="Core.openRuneSelect(3)" class="rune-slot-fancy"></div>
+                </div>
+                <p style="text-align:center; font-size:0.75rem; color:#9ca3af; margin-top:20px">Toque no slot para gerenciar</p>
+            </div>
+            <div id="cont-skill" class="detail-content">
+                <div id="skill-desc-list" class="skill-list-container"></div>
+            </div>
+        </div>
+        <div class="action-dock">
+            <button class="btn btn-primary" style="flex:1" onclick="Core.pup()">Level Up</button>
+            <button class="btn btn-purple" style="flex:1" onclick="Core.openEvo()">Evoluir</button>
+            <button class="btn btn-gold" style="flex:1" onclick="Core.openSkill()">Skill</button>
+        </div>
+    </div>
+
+    <div id="prep" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Seleção</h3><div style="width:30px"></div></div>
+        <div style="padding:20px; display:flex; justify-content:center; gap:10px; background:#fff">
+            <div id="s0" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(0)"></div>
+            <div id="s1" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(1)"></div>
+            <div id="s2" class="hero-slot" style="width:70px; height:70px" onclick="Prep.rem(2)"></div>
+        </div>
+        
+        <!-- BOTOES CENTRALIZADOS -->
+        <div class="prep-actions">
+            <button id="btn-fight" class="btn btn-primary" onclick="Battle.start(0)" style="width:200px; height:50px; font-size:1rem; box-shadow:0 5px 15px rgba(59,130,246,0.4)">⚔️ LUTAR</button>
+            <div id="btn-farm" style="display:none; width:100%; text-align:center">
+                <button class="btn btn-gold" onclick="Battle.start(5)" style="width:200px; height:40px; font-size:0.8rem">⚡ AUTO x5</button>
+            </div>
+        </div>
+
+        <div id="prep-grid" class="scroll-y"></div>
+    </div>
+
+    <div id="rune_bag" class="screen">
+        <div class="top-bar"><button class="btn-icon" style="border:none;background:none;font-size:1.5rem" onclick="UI.nav('hub')">❮</button><h3>Runas</h3><div style="width:30px"></div></div>
+        <div id="rune-bag-grid" class="rune-bag-container scroll-y"></div>
+    </div>
+
+    <!-- BATTLE -->
+    <div id="battle" class="screen">
+        <div class="arena-floor"></div>
+        <div class="clouds"></div>
+        
+        <div style="position:absolute; top:20px; right:20px; z-index:50; display:flex; gap:10px">
+            <button id="btn-spd" class="toggle-btn" onclick="Battle.spd()">x1</button>
+            <button id="btn-auto" class="toggle-btn" onclick="Battle.toggleAuto()">A</button>
+        </div>
+        <div id="farm-ui" style="position:absolute; top:20px; left:20px; color:#fff; font-weight:bold; text-shadow:0 1px 2px #000; display:none; z-index:50">Auto: <span id="farm-count">0</span></div>
+
+        <div class="battle-scene" id="stg">
+            <div class="team-row enemy" id="r-ene"></div>
+            <div class="team-row player" id="r-pla"></div>
+        </div>
+
+        <div id="btl-ui" class="battle-hud">
+            <div style="position:absolute; top:-40px; color:#fff; text-shadow:0 1px 3px #000; font-weight:800" id="act-msg"></div>
+            <div id="skill-list" style="display:flex; gap:15px"></div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="m-dex-detail" class="modal">
+        <div class="modal-content">
+            <div class="mon-detail-header">
+                <div id="dxd-vis" class="big-model"></div>
+                <h2 id="dxd-name" style="margin-bottom:5px"></h2>
+                <div id="dxd-stars" class="stars" style="position:relative; margin-bottom:5px; width:auto; justify-content:center"></div>
+                <div class="mon-info-badge" id="dxd-badge"></div>
+            </div>
+            <div class="stat-grid" style="padding:10px">
+                <div class="stat-box"><span class="stat-label">HP</span><div class="stat-val-group"><span id="dxd-hp" class="stat-value"></span></div></div>
+                <div class="stat-box"><span class="stat-label">ATK</span><div class="stat-val-group"><span id="dxd-atk" class="stat-value"></span></div></div>
+            </div>
+            <h3 style="text-align:left; padding:0 10px; margin-top:10px">Habilidades</h3>
+            <div id="dxd-skills" class="skill-list-container" style="padding:10px"></div>
+            <button class="btn btn-white" style="margin-top:10px" onclick="UI.modal('m-dex-detail',0)">Fechar</button>
+        </div>
+    </div>
 
     <div id="m-confirm" class="modal"><div class="modal-content"><h3>Confirmar</h3><p id="confirm-msg"></p><div style="display:flex;gap:10px"><button class="btn btn-white" style="flex:1" onclick="UI.modal('m-confirm',0)">Não</button><button class="btn btn-primary" style="flex:1" onclick="Core.execConfirm()">Sim</button></div></div></div>
-    <div id="m-missions" class="modal"><div class="modal-content" style="max-width:400px"><h3>Missões Diárias</h3><div id="mission-list" style="flex:1; overflow-y:auto; width:100%; text-align:left;"></div><button class="btn btn-white" onclick="UI.modal('m-missions',0)">Fechar</button></div></div>
-    <div id="m-filter" class="modal"><div class="modal-content"><h3>Filtrar Elemento</h3><div class="filter-grid"><div class="filter-btn active" onclick="Core.setInvFilter('all', this)">Todos</div><div class="filter-btn" onclick="Core.setInvFilter('Fogo', this)">🔥 Fogo</div><div class="filter-btn" onclick="Core.setInvFilter('Água', this)">💧 Água</div><div class="filter-btn" onclick="Core.setInvFilter('Vento', this)">🍃 Vento</div><div class="filter-btn" onclick="Core.setInvFilter('Terra', this)">⛰️ Terra</div><div class="filter-btn" onclick="Core.setInvFilter('Luz', this)">☀️ Luz</div><div class="filter-btn" onclick="Core.setInvFilter('Trevas', this)">🌙 Trevas</div></div><button class="btn btn-white" style="margin-top:10px" onclick="UI.modal('m-filter',0)">Fechar</button></div></div>
-    <div id="m-shop" class="modal"><div class="modal-content" style="width:95%; max-width:400px"><h3>Mercado</h3><div id="shop-container" class="shop-grid"></div><button class="btn btn-white" onclick="UI.modal('m-shop',0)">Sair</button></div></div>
-    <div id="m-gacha" class="modal"><div class="modal-content" style="background:#1a1a2e; color:#fff; border:2px solid #4c1d95"><div id="portal-visual"><div style="font-size:3rem; z-index:2">🌀</div></div><h3 style="color:#a78bfa">Portal Astral</h3><div style="display:grid; grid-template-columns:1fr; gap:10px; width:100%"><button class="btn btn-primary" onclick="Core.spin('common',1)">Comum x1 (1🎫)</button><button class="btn btn-gold" onclick="Core.spin('rare',1)">Raro x1 (1🎟️)</button><button id="btn-g-10" class="btn btn-gold" onclick="Core.spin('rare',10)" style="display:none">Raro x10 (10🎟️)</button></div><div style="margin-top:10px; font-size:0.8rem; color:#888">🎫 <span id="g-tix">0</span> | 🎟️ <span id="g-rare">0</span></div><button class="btn btn-white" style="background:rgba(255,255,255,0.1); color:#fff; border:none; margin-top:10px" onclick="UI.modal('m-gacha',0)">Sair</button></div></div>
+    
+    <!-- MISSIONS MODAL -->
+    <div id="m-missions" class="modal">
+        <div class="modal-content" style="max-width:400px">
+            <h3>Missões Diárias</h3>
+            <div id="mission-list" style="flex:1; overflow-y:auto; width:100%; text-align:left;"></div>
+            <button class="btn btn-white" onclick="UI.modal('m-missions',0)">Fechar</button>
+        </div>
+    </div>
+
+    <!-- FILTER MODAL -->
+    <div id="m-filter" class="modal">
+        <div class="modal-content">
+            <h3>Filtrar Elemento</h3>
+            <div class="filter-grid">
+                <div class="filter-btn active" onclick="Core.setInvFilter('all', this)">Todos</div>
+                <div class="filter-btn" onclick="Core.setInvFilter('Fogo', this)">🔥 Fogo</div>
+                <div class="filter-btn" onclick="Core.setInvFilter('Água', this)">💧 Água</div>
+                <div class="filter-btn" onclick="Core.setInvFilter('Vento', this)">🍃 Vento</div>
+                <div class="filter-btn" onclick="Core.setInvFilter('Terra', this)">⛰️ Terra</div>
+                <div class="filter-btn" onclick="Core.setInvFilter('Luz', this)">☀️ Luz</div>
+                <div class="filter-btn" onclick="Core.setInvFilter('Trevas', this)">🌙 Trevas</div>
+            </div>
+            <button class="btn btn-white" style="margin-top:10px" onclick="UI.modal('m-filter',0)">Fechar</button>
+        </div>
+    </div>
+
+    <!-- LOJA -->
+    <div id="m-shop" class="modal"><div class="modal-content" style="width:95%; max-width:400px">
+        <h3>Mercado</h3>
+        <div id="shop-container" class="shop-grid"></div>
+        <button class="btn btn-white" onclick="UI.modal('m-shop',0)">Sair</button>
+    </div></div>
+    
+    <!-- GACHA -->
+    <div id="m-gacha" class="modal"><div class="modal-content" style="background:#1a1a2e; color:#fff; border:2px solid #4c1d95">
+        <div id="portal-visual"><div style="font-size:3rem; z-index:2">🌀</div></div>
+        <h3 style="color:#a78bfa">Portal Astral</h3>
+        <div style="display:grid; grid-template-columns:1fr; gap:10px; width:100%">
+            <button class="btn btn-primary" onclick="Core.spin('common',1)">Comum x1 (1🎫)</button>
+            <button class="btn btn-gold" onclick="Core.spin('rare',1)">Raro x1 (1🎟️)</button>
+            <button id="btn-g-10" class="btn btn-gold" onclick="Core.spin('rare',10)" style="display:none">Raro x10 (10🎟️)</button>
+        </div>
+        <div style="margin-top:10px; font-size:0.8rem; color:#888">🎫 <span id="g-tix">0</span> | 🎟️ <span id="g-rare">0</span></div>
+        <button class="btn btn-white" style="background:rgba(255,255,255,0.1); color:#fff; border:none; margin-top:10px" onclick="UI.modal('m-gacha',0)">Sair</button>
+    </div></div>
     <div id="m-gacha-results" class="modal"><div class="modal-content"><h3>Invocado!</h3><div id="gacha-result-grid" style="display:flex; justify-content:center; flex-wrap:wrap; gap:10px; padding:10px"></div><button class="btn btn-primary" onclick="UI.modal('m-gacha-results',0)">Confirmar</button></div></div>
+
     <div id="m-end" class="modal"><div class="modal-content"><h1 id="end-title">FIM</h1><div style="display:flex; justify-content:space-around; font-size:1.2rem; font-weight:bold"><div>💠 <span id="end-mana">0</span></div><div>💎 <span id="end-gems">0</span></div></div><div id="rune-drop-msg" style="color:var(--c-accent)"></div><button class="btn btn-primary" onclick="Battle.close()">Continuar</button></div></div>
+
+    <!-- RUNE SELECT -->
     <div id="m-rune" class="modal"><div class="modal-content" style="height:70vh"><h3>Runas</h3><div id="rune-list" class="scroll-y" style="display:flex; flex-direction:column; gap:10px"></div><button class="btn btn-white" onclick="UI.modal('m-rune',0)">Fechar</button></div></div>
-    <div id="m-rune-up" class="modal"><div class="modal-content" style="max-width:350px"><h3>Melhorar Runa</h3><div class="rune-up-view"><div class="rune-preview-large" id="up-rune-visual"></div><div style="text-align:center"><div id="up-rune-type" style="font-weight:800; color:var(--c-primary); text-transform:uppercase"></div><div id="up-rune-lvl" style="font-size:0.8rem; background:#333; color:#fff; border-radius:10px; padding:2px 8px; display:inline-block; margin-top:5px"></div></div></div><div class="stats-comparison" id="up-stats-comp"></div><div style="margin:5px 0; font-size:0.9rem">Chance: <span id="up-chance" style="font-weight:bold"></span></div><div style="display:flex; gap:10px; width:100%"><button class="btn btn-white" style="flex:1" onclick="UI.modal('m-rune-up',0)">Voltar</button><button id="btn-do-up" class="btn btn-gold" style="flex:1" onclick="Core.doUpgrade()">Upar (<span id="up-cost">0</span>)</button></div></div></div>
+    
+    <!-- RUNE POWER-UP -->
+    <div id="m-rune-up" class="modal">
+        <div class="modal-content" style="max-width:350px">
+            <h3>Melhorar Runa</h3>
+            <div class="rune-up-view">
+                <div class="rune-preview-large" id="up-rune-visual"></div>
+                <div style="text-align:center">
+                    <div id="up-rune-type" style="font-weight:800; color:var(--c-primary); text-transform:uppercase"></div>
+                    <div id="up-rune-lvl" style="font-size:0.8rem; background:#333; color:#fff; border-radius:10px; padding:2px 8px; display:inline-block; margin-top:5px"></div>
+                </div>
+            </div>
+            <div class="stats-comparison" id="up-stats-comp"></div>
+            <div style="margin:5px 0; font-size:0.9rem">Chance: <span id="up-chance" style="font-weight:bold"></span></div>
+            <div style="display:flex; gap:10px; width:100%">
+                <button class="btn btn-white" style="flex:1" onclick="UI.modal('m-rune-up',0)">Voltar</button>
+                <button id="btn-do-up" class="btn btn-gold" style="flex:1" onclick="Core.doUpgrade()">Upar (<span id="up-cost">0</span>)</button>
+            </div>
+        </div>
+    </div>
+
     <div id="m-evo" class="modal"><div class="modal-content"><h3>Evolução</h3><p>Use <span id="evo-req-c">0</span> monstros <span id="evo-req-s">0</span>★</p><div id="evo-slots" style="display:flex; justify-content:center; gap:5px"></div><div id="evo-grid" class="scroll-y" style="height:200px; border:1px solid #eee; border-radius:10px"></div><button id="btn-do-evo" class="btn btn-purple" onclick="Core.doEvolution()" disabled>Evoluir</button><button class="btn btn-white" onclick="UI.modal('m-evo',0)">Fechar</button></div></div>
+    
     <div id="m-skill" class="modal"><div class="modal-content"><h3>Skill Up</h3><button class="btn btn-gold" onclick="Core.useGrimoire()">Usar Grimório (<span id="sk-grim">0</span>)</button><p>Ou Sacrifique Cópia:</p><div id="skill-slots" style="display:flex; justify-content:center"></div><div id="skill-grid" class="scroll-y" style="height:150px; border:1px solid #eee; border-radius:10px"></div><button id="btn-do-skill" class="btn btn-primary" onclick="Core.doSkill()" disabled>Sacrificar</button><button class="btn btn-white" onclick="UI.modal('m-skill',0)">Fechar</button></div></div>
 
 </div>
 
 <script>
-    const formatNum = (num) => { if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'; if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k'; return num; };
+    /* ================================================================
+    >>> FORMATADOR DE NÚMEROS (NOVO) <<<
+    Esta função converte números grandes para formato "k" ou "M".
+    Ex: 1500 -> 1.5k, 1000000 -> 1M
+    ================================================================
+    */
+    const formatNum = (num) => {
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        return num;
+    };
+
+    /*
+    ================================================================================
+    >>> GUIA PARA ADICIONAR UM NOVO PERSONAGEM MANUALMENTE <<<
+    
+    1. Encontre a variável "const DB = [...]" abaixo.
+    2. Adicione um novo objeto na lista seguindo o modelo:
+
+       {
+           id: 999,                   // ID único (use um número que não exista na lista)
+           nat: 5,                    // Estrelas (1 a 5)
+           n: 'Nome do Heroi',        // Nome que aparecerá no jogo
+           type: 'Fogo',              // Elemento: 'Água', 'Fogo', 'Vento', 'Terra', 'Luz', 'Trevas'
+           img: '',                   // Deixe vazio '' para usar o emoji, ou coloque a URL da imagem (ex: 'https://site.com/imagem.png')
+           visual: '🤠',              // Emoji (usado se a imagem estiver vazia ou falhar)
+           s: [                       // Habilidades (Skills)
+               {n:'Ataque 1', m:1, cd:0, ty:'atk'},     // ty: 'atk' (dano), 'aoe' (area), 'heal' (cura)
+               {n:'Ataque 2', m:1.5, cd:3, ty:'aoe'}    // m: Multiplicador de dano, cd: Cooldown (Turnos)
+           ],
+           hp: 100, atk: 50           // Status Base (Vida e Ataque)
+       },
+
+    3. Salve o arquivo. O novo personagem aparecerá no Gacha ou nas batalhas.
+    ================================================================================
+    */
     const MAX_LVL = {1:10, 2:20, 3:30, 4:40, 5:50, 6:50};
     const EXPL_REGIONS = [ { id: 1, name: "Floresta", icon: "🌲", color: "#10b981" }, { id: 2, name: "Vulcão", icon: "🌋", color: "#ef4444" }, { id: 3, name: "Ruínas", icon: "🏛️", color: "#fbbf24" }, { id: 4, name: "Pico", icon: "⚡", color: "#a855f7" } ];
     const SHOP_DB = [
@@ -255,45 +635,43 @@
         {id:'xpboost_15',name:'Booster (15m)',cost:90,currency:'gems',icon:'🚀'},
         {id:'food_5',name:'Rainbowmon',cost:500000,currency:'mana',icon:'🥚'}
     ];
-    // NEW DAILY MISSIONS (BETTER REWARDS)
+    // Simple missions db
     const MISSIONS_DB = [
-        {id:'bat_3', desc:'Batalhar 3 Vezes', target:3, r:{mana:50000, gems:10}, type:'win'},
-        {id:'bat_10', desc:'Batalhar 10 Vezes', target:10, r:{mana:100000, gems:30}, type:'win'},
-        {id:'sum_1', desc:'Invocar 1 Monstro', target:1, r:{mana:30000, gems:0}, type:'sum'},
-        {id:'pup_3', desc:'Upar Nível 3x', target:3, r:{mana:40000, gems:0}, type:'pup'},
-        {id:'rup_3', desc:'Upar Runa 3x', target:3, r:{mana:60000, gems:0}, type:'rup'},
-        {id:'dun_5', desc:'Masmorra 5 Vezes', target:5, r:{mana:0, gems:50}, type:'dun_win'},
-        {id:'login', desc:'Login Diário', target:1, r:{mana:50000, gems:20}, type:'login'}
+        {id:'bat_3', desc:'Vencer 3 Batalhas', target:3, r:{mana:2000, gems:0}, type:'win'},
+        {id:'bat_10', desc:'Vencer 10 Batalhas', target:10, r:{mana:0, gems:20}, type:'win'},
+        {id:'sum_1', desc:'Invocar 1 Monstro', target:1, r:{mana:3000, gems:0}, type:'sum'},
+        {id:'pup_1', desc:'Upar Nível', target:1, r:{mana:2000, gems:0}, type:'pup'},
+        {id:'rup_3', desc:'Upar Runa 3x', target:3, r:{mana:3000, gems:0}, type:'rup'},
+        {id:'dun_3', desc:'Vencer 3 Masmorras', target:3, r:{mana:0, gems:30}, type:'dun_win'},
+        {id:'login', desc:'Login Diário', target:1, r:{mana:5000, gems:10}, type:'login'}
     ];
 
     const DB = [
-        {id:101,nat:1,n:'Slime',type:'Água',img:'',visual:'💧',s:[{n:'Golpe',m:1.2,cd:0,ty:'atk'},{n:'Gosma',m:1.1,cd:2,ty:'debuff_spd'}],hp:50,atk:10},
-        {id:102,nat:1,n:'Wisp',type:'Fogo',img:'',visual:'🔥',s:[{n:'Queimar',m:1.2,cd:0,ty:'atk'},{n:'Incêndio',m:1.3,cd:3,ty:'aoe'}],hp:45,atk:12},
-        {id:201,nat:2,n:'Goblin',type:'Terra',img:'',visual:'👺',s:[{n:'Lança',m:1.3,cd:0,ty:'atk'},{n:'Fúria',m:0,cd:3,ty:'buff_atk'}],hp:80,atk:18},
-        {id:304,nat:3,n:'Fairy',type:'Luz',img:'',visual:'🧚',s:[{n:'Raio',m:1.3,cd:0,ty:'atk'},{n:'Cura',m:2.5,cd:3,ty:'heal'}],hp:90,atk:15},
-        {id:503,nat:3,n:'Dríade',type:'Vento',img:'',visual:'🌿',s:[{n:'Espinhos',m:1.2,cd:0,ty:'atk'},{n:'Vento Suave',m:2.0,cd:3,ty:'heal_aoe'}],hp:110,atk:18},
-        {id:509,nat:3,n:'Ent Ancião',type:'Terra',img:'',visual:'🌳',s:[{n:'Esmagar',m:1.2,cd:0,ty:'atk'},{n:'Raízes',m:1.3,cd:3,ty:'aoe'}],hp:140,atk:15},
-        {id:505,nat:3,n:'Sereia',type:'Água',img:'',visual:'🧜‍♀️',s:[{n:'Bolha',m:1.2,cd:0,ty:'atk'},{n:'Canto',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:18},
-        {id:401,nat:4,n:'Valk',type:'Vento',img:'',visual:'🦅',s:[{n:'Corte',m:1.4,cd:0,ty:'atk'},{n:'Tempestade',m:1.6,cd:3,ty:'aoe'},{n:'Grito',m:0,cd:4,ty:'buff_atk'}],hp:150,atk:25},
-        {id:504,nat:4,n:'Ninja',type:'Vento',img:'',visual:'🥷',s:[{n:'Shuriken',m:1.4,cd:0,ty:'atk'},{n:'Corte Sônico',m:1.7,cd:3,ty:'aoe'},{n:'Executar',m:2.2,cd:5,ty:'atk'}],hp:120,atk:32},
-        {id:506,nat:4,n:'Mago Ígneo',type:'Fogo',img:'',visual:'🧙‍♂️',s:[{n:'Bola de Fogo',m:1.5,cd:0,ty:'atk'},{n:'Explosão',m:1.8,cd:3,ty:'aoe'},{n:'Meteoro',m:2.0,cd:5,ty:'aoe'}],hp:110,atk:30},
-        {id:510,nat:4,n:'Paladino',type:'Luz',img:'',visual:'🛡️',s:[{n:'Golpe Divino',m:1.3,cd:0,ty:'atk'},{n:'Proteção',m:0,cd:3,ty:'buff_def'},{n:'Cura Maior',m:3.0,cd:4,ty:'heal'}],hp:160,atk:20},
-        {id:503,nat:4,n:'Lobisomem',type:'Trevas',img:'',visual:'🐺',s:[{n:'Mordida',m:1.4,cd:0,ty:'atk'},{n:'Uivo',m:1.6,cd:3,ty:'aoe'},{n:'Fúria',m:0,cd:4,ty:'turn'}],hp:130,atk:25},
-        {id:511,nat:5,n:'Lorde Vampiro',type:'Fogo',img:'',visual:'🧛',s:[{n:'Drenar',m:1.5,cd:0,ty:'atk'},{n:'Morcegos',m:1.8,cd:3,ty:'aoe'},{n:'Imortalidade',m:0,cd:5,ty:'turn'}],hp:160,atk:35},
-        {id:507,nat:5,n:'Arcanjo',type:'Luz',img:'',visual:'👼',s:[{n:'Espada Sagrada',m:1.5,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Ressurreição',m:0,cd:6,ty:'heal_aoe'}],hp:170,atk:28},
-        {id:508,nat:5,n:'Poseidon',type:'Água',img:'',visual:'🔱',s:[{n:'Tridente',m:1.5,cd:0,ty:'atk'},{n:'Tsunami',m:1.8,cd:3,ty:'aoe'},{n:'Maremoto',m:2.0,cd:5,ty:'aoe'}],hp:180,atk:26},
+        {id:101,nat:1,n:'Slime',type:'Água',img:'',visual:'💧',s:[{n:'Hit',m:1,cd:0,ty:'atk'}],hp:50,atk:10},
+        {id:102,nat:1,n:'Wisp',type:'Fogo',img:'',visual:'🔥',s:[{n:'Burn',m:1,cd:0,ty:'atk'}],hp:45,atk:12},
+        {id:201,nat:2,n:'Goblin',type:'Terra',img:'',visual:'👺',s:[{n:'Hit',m:1,cd:0,ty:'atk'},{n:'Smash',m:1.5,cd:2,ty:'atk'}],hp:80,atk:18},
+        {id:301,nat:3,n:'Golem',type:'Terra',img:'',visual:'🗿',s:[{n:'Hit',m:1,cd:0,ty:'atk'},{n:'Rock',m:1.3,cd:2,ty:'atk'},{n:'Quake',m:2,cd:4,ty:'aoe'}],hp:120,atk:20},
+        {id:304,nat:3,n:'Fairy',type:'Luz',img:'',visual:'🧚',s:[{n:'Beam',m:1,cd:0,ty:'atk'},{n:'Heal',m:2.5,cd:3,ty:'heal'}],hp:90,atk:15},
+        {id:401,nat:4,n:'Valk',type:'Vento',img:'',visual:'🦅',s:[{n:'Cut',m:1,cd:0,ty:'atk'},{n:'Storm',m:1.5,cd:3,ty:'aoe'}],hp:150,atk:25},
+        {id:502,nat:5,n:'Dragon',type:'Água',img:'',visual:'🐉',s:[{n:'Bite',m:1.2,cd:0,ty:'atk'},{n:'Tsunami',m:1.8,cd:4,ty:'aoe'}],hp:200,atk:30},
+        {id:503,nat:4,n:'Lobisomem',type:'Trevas',img:'',visual:'🐺',s:[{n:'Mordida',m:1.2,cd:0,ty:'atk'},{n:'Uivo',m:1.4,cd:3,ty:'aoe'},{n:'Fúria',m:1.6,cd:4,ty:'atk'}],hp:130,atk:25},
+        {id:504,nat:4,n:'Ninja',type:'Vento',img:'',visual:'🥷',s:[{n:'Shuriken',m:1.2,cd:0,ty:'atk'},{n:'Corte Sônico',m:1.5,cd:3,ty:'aoe'},{n:'Assassinato',m:2.0,cd:5,ty:'atk'}],hp:120,atk:32},
+        {id:505,nat:3,n:'Sereia',type:'Água',img:'',visual:'🧜‍♀️',s:[{n:'Bolha',m:1.1,cd:0,ty:'atk'},{n:'Canto',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:18},
+        {id:506,nat:4,n:'Mago Ígneo',type:'Fogo',img:'',visual:'🧙‍♂️',s:[{n:'Bola de Fogo',m:1.2,cd:0,ty:'atk'},{n:'Explosão',m:1.6,cd:3,ty:'aoe'},{n:'Chuva de Meteoros',m:1.8,cd:5,ty:'aoe'}],hp:110,atk:30},
+        {id:507,nat:5,n:'Arcanjo',type:'Luz',img:'',visual:'👼',s:[{n:'Espada Sagrada',m:1.3,cd:0,ty:'atk'},{n:'Julgamento',m:1.5,cd:3,ty:'aoe'},{n:'Ressurreição',m:2.5,cd:6,ty:'heal'}],hp:160,atk:28},
+        {id:508,nat:5,n:'Poseidon',type:'Água',img:'',visual:'🔱',s:[{n:'Tridente',m:1.3,cd:0,ty:'atk'},{n:'Tsunami',m:1.5,cd:3,ty:'aoe'},{n:'Maremoto',m:1.8,cd:5,ty:'aoe'}],hp:180,atk:26},
+        {id:509,nat:3,n:'Ent Ancião',type:'Terra',img:'',visual:'🌳',s:[{n:'Esmagar',m:1.1,cd:0,ty:'atk'},{n:'Raízes',m:1.3,cd:3,ty:'aoe'}],hp:140,atk:15},
+        {id:512,nat:3,n:'Dríade',type:'Vento',img:'',visual:'🌿',s:[{n:'Espinhos',m:1.2,cd:0,ty:'atk'},{n:'Vento Suave',m:2.0,cd:3,ty:'heal_aoe'}],hp:110,atk:18},
+        {id:511,nat:5,n:'Vampiro',type:'Fogo',img:'',visual:'🧛',s:[{n:'Drenar',m:1.3,cd:0,ty:'atk'},{n:'Morcegos',m:1.5,cd:3,ty:'aoe'},{n:'Imortalidade',m:0,cd:5,ty:'turn'}],hp:160,atk:35},
         {id:990,nat:5,n:'Rainbowmon',type:'Luz',img:'',visual:'🥚',s:[{n:'-',m:0,cd:0,ty:'atk'}],hp:100,atk:10}
     ];
+    
+    // Lista BOSS_DB para garantir que só spawnem nas masmorras
     const BOSS_DB = {
         golem: {id:901,nat:6,n:'Golem Ancestral',type:'Terra',img:'',visual:'🗿',s:[{n:'Esmagar',m:1.5,cd:0,ty:'atk'},{n:'Terremoto',m:2.5,cd:4,ty:'aoe'}],hp:5000,atk:100},
         dragon: {id:902,nat:6,n:'Dragão do Caos',type:'Fogo',img:'',visual:'🐲',s:[{n:'Baforada',m:1.5,cd:0,ty:'atk'},{n:'Apocalipse',m:3.0,cd:5,ty:'aoe'}],hp:4000,atk:150}
     };
-    // ... restante do código ...
-    
-    // (O restante do código JavaScript permanece o mesmo da versão anterior, 
-    // com a adição da lógica de Buffs/Debuffs em Battle.execSkill e Battle.turn 
-    // conforme planejado na resposta anterior).
-    
+
     const DEFAULT_STATE = { 
         mana:2000, gems:50, pot:5, tix:0, rare_tix:5, grimoires:0, xp:0, max_xp:100, p_lvl:1, maxStage:1, maxTower: 1, cleared:[], runes_inv:[], roster:[], xp_boost_end_time: 0, first_summon_done: false,
         daily_missions: { last_reset: 0, progress: {}, claimed: [] }
@@ -315,15 +693,25 @@
             if(!s.daily_missions) s.daily_missions = { last_reset: 0, progress: {}, claimed: [] };
             if(!s.maxTower) s.maxTower = 1;
 
+            // Check Daily Reset
             const now = new Date();
             const lastDate = new Date(s.daily_missions.last_reset);
             const isDifferentDay = now.getDate() !== lastDate.getDate() || now.getMonth() !== lastDate.getMonth();
-            if (isDifferentDay) s.daily_missions = { last_reset: Date.now(), progress: {}, claimed: [] };
+            
+            if (isDifferentDay) {
+                s.daily_missions = { last_reset: Date.now(), progress: {}, claimed: [] };
+            }
+
+            // Auto Login Mission
             Core.updateMission('login', 1);
+            
+            // Fix Roster if corrupted
             if(!Array.isArray(s.roster)) s.roster = [];
+            
             uidCount = s.roster.reduce((m,r)=>Math.max(m,r.uid),0)+1;
             runeIdCount = Math.max((s.runes_inv.reduce((m,r)=>Math.max(m,r.id),0)),100)+1;
             el('p-name').innerText=u; UI.upd(); UI.nav('hub');
+            
             setInterval(() => {
                 const n = Date.now();
                 if (s.xp_boost_end_time > n) {
@@ -384,8 +772,16 @@
                 const done = prog >= m.target;
                 const claimed = s.daily_missions.claimed.includes(m.id);
                 const rw = m.r.mana ? `${formatNum(m.r.mana)} 💠` : `${m.r.gems} 💎`;
+                
                 const div = document.createElement('div'); div.className = 'mission-row';
-                div.innerHTML = `<div class="mission-info"><div class="mission-desc">${m.desc}</div><div class="mission-prog">Progresso: ${prog}/${m.target}</div><div class="mission-reward">Recompensa: ${rw}</div></div><button class="btn-claim" onclick="Core.claimMission('${m.id}')" ${claimed ? 'disabled' : (done ? '' : 'disabled')}>${claimed ? 'Recebido' : 'Resgatar'}</button>`;
+                div.innerHTML = `
+                    <div class="mission-info">
+                        <div class="mission-desc">${m.desc}</div>
+                        <div class="mission-prog">Progresso: ${prog}/${m.target}</div>
+                        <div class="mission-reward">Recompensa: ${rw}</div>
+                    </div>
+                    <button class="btn-claim" onclick="Core.claimMission('${m.id}')" ${claimed ? 'disabled' : (done ? '' : 'disabled')}>${claimed ? 'Recebido' : 'Resgatar'}</button>
+                `;
                 list.appendChild(div);
             });
         },
@@ -396,35 +792,100 @@
             s.mana += m.r.mana; s.gems += m.r.gems;
             Game.save(); UI.upd(); Core.renMissions(); UI.toast("Recompensa Resgatada!");
         },
-        setInvFilter: (filter, el) => { tmp.invFilter = filter; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); Core.openInv(); UI.modal('m-filter', 0); },
+
+        setInvFilter: (filter, el) => {
+            tmp.invFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            Core.openInv();
+            UI.modal('m-filter', 0); 
+        },
         openInv: () => {
             UI.nav('inv'); const g=el('inv-grid'); g.innerHTML='';
             let filteredRoster = s.roster;
-            if (tmp.invFilter !== 'all') filteredRoster = s.roster.filter(m => { const d = DB.find(x => x.id === m.id); return d.type === tmp.invFilter; });
+            if (tmp.invFilter !== 'all') {
+                filteredRoster = s.roster.filter(m => {
+                    const d = DB.find(x => x.id === m.id);
+                    return d.type === tmp.invFilter;
+                });
+            }
             const elemOrder = {'Água':1, 'Fogo':2, 'Vento':3, 'Luz':4, 'Trevas':5, 'Terra':6};
             filteredRoster.sort((a,b)=>{
                 const da=DB.find(x=>x.id===a.id), db=DB.find(x=>x.id===b.id);
-                if (tmp.invFilter === 'all') { const ea=elemOrder[da.type]||99, eb=elemOrder[db.type]||99; if(ea!==eb) return ea-eb; }
-                if(b.star!==a.star) return b.star-a.star; return b.lvl-a.lvl;
+                if (tmp.invFilter === 'all') {
+                    const ea=elemOrder[da.type]||99, eb=elemOrder[db.type]||99;
+                    if(ea!==eb) return ea-eb;
+                }
+                if(b.star!==a.star) return b.star-a.star;
+                return b.lvl-a.lvl;
             });
             filteredRoster.forEach(m=>{ const d=document.createElement('div'); d.className='hero-slot'; if(m.star===5) d.classList.add('legendary-glow'); d.innerHTML=UI.renMon(m); d.onclick=()=>Core.selInv(m.uid); g.appendChild(d); });
+        },
+        openDex: () => {
+            UI.nav('dex'); const g=el('dex-grid'); g.innerHTML='';
+            const allMons = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990); // No bosses, no rainbowmon
+            // Sort
+            const elemOrder = {'Água':1, 'Fogo':2, 'Vento':3, 'Luz':4, 'Trevas':5, 'Terra':6};
+            allMons.sort((a,b) => {
+                const ea=elemOrder[a.type]||99, eb=elemOrder[b.type]||99;
+                if(ea!==eb) return ea-eb;
+                return b.nat - a.nat;
+            });
+
+            allMons.forEach(d => {
+                const owned = s.roster.some(m => m.id === d.id);
+                const div = document.createElement('div');
+                div.className = `dex-slot ${owned ? '' : 'unknown'}`;
+                div.innerHTML = `<div style="font-size:2rem">${UI.getVis(d)}</div><div class="stars" style="position:absolute; bottom:2px; left:0; width:100%; justify-content:center; gap:0">${'★'.repeat(d.nat)}</div>`;
+                div.onclick = () => Core.showDexDetail(d);
+                g.appendChild(div);
+            });
+        },
+        showDexDetail: (d) => {
+            el('dxd-vis').innerHTML = UI.getVis(d);
+            el('dxd-name').innerText = d.n;
+            el('dxd-stars').innerHTML = '★'.repeat(d.nat);
+            el('dxd-badge').innerText = d.type;
+            
+            el('dxd-hp').innerText = d.hp;
+            el('dxd-atk').innerText = d.atk;
+            
+            const sl = el('dxd-skills'); sl.innerHTML = '';
+            d.s.forEach((sk,i)=>{
+                const c=document.createElement('div'); c.className='skill-card-detail';
+                c.innerHTML=`<div class="skill-icon-large">${i===0?'⚔️':i===1?'⚡':'🔥'}</div><div><div style="font-weight:bold">${sk.n}</div><div style="font-size:0.75rem;color:#888">${sk.ty ? sk.ty.toUpperCase() : 'ATK'}</div></div>`;
+                sl.appendChild(c);
+            });
+            UI.modal('m-dex-detail', 1);
         },
         selInv: (uid) => {
             tmp.selInv=uid; const m=s.roster.find(x=>x.uid===uid); const d=DB.find(x=>x.id===m.id); UI.nav('mon_detail');
             let elemColor = d.type==='Fogo'?'#ef4444':d.type==='Água'?'#3b82f6':'#10b981';
             el('mon_detail').style.setProperty('--elem-bg', elemColor);
             el('md-vis').innerHTML=UI.getVis(d); el('md-name').innerText=d.n;
+            
             let typeIcon = d.type === 'Fogo' ? '🔥' : (d.type === 'Água' ? '💧' : (d.type === 'Vento' ? '🍃' : (d.type === 'Terra' ? '⛰️' : (d.type === 'Luz' ? '☀️' : '🌙'))));
-            let maxLvl = MAX_LVL[m.star] || 50; let isMax = m.lvl >= maxLvl;
+            let maxLvl = MAX_LVL[m.star] || 50;
+            let isMax = m.lvl >= maxLvl;
             el('md-badge').innerHTML = `${typeIcon} Nv. ${m.lvl} ${isMax ? '<span style="color:#f59e0b; font-weight:800">(MAX)</span>' : ''}`;
             if (isMax) el('md-badge').classList.add('max-lvl'); else el('md-badge').classList.remove('max-lvl');
-            let stars = ''; for(let i=0;i<m.star;i++) stars+=`<div class="star" style="width:12px;height:12px"></div>`; el('md-stars').innerHTML=stars;
-            let sm = 1 + m.lvl*0.1; let bon = {hp:0, atk:0, def:0, crit:0};
+
+            let stars = ''; for(let i=0;i<m.star;i++) stars+=`<div class="star" style="width:12px;height:12px"></div>`;
+            el('md-stars').innerHTML=stars;
+            
+            let sm = 1 + m.lvl*0.1;
+            let bon = {hp:0, atk:0, def:0, crit:0};
             m.runes.forEach(r => { if(r) { bon[r.type] += r.val; if(r.subs) r.subs.forEach(s => bon[s.type] += s.val); } });
-            el('st-hp').innerText = Math.floor(d.hp * sm); el('bn-hp').innerText = `(+${bon.hp})`;
-            el('st-atk').innerText = Math.floor(d.atk * sm); el('bn-atk').innerText = `(+${bon.atk})`;
-            el('st-def').innerText = Math.floor(10 + m.lvl); el('bn-def').innerText = `(+${bon.def})`;
+
+            const baseHp = Math.floor(d.hp * sm);
+            const baseAtk = Math.floor(d.atk * sm);
+            const baseDef = Math.floor(10 + (m.lvl)); 
+            
+            el('st-hp').innerText = baseHp; el('bn-hp').innerText = `(+${bon.hp})`;
+            el('st-atk').innerText = baseAtk; el('bn-atk').innerText = `(+${bon.atk})`;
+            el('st-def').innerText = baseDef; el('bn-def').innerText = `(+${bon.def})`;
             el('st-crit').innerText = 15;
+
             [0,1,2,3].forEach(i=>{ 
                 const r=m.runes[i]; const rx=el(`rs-${i}`); 
                 if(r) { rx.className='rune-slot-fancy filled'; rx.style.setProperty('--rune-color',r.type==='hp'?'#ef4444':'#3b82f6'); rx.innerHTML=`<div class="icon" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div><div class="lvl">+${r.lvl}</div>`; } 
@@ -433,12 +894,17 @@
             const sl=el('skill-desc-list'); sl.innerHTML='';
             d.s.forEach((sk,i)=>{
                 const c=document.createElement('div'); c.className='skill-card-detail';
-                c.innerHTML=`<div class="skill-icon-large">${i===0?'⚔️':i===1?'⚡':'🔥'}</div><div><div style="font-weight:bold">${sk.n} <small style="color:#666">Lv.${m.skLvl[i]||1}</small></div><div style="font-size:0.75rem;color:#888">${sk.ty.toUpperCase()} - CD:${sk.cd}</div></div>`;
+                c.innerHTML=`<div class="skill-icon-large">${i===0?'⚔️':i===1?'⚡':'🔥'}</div><div><div style="font-weight:bold">${sk.n} <small style="color:#666">Lv.${m.skLvl[i]}</small></div><div style="font-size:0.75rem;color:#888">${sk.ty.toUpperCase()} - CD:${sk.cd}</div></div>`;
                 sl.appendChild(c);
             });
         },
         backToInv: () => UI.nav('inv'),
-        pup: () => { const m=s.roster.find(x=>x.uid===tmp.selInv); if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||50)) return; s.pot--; m.lvl++; Game.save(); Core.selInv(m.uid); UI.upd(); Core.updateMission('pup'); },
+        pup: () => { 
+            const m=s.roster.find(x=>x.uid===tmp.selInv); 
+            if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||50)) return; 
+            s.pot--; m.lvl++; Game.save(); Core.selInv(m.uid); UI.upd();
+            Core.updateMission('pup');
+        },
         openEvo: () => { const m=s.roster.find(x=>x.uid===tmp.selInv); if(m.star>=6) return; tmp.evoTarget=tmp.selInv; tmp.evoFodder=[]; el('evo-req-c').innerText=m.star; el('evo-req-s').innerText=m.star; UI.modal('m-evo',1); Core.renEvo(); },
         renEvo: () => {
             const t=s.roster.find(x=>x.uid===tmp.evoTarget); const g=el('evo-grid'); g.innerHTML='';
@@ -451,8 +917,11 @@
             el('btn-do-evo').disabled = tmp.evoFodder.length<t.star;
         },
         doEvolution: () => {
-            const t=s.roster.find(x=>x.uid===tmp.evoTarget); s.roster=s.roster.filter(m=>!tmp.evoFodder.includes(m.uid));
-            tmp.prep=tmp.prep.filter(u=>!tmp.evoFodder.includes(u)); t.star++; t.lvl=1; Game.save(); UI.modal('m-evo',0); Core.selInv(t.uid); UI.toast("Evolução Sucesso!"); Core.openInv(); 
+            const t=s.roster.find(x=>x.uid===tmp.evoTarget);
+            s.roster=s.roster.filter(m=>!tmp.evoFodder.includes(m.uid));
+            tmp.prep=tmp.prep.filter(u=>!tmp.evoFodder.includes(u)); 
+            t.star++; t.lvl=1; Game.save(); UI.modal('m-evo',0); Core.selInv(t.uid); UI.toast("Evolução Sucesso!");
+            Core.openInv(); 
         },
         openSkill: () => { tmp.skillFodder=[]; UI.modal('m-skill',1); Core.renSkill(); },
         renSkill: () => {
@@ -460,20 +929,20 @@
             el('skill-slots').innerHTML=`<div class="hero-slot" style="width:40px;height:40px;border-style:dashed">${tmp.skillFodder[0]?UI.renMon(s.roster.find(x=>x.uid===tmp.skillFodder[0])):''}</div>`;
             s.roster.filter(m=>m.id===t.id && m.uid!==t.uid).forEach(m=>{
                 const d=document.createElement('div'); d.className=`hero-slot ${tmp.skillFodder.includes(m.uid)?'selected':''}`;
-                d.innerHTML=UI.renMon(m); d.onclick=()=>{ tmp.skillFodder=tmp.skillFodder.includes(m.uid)?[]:[m.uid]; Core.renSkill(); };
+                d.onclick=()=>{ tmp.skillFodder=tmp.skillFodder.includes(m.uid)?[]:[m.uid]; Core.renSkill(); };
                 g.appendChild(d);
             });
             el('btn-do-skill').disabled=tmp.skillFodder.length===0;
         },
         doSkill: () => {
-            const t=s.roster.find(x=>x.uid===tmp.selInv); s.roster=s.roster.filter(m=>!tmp.skillFodder.includes(m.uid));
+            const t=s.roster.find(x=>x.uid===tmp.selInv);
+            s.roster=s.roster.filter(m=>!tmp.skillFodder.includes(m.uid));
             tmp.prep=tmp.prep.filter(u=>!tmp.skillFodder.includes(u));
-            if(!t.skLvl) t.skLvl = t.id === 990 ? [1] : DB.find(x=>x.id===t.id).s.map(()=>1); // safety
-            t.skLvl[0]++; Game.save(); UI.modal('m-skill',0); Core.selInv(t.uid); UI.toast("Skill UP!"); Core.openInv(); 
+            t.skLvl[0]++; Game.save(); UI.modal('m-skill',0); Core.selInv(t.uid); UI.toast("Skill UP!");
+            Core.openInv(); 
         },
         useGrimoire: () => {
             if(s.grimoires<1) return; s.grimoires--; const t=s.roster.find(x=>x.uid===tmp.selInv);
-            if(!t.skLvl) t.skLvl = DB.find(x=>x.id===t.id).s.map(()=>1);
             t.skLvl[0]++; Game.save(); UI.modal('m-skill',0); UI.upd(); Core.selInv(t.uid);
         },
         openRuneBag: () => {
@@ -481,18 +950,24 @@
             s.runes_inv.forEach(r=>{
                 const rarityColor = r.rarity === 'Lendario' ? 'border-color:var(--c-gold); box-shadow:0 0 5px var(--c-gold)' : (r.rarity === 'Epico' ? 'border-color:var(--c-accent)' : 'border-color:var(--c-primary)');
                 const d=document.createElement('div'); d.className='rune-slot-bag'; d.style.cssText = rarityColor;
-                d.innerHTML=`<div class="rune-content"><div class="rune-img" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div></div><div class="rune-lvl-tag">+${r.lvl}</div><div class="rune-set-icon">${r.type.toUpperCase()}</div>`;
-                d.onclick = () => Core.popRuneUp(r.id); g.appendChild(d);
+                d.innerHTML=`
+                    <div class="rune-content"><div class="rune-img" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div></div>
+                    <div class="rune-lvl-tag">+${r.lvl}</div><div class="rune-set-icon">${r.type.toUpperCase()}</div>
+                `;
+                d.onclick = () => Core.popRuneUp(r.id);
+                g.appendChild(d);
             });
         },
         sellRune: (rid, p) => { s.runes_inv=s.runes_inv.filter(r=>r.id!==rid); s.mana+=p; Game.save(); UI.upd(); Core.openRuneBag(); },
         openRuneSelect: (slot) => { tmp.selRuneSlot=slot; UI.modal('m-rune',1); Core.renRuneList(); },
         renRuneList: () => {
-            const l=el('rune-list'); l.innerHTML=''; const m=s.roster.find(x=>x.uid===tmp.selInv);
+            const l=el('rune-list'); l.innerHTML='';
+            const m=s.roster.find(x=>x.uid===tmp.selInv);
             if(m.runes[tmp.selRuneSlot]) { l.innerHTML+=`<div class="panel" style="padding:10px;border-left:4px solid red" onclick="Core.unequipRune()">Remover Atual</div>`; }
             s.runes_inv.forEach(r=>{
                 const d=document.createElement('div'); d.className='panel'; d.style.padding='10px'; d.style.cursor='pointer';
-                d.innerHTML=`+${r.lvl} ${r.type} <small>${r.rarity}</small>`; d.onclick=()=>Core.equipRune(r.id); l.appendChild(d);
+                d.innerHTML=`+${r.lvl} ${r.type} <small>${r.rarity}</small>`; d.onclick=()=>Core.equipRune(r.id);
+                l.appendChild(d);
             });
         },
         equipRune: (rid) => {
@@ -506,10 +981,17 @@
             const m=s.roster.find(x=>x.uid===tmp.selInv); s.runes_inv.push(m.runes[tmp.selRuneSlot]); m.runes[tmp.selRuneSlot]=null;
             Game.save(); UI.modal('m-rune',0); Core.selInv(m.uid); UI.upd();
         },
+        
+        // --- RUNE POWER UP (NEW) ---
         popRuneUp: (rid) => {
-            let r = s.runes_inv.find(x=>x.id===rid); if(!r) s.roster.forEach(m => m.runes.forEach(eq=>{if(eq&&eq.id===rid) r=eq})); if(!r) return;
-            tmp.upRune = r; const rClass = r.rarity==='Lendario'?'legend':''; const iconColor = r.type==='hp'?'#ef4444':'#3b82f6';
-            el('up-rune-visual').innerHTML = `<div style="color:${iconColor}">⬢</div>`; el('up-rune-visual').className = `rune-preview-large ${rClass}`;
+            let r = s.runes_inv.find(x=>x.id===rid);
+            if(!r) s.roster.forEach(m => m.runes.forEach(eq=>{if(eq&&eq.id===rid) r=eq}));
+            if(!r) return;
+            tmp.upRune = r;
+            const rClass = r.rarity==='Lendario'?'legend':'';
+            const iconColor = r.type==='hp'?'#ef4444':'#3b82f6';
+            el('up-rune-visual').innerHTML = `<div style="color:${iconColor}">⬢</div>`;
+            el('up-rune-visual').className = `rune-preview-large ${rClass}`;
             el('up-rune-type').innerText = r.type; el('up-rune-lvl').innerText = `+${r.lvl}`;
             const nextVal = Math.ceil(r.val * 1.1);
             let html = `<div class="stat-line"><span>${r.type.toUpperCase()}</span><div>${r.val} <span class="stat-arrow">➜</span> <span class="new-val">${nextVal}</span></div></div>`;
@@ -518,22 +1000,31 @@
             el('up-stats-comp').innerHTML = html;
             let cost = 500 + (r.lvl*500); el('up-cost').innerText = formatNum(cost);
             let chance = 100 - (r.lvl * 5); if(chance<5) chance=5;
-            el('up-chance').innerText = `${chance}%`; UI.modal('m-rune-up',1);
+            el('up-chance').innerText = `${chance}%`;
+            UI.modal('m-rune-up',1);
         },
         doUpgrade: () => {
             const r = tmp.upRune; if(r.lvl>=15) return UI.toast("Max!");
             const cost = 500 + (r.lvl*500); if(s.mana<cost) return UI.toast("Mana!");
-            s.mana-=cost; UI.upd(); Core.updateMission('rup');
+            s.mana-=cost; UI.upd();
+            Core.updateMission('rup');
             let chance = 100 - (r.lvl * 5); if(chance<5) chance=5;
             if(Math.random() * 100 < chance) {
                 r.lvl++; r.val = Math.ceil(r.val*1.1);
-                if(r.lvl%3===0) { if(!r.subs) r.subs=[]; if(r.subs.length<4) r.subs.push({type:['atk','def','hp','crit'][Math.floor(Math.random()*4)], val:5}); else r.subs[Math.floor(Math.random()*r.subs.length)].val+=5; }
+                if(r.lvl%3===0) {
+                    if(!r.subs) r.subs=[];
+                    if(r.subs.length<4) r.subs.push({type:['atk','def','hp','crit'][Math.floor(Math.random()*4)], val:5}); 
+                    else r.subs[Math.floor(Math.random()*r.subs.length)].val+=5;
+                }
                 Game.save(); Core.popRuneUp(r.id); UI.toast("Sucesso!"); 
                 if(el('mon_detail').classList.contains('active')) Core.selInv(tmp.selInv);
                 if(el('rune_bag').classList.contains('active')) Core.openRuneBag();
             } else UI.toast("Falha...");
         },
-        renShop: () => { const c=el('shop-container'); c.innerHTML=''; SHOP_DB.forEach(i=>{ const d=document.createElement('div'); d.className='shop-card'; d.innerHTML=`<div class="shop-icon">${i.icon}</div><div class="shop-name">${i.name}</div><button class="shop-price" onclick="Core.buy('${i.id}',${i.cost},'${i.currency}')">${formatNum(i.cost)}${i.currency==='mana'?'💠':'💎'}</button>`; c.appendChild(d); }); },
+        renShop: () => {
+            const c=el('shop-container'); c.innerHTML='';
+            SHOP_DB.forEach(i=>{ const d=document.createElement('div'); d.className='shop-card'; d.innerHTML=`<div class="shop-icon">${i.icon}</div><div class="shop-name">${i.name}</div><button class="shop-price" onclick="Core.buy('${i.id}',${i.cost},'${i.currency}')">${formatNum(i.cost)}${i.currency==='mana'?'💠':'💎'}</button>`; c.appendChild(d); });
+        },
         buy: (id,c,curr) => {
             if(curr==='mana'&&s.mana<c || curr==='gems'&&s.gems<c) return UI.toast("Falta grana");
             if (id === 'xpboost') { s.xp_boost_end_time = Math.max(Date.now(), s.xp_boost_end_time) + (7 * 60 * 1000); s.gems -= c; Game.save(); UI.upd(); return UI.toast("Booster +7min!"); }
@@ -541,12 +1032,16 @@
             if (id === 'tix_pack') { s.mana -= c; s.tix += 11; UI.toast("Pack Comum!"); }
             else if (id === 'rare_pack') { s.gems -= c; s.rare_tix += 11; UI.toast("Pack Raro!"); }
             else if (id === 'food_5') { s.mana -= c; let f={uid:uidCount++, id:990, lvl:1, star:5, skLvl:[1], runes:[null,null,null,null]}; s.roster.push(f); UI.toast("Rainbowmon!"); }
-            else { if(curr==='mana') s.mana-=c; else s.gems-=c; if(id==='pot') s.pot++; else if(id==='tix') s.tix++; else if(id==='rare') s.rare_tix++; else s.grimoires++; }
+            else {
+                if(curr==='mana') s.mana-=c; else s.gems-=c;
+                if(id==='pot') s.pot++; else if(id==='tix') s.tix++; else if(id==='rare') s.rare_tix++; else s.grimoires++;
+            }
             Game.save(); UI.upd(); 
         },
         spin: (type, n) => {
             let k=type==='common'?'tix':'rare_tix'; if(s[k]<n) return UI.toast("Sem tickets");
-            s[k]-=n; UI.upd(); el('portal-visual').style.animation='spin 0.2s infinite linear'; 
+            s[k]-=n; UI.upd(); 
+            el('portal-visual').style.animation='spin 0.2s infinite linear'; 
             setTimeout(()=>{
                 el('portal-visual').style.animation='none';
                 let res=[]; let hasLegend = false;
@@ -555,7 +1050,9 @@
                     if(type==='common') { if(r > 98) nat=3; else if(r > 75) nat=2; else nat=1; } 
                     else { if (!s.first_summon_done && i === 0) { if (r > 50) nat=5; else nat=4; s.first_summon_done = true; } else { if (r > 99.5) nat=5; else if (r > 91.5) nat=4; else nat=3; } }
                     if(nat === 5) hasLegend = true;
-                    let p = DB.filter(x=>x.nat===nat && x.id !== 901 && x.id !== 902 && x.id !== 990); if(p.length===0) p=DB.filter(x=>x.nat===1); 
+                    // Exclui IDs 901 e 902 (Chefes) da roleta
+                    let p = DB.filter(x=>x.nat===nat && x.id !== 901 && x.id !== 902 && x.id !== 990); 
+                    if(p.length===0) p=DB.filter(x=>x.nat===1); 
                     let m = p[Math.floor(Math.random()*p.length)];
                     let nm={uid:uidCount++, id:m.id, lvl:1, star:nat, skLvl:m.s.map(()=>1), runes:[null,null,null,null]};
                     s.roster.push(nm); res.push(nm);
@@ -563,16 +1060,53 @@
                 if(hasLegend) { el('flash-fx').classList.add('active'); setTimeout(() => el('flash-fx').classList.remove('active'), 1500); }
                 Game.save(); const g=el('gacha-result-grid'); g.innerHTML='';
                 res.forEach(r=>{ const d=document.createElement('div'); d.className='hero-slot'; if(r.star===5) d.classList.add('legendary-glow'); d.innerHTML=UI.renMon(r); g.appendChild(d); });
-                UI.modal('m-gacha-results',1); Core.updateMission('sum', n);
+                UI.modal('m-gacha-results',1);
+                Core.updateMission('sum', n);
             }, 400);
         },
-        renExpl: () => { const c=el('expl-regions'); c.innerHTML=''; EXPL_REGIONS.forEach(r=>{ const d=document.createElement('div'); d.className='panel'; d.style.padding='15px'; d.style.display='flex'; d.style.gap='10px'; d.style.borderLeft=`4px solid ${r.color}`; d.innerHTML=`<div style="font-size:1.5rem">${r.icon}</div><div><b>${r.name}</b></div>`; d.onclick=()=>{ el('expl-regions').style.display='none'; el('expl-stages-list').style.display='flex'; Core.renStageList(r.id); }; c.appendChild(d); }); },
+        renExpl: () => {
+            const c=el('expl-regions'); c.innerHTML='';
+            EXPL_REGIONS.forEach(r=>{
+                const d=document.createElement('div'); d.className='panel'; d.style.padding='15px'; d.style.display='flex'; d.style.gap='10px'; d.style.borderLeft=`4px solid ${r.color}`;
+                d.innerHTML=`<div style="font-size:1.5rem">${r.icon}</div><div><b>${r.name}</b></div>`;
+                d.onclick=()=>{ el('expl-regions').style.display='none'; el('expl-stages-list').style.display='flex'; Core.renStageList(r.id); };
+                c.appendChild(d);
+            });
+        },
         backToExplRegions: () => { el('expl-stages-list').style.display='none'; el('expl-regions').style.display='flex'; },
-        renStageList: (rid) => { const c=el('expl-list-container'); c.innerHTML=''; for(let i=1;i<=8;i++) { const gid=(rid-1)*8+i; const locked=gid>s.maxStage; const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='10px'; d.innerHTML=`Fase ${rid}-${i} ${locked?'🔒':''}`; if(!locked) d.onclick=()=>Core.prep('story',gid); c.appendChild(d); } },
+        renStageList: (rid) => {
+            const c=el('expl-list-container'); c.innerHTML='';
+            for(let i=1;i<=8;i++) {
+                const gid=(rid-1)*8+i; const locked=gid>s.maxStage;
+                const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='10px';
+                d.innerHTML=`Fase ${rid}-${i} ${locked?'🔒':''}`; if(!locked) d.onclick=()=>Core.prep('story',gid);
+                c.appendChild(d);
+            }
+        },
         renDung: () => { el('dung-select').style.display='block'; el('dung-floors').style.display='none'; },
-        selectDung: (t) => { tmp.dungType=t; el('dung-select').style.display='none'; el('dung-floors').style.display='flex'; const c=el('dung-list-container'); c.innerHTML=''; for(let i=1;i<=10;i++) { const pk=`d-${t}-${i-1}`; const locked = i>1 && !s.cleared.includes(pk); const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; d.innerHTML=`Andar B${i} ${locked?'🔒':''}`; if(!locked) d.onclick=()=>Core.prep('dung',i); c.appendChild(d); } },
+        selectDung: (t) => {
+            tmp.dungType=t; el('dung-select').style.display='none'; el('dung-floors').style.display='flex';
+            const c=el('dung-list-container'); c.innerHTML='';
+            for(let i=1;i<=10;i++) {
+                const pk=`d-${t}-${i-1}`; const locked = i>1 && !s.cleared.includes(pk);
+                const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; d.innerHTML=`Andar B${i} ${locked?'🔒':''}`;
+                if(!locked) d.onclick=()=>Core.prep('dung',i); 
+                c.appendChild(d);
+            }
+        },
         backToDungSelect: () => { el('dung-floors').style.display='none'; el('dung-select').style.display='block'; },
-        renTower: () => { const c=el('tower-list-container'); c.innerHTML=''; for(let i=1;i<=50;i++) { const locked = i > s.maxTower; const isBoss = i % 10 === 0; const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; d.style.borderColor = isBoss ? 'var(--c-gold)' : '#e5e7eb'; d.innerHTML=`<div style="display:flex;justify-content:space-between"><span>${isBoss?'👑 ':''}Andar ${i}</span><span>${locked?'🔒':'⚔️'}</span></div>`; if(!locked) d.onclick=()=>Core.prep('tower',i); c.appendChild(d); } },
+        renTower: () => {
+            const c=el('tower-list-container'); c.innerHTML='';
+            for(let i=1;i<=50;i++) {
+                 const locked = i > s.maxTower;
+                 const isBoss = i % 10 === 0;
+                 const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; 
+                 d.style.borderColor = isBoss ? 'var(--c-gold)' : '#e5e7eb';
+                 d.innerHTML=`<div style="display:flex;justify-content:space-between"><span>${isBoss?'👑 ':''}Andar ${i}</span><span>${locked?'🔒':'⚔️'}</span></div>`;
+                 if(!locked) d.onclick=()=>Core.prep('tower',i);
+                 c.appendChild(d);
+            }
+        },
         prep: (m,l) => { tmp.mode=m; tmp.lvl=l; tmp.prep=[]; UI.nav('prep'); Prep.render(); },
         reqConfirm: (m,a) => { el('confirm-msg').innerText=m; pendingAction=a; UI.modal('m-confirm',1); },
         execConfirm: () => { if(pendingAction) pendingAction(); UI.modal('m-confirm',0); }
@@ -581,127 +1115,267 @@
     const Prep = {
         render: () => {
             [0,1,2].forEach(i=>el(`s${i}`).innerHTML=tmp.prep[i]?UI.renMon(s.roster.find(x=>x.uid===tmp.prep[i])):'+');
-            const g=el('prep-grid'); g.innerHTML=''; s.roster.sort((a,b)=>(b.star-a.star)||(b.lvl-a.lvl));
-            s.roster.forEach(m=>{ const d=document.createElement('div'); d.className=`hero-slot ${tmp.prep.includes(m.uid)?'selected':''}`; d.innerHTML=UI.renMon(m); d.onclick=()=>{ if(tmp.prep.includes(m.uid)) tmp.prep=tmp.prep.filter(x=>x!==m.uid); else if(tmp.prep.length<3) tmp.prep.push(m.uid); Prep.render(); }; g.appendChild(d); });
-            const sk = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`; el('btn-farm').style.display = s.cleared.includes(sk) ? 'block' : 'none';
+            const g=el('prep-grid'); g.innerHTML='';
+            s.roster.sort((a,b)=>(b.star-a.star)||(b.lvl-a.lvl));
+            s.roster.forEach(m=>{
+                const d=document.createElement('div'); d.className=`hero-slot ${tmp.prep.includes(m.uid)?'selected':''}`;
+                d.innerHTML=UI.renMon(m); d.onclick=()=>{ if(tmp.prep.includes(m.uid)) tmp.prep=tmp.prep.filter(x=>x!==m.uid); else if(tmp.prep.length<3) tmp.prep.push(m.uid); Prep.render(); };
+                g.appendChild(d);
+            });
+            const sk = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
+            el('btn-farm').style.display = s.cleared.includes(sk) ? 'block' : 'none';
         },
         rem: (i) => { if(tmp.prep[i]) { tmp.prep.splice(i,1); Prep.render(); } }
     };
 
     const Battle = {
-        spd: () => { let next = b.spd === 1 ? 2 : (b.spd === 2 ? 3 : 1); if (next === 3 && s.p_lvl < 5) { UI.toast("3x libera no Nv. 5"); next = 1; } b.spd = next; el('btn-spd').innerText = 'x' + b.spd; },
-        toggleAuto: () => { if (s.p_lvl < 2) return UI.toast("Auto libera no Nv. 2"); b.auto=!b.auto; el('btn-auto').classList.toggle('active', b.auto); if(b.auto) Battle.turn(); },
+        spd: () => { 
+            let next = b.spd === 1 ? 2 : (b.spd === 2 ? 3 : 1);
+            if (next === 3 && s.p_lvl < 5) { UI.toast("3x libera no Nv. 5"); next = 1; }
+            b.spd = next;
+            el('btn-spd').innerText = 'x' + b.spd;
+        },
+        toggleAuto: () => { 
+            if (s.p_lvl < 2) return UI.toast("Auto libera no Nv. 2");
+            b.auto=!b.auto; 
+            if(b.auto) el('btn-auto').classList.add('active'); else el('btn-auto').classList.remove('active');
+            if(b.auto) Battle.turn(); 
+        },
         start: (n) => {
-            if(!tmp.prep.length) return UI.toast("Selecione monstros!"); b.farmRuns=n; b.auto=n>0; b.spd=s.p_lvl>=5?3:2; el('btn-spd').innerText='x'+b.spd; el('btn-auto').classList.toggle('active', b.auto); el('farm-ui').style.display=n>0?'block':'none';
-            b.p = tmp.prep.map((uid,i) => { const m=s.roster.find(x=>x.uid===uid); const d=DB.find(x=>x.id===m.id); let sm=1+m.lvl*0.1; let rs={hp:0,atk:0,def:0,crit:0}; m.runes.forEach(r=>{if(r){rs[r.type]+=r.val}}); return {...d, max:Math.floor(d.hp*sm+rs.hp), cur:Math.floor(d.hp*sm+rs.hp), atk:Math.floor(d.atk*sm+rs.atk), idx:i, side:'p', dead:false, cds:d.s.map(()=>0), skLvl:m.skLvl, buffs:[]}; });
+            if(!tmp.prep.length) return UI.toast("Selecione monstros!");
+            b.farmRuns=n; b.auto=n>0; b.spd=s.p_lvl>=5?3:2; el('btn-spd').innerText='x'+b.spd; el('btn-auto').classList.toggle('active', b.auto); el('farm-ui').style.display=n>0?'block':'none';
+            b.p = tmp.prep.map((uid,i) => {
+                const m=s.roster.find(x=>x.uid===uid); const d=DB.find(x=>x.id===m.id);
+                let sm=1+m.lvl*0.1; let rs={hp:0,atk:0,def:0,crit:0};
+                m.runes.forEach(r=>{if(r){rs[r.type]+=r.val}});
+                return {...d, max:Math.floor(d.hp*sm+rs.hp), cur:Math.floor(d.hp*sm+rs.hp), atk:Math.floor(d.atk*sm+rs.atk), idx:i, side:'p', dead:false, cds:d.s.map(()=>0), skLvl:m.skLvl, buffs:[]};
+            });
             b.e = Array(tmp.mode==='story'?3:1).fill(0).map((_,i)=>{
                 let d; let sm;
-                if (tmp.mode==='dung') { if (tmp.dungType === 'golem') d = BOSS_DB.golem; else d = BOSS_DB.dragon; sm = 1 + (tmp.lvl * 0.5); } 
-                else if (tmp.mode === 'tower') { if (tmp.lvl % 10 === 0) { d = BOSS_DB.dragon; sm = 1 + (tmp.lvl * 0.3); } else { const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990); d = commonDB[Math.floor(Math.random()*commonDB.length)]; sm = 1 + (tmp.lvl * 0.15); } } 
-                else { const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990); d = commonDB[Math.floor(Math.random()*commonDB.length)]; sm = 1 + (tmp.lvl * 0.2); }
+                if (tmp.mode==='dung') {
+                    if (tmp.dungType === 'golem') d = BOSS_DB.golem;
+                    else d = BOSS_DB.dragon;
+                    sm = 1 + (tmp.lvl * 0.5); // Escala agressiva masmorra
+                } else if (tmp.mode === 'tower') {
+                     // TOWER LOGIC
+                     if (tmp.lvl % 10 === 0) { // Boss Floor
+                        d = BOSS_DB.dragon; // Placeholder Boss
+                        sm = 1 + (tmp.lvl * 0.3);
+                     } else {
+                        const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990);
+                        d = commonDB[Math.floor(Math.random()*commonDB.length)];
+                        sm = 1 + (tmp.lvl * 0.15);
+                     }
+                } else {
+                    // FILTRO DE SEGURANÇA: NUNCA SPAWNAR BOSS OU FOOD EM HISTÓRIA
+                    const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990);
+                    d = commonDB[Math.floor(Math.random()*commonDB.length)]; 
+                    sm = 1 + (tmp.lvl * 0.2); // Escala suave historia
+                }
+                // Clonar objeto para evitar referência
                 return {...d, max:Math.floor(d.hp*sm), cur:Math.floor(d.hp*sm), atk:Math.floor(d.atk*sm), idx:i, side:'e', dead:false, cds:d.s.map(()=>0), skLvl:[1], buffs:[]};
             });
-            b.t='p'; b.idx=0; b.target=null; UI.nav('battle'); Battle.initBoard(); Battle.turn();
+            b.t='p'; b.idx=0; b.target=null; 
+            UI.nav('battle'); Battle.initBoard(); Battle.turn();
         },
         initBoard: () => {
-            const ren = (u) => `<div id="${u.side}${u.idx}" class="b-unit" onclick="Battle.clk('${u.side}',${u.idx})"><div class="hp-bar-w"><div class="hp-fill" style="width:100%"></div></div><div class="buffs-container" id="bf-${u.side}${u.idx}"></div><div class="visual">${UI.getVis(u)}</div>${u.side==='e'?'<div id="tgt-'+u.idx+'" class="target-marker" style="display:none">▼</div>':''}</div>`;
-            el('r-pla').innerHTML = b.p.map(ren).join(''); el('r-ene').innerHTML = b.e.map(ren).join('');
+            const ren = (u) => `
+                <div id="${u.side}${u.idx}" class="b-unit" onclick="Battle.clk('${u.side}',${u.idx})">
+                    <div class="hp-bar-w"><div class="hp-fill" style="width:100%"></div></div>
+                    <div class="buffs-container" id="bf-${u.side}${u.idx}"></div>
+                    <div class="visual">${UI.getVis(u)}</div>
+                    ${u.side==='e'?'<div id="tgt-'+u.idx+'" class="target-marker" style="display:none">▼</div>':''}
+                </div>`;
+            el('r-pla').innerHTML = b.p.map(ren).join('');
+            el('r-ene').innerHTML = b.e.map(ren).join('');
         },
         updateVisuals: () => {
-            const update = (list) => { list.forEach(u => {
-                const d = el(`${u.side}${u.idx}`); if(d) { d.querySelector('.hp-fill').style.width = `${(u.cur/u.max)*100}%`; if(u.dead) { d.classList.add('dead'); d.querySelector('.hp-bar-w').style.display='none'; } else { d.classList.remove('dead'); d.querySelector('.hp-bar-w').style.display='block'; }
-                const bf = el(`bf-${u.side}${u.idx}`); bf.innerHTML = '';
-                u.buffs.forEach(b => bf.innerHTML += `<div class="buff-icon ${b.type}">${b.type.replace('_',' ').toUpperCase().substring(0,3)}<span class="buff-turn">${b.turns}</span></div>`);
-                if(u.side==='e') el(`tgt-${u.idx}`).style.display = b.target===u.idx ? 'block' : 'none';
-            }});}; update(b.p); update(b.e);
+            const update = (list) => {
+                list.forEach(u => {
+                    const d = el(`${u.side}${u.idx}`);
+                    if(d) {
+                        d.querySelector('.hp-fill').style.width = `${(u.cur/u.max)*100}%`;
+                        if(u.dead) { 
+                            d.classList.add('dead'); 
+                            d.querySelector('.hp-bar-w').style.display='none'; 
+                        } else {
+                            d.classList.remove('dead');
+                            d.querySelector('.hp-bar-w').style.display='block';
+                        }
+                    }
+                    // Update Buffs
+                    const bf = el(`bf-${u.side}${u.idx}`);
+                    bf.innerHTML = '';
+                    u.buffs.forEach(b => {
+                        const bDiv = document.createElement('div');
+                        bDiv.className = `buff-icon ${b.type}`;
+                        bDiv.innerHTML = `${b.type.substring(0,3).toUpperCase()}<span class="buff-turn">${b.turns}</span>`;
+                        bf.appendChild(bDiv);
+                    });
+
+                    if(u.side==='e') el(`tgt-${u.idx}`).style.display = b.target===u.idx ? 'block' : 'none';
+                });
+            };
+            update(b.p); update(b.e);
         },
         clk: (side, idx) => {
-            if (b.skillPending && side === 'p') { const u = b.p[b.idx]; const skillIdx = b.skillPending.sIdx; Battle.execSkill(u, b.p[idx], skillIdx); b.skillPending = null; el('act-msg').innerText = `Turno de ${u.n}`; document.querySelectorAll('.b-unit.selectable').forEach(e => e.classList.remove('selectable')); return; }
-            if(b.t!=='p' || b.auto) return; if(side==='e' && !b.e[idx].dead) { b.target = idx; Battle.updateVisuals(); }
+            if (b.skillPending && side === 'p') {
+                const u = b.p[b.idx];
+                const skillIdx = b.skillPending.sIdx;
+                Battle.execSkill(u, b.p[idx], skillIdx);
+                b.skillPending = null;
+                el('act-msg').innerText = `Turno de ${u.n}`;
+                document.querySelectorAll('.b-unit.selectable').forEach(e => e.classList.remove('selectable'));
+                return;
+            }
+            if(b.t!=='p' || b.auto) return;
+            if(side==='e' && !b.e[idx].dead) {
+                b.target = idx; // JUST SELECT TARGET
+                Battle.updateVisuals();
+            }
         },
         turn: () => {
             if(b.e.every(x=>x.dead)) return Battle.end(1); if(b.p.every(x=>x.dead)) return Battle.end(0);
-            document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('actor')); document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('active-turn'));
+            
+            // Cleanup actors
+            document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('actor'));
+            document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('active-turn'));
+            
             const sideList = b.t==='p'?b.p:b.e;
-            if(b.idx >= sideList.length) { b.t=b.t==='p'?'e':'p'; b.idx=0; return Battle.turn(); }
+            if(b.idx >= sideList.length) { 
+                b.t = b.t==='p'?'e':'p'; 
+                b.idx = 0; 
+                return Battle.turn(); 
+            }
+            
             const u = sideList[b.idx];
             if(u.dead) { b.idx++; return Battle.turn(); }
-
-            // PROCESS DOTS/STUNS
+            
+            // --- PROCESS DOTS/STUNS/BUFFS ---
             let stunned = false;
             u.buffs = u.buffs.filter(bf => {
-                if(bf.type === 'poison') { u.cur -= Math.floor(u.max * 0.05); const d=el(`${u.side}${u.idx}`); if(d){ const p=document.createElement('div'); p.className='dmg-popup'; p.style.color='#10b981'; p.innerText='POISON'; d.appendChild(p); setTimeout(()=>p.remove(),800); } }
+                if(bf.type === 'poison') {
+                    const dmg = Math.floor(u.max * 0.05); // 5% HP
+                    u.cur -= dmg;
+                    // Visual popup
+                    const tEl = el(`${u.side}${u.idx}`);
+                    if(tEl) {
+                        const p = document.createElement('div'); p.className='dmg-popup'; 
+                        p.innerText = "POISON"; p.style.color = '#10b981';
+                        tEl.appendChild(p); setTimeout(()=>p.remove(),800);
+                    }
+                }
                 if(bf.type === 'stun') stunned = true;
-                bf.turns--; return bf.turns > 0;
+                
+                bf.turns--;
+                return bf.turns > 0;
             });
             if(u.cur <= 0) u.dead = true;
+            
             Battle.updateVisuals();
 
-            if(u.dead || stunned) { b.idx++; setTimeout(Battle.turn, 500/b.spd); return; }
+            if(u.dead || stunned) {
+                b.idx++;
+                setTimeout(Battle.turn, 500/b.spd);
+                return;
+            }
 
             u.cds = u.cds.map(c=>Math.max(0, c-1));
 
-            if(b.t === 'p') {
+            if(b.t==='p') {
                 if(b.auto) {
                     el('btl-ui').classList.remove('active');
                     setTimeout(() => {
-                        let t = null; let si = 0;
                         // AI LOGIC
-                        const healSkill = u.s.findIndex(sk => (sk.ty === 'heal' || sk.ty === 'heal_aoe') && u.cds[u.s.indexOf(sk)] === 0);
-                        if(healSkill !== -1 && b.p.some(a => !a.dead && a.cur < a.max*0.5)) { t = b.p.find(a => !a.dead && a.cur < a.max*0.5); si = healSkill; }
-                        else {
-                            // Elemental Adv Logic
+                        let t = null; let si = 0;
+                        
+                        // 1. Check Heal
+                        const healSkillIdx = u.s.findIndex(sk => (sk.ty === 'heal' || sk.ty === 'heal_aoe') && u.cds[u.s.indexOf(sk)] === 0);
+                        if(healSkillIdx !== -1 && b.p.some(a => !a.dead && a.cur < a.max*0.5)) {
+                             t = b.p.find(a => !a.dead && a.cur < a.max*0.5);
+                             si = healSkillIdx;
+                        } else {
+                            // 2. Elemental Adv
                             const targets = b.e.filter(e => !e.dead);
                             const advT = targets.find(e => {
                                 const at = u.type, dt = e.type;
                                 return (at=='Água'&&dt=='Fogo')||(at=='Fogo'&&dt=='Vento')||(at=='Vento'&&dt=='Terra')||(at=='Terra'&&dt=='Água')||(at=='Luz'&&dt=='Trevas')||(at=='Trevas'&&dt=='Luz');
                             });
                             t = advT || targets[0];
-                            // Pick best atk skill
+                            // 3. Best Atk Skill
                             for(let k=u.s.length-1; k>=0; k--) if(u.cds[k]===0 && (u.s[k].ty==='atk'||u.s[k].ty==='aoe')) { si=k; break; }
                         }
-                        Battle.execSkill(u, t, si);
+
+                        Battle.execSkill(u, t, si); 
                     }, 500/b.spd);
                 } else {
-                    el('act-msg').innerText = `Turno de ${u.n}`; el(`${u.side}${u.idx}`).classList.add('active-turn'); 
-                    el('skill-list').innerHTML = u.s.map((s,i) => `<div class="skill-btn-3d ${u.cds[i]>0?'cd':''}" onclick="${u.cds[i]>0?'':'Battle.act('+i+')'}"><div class="sk-icon">${i===0?'⚔️':(i===1?'⚡':'🔥')}</div><div class="dk-badge">${s.ty ? s.ty.toUpperCase() : 'ATK'}</div>${u.cds[i]>0 ? `<div style="position:absolute;font-size:2rem;color:white;font-weight:900;text-shadow:0 0 5px #000">${u.cds[i]}</div>`:''}</div>`).join('');
+                    el('act-msg').innerText = `Turno de ${u.n}`;
+                    el(`${u.side}${u.idx}`).classList.add('active-turn'); 
+
+                    el('skill-list').innerHTML = u.s.map((s,i) => `
+                        <div class="skill-btn-3d ${u.cds[i]>0?'cd':''}" onclick="${u.cds[i]>0?'':'Battle.act('+i+')'}">
+                            <div class="sk-icon">${i===0?'⚔️':(i===1?'⚡':'🔥')}</div>
+                            <div class="dk-badge">${s.ty ? s.ty.toUpperCase() : 'ATK'}</div>
+                            ${u.cds[i]>0 ? `<div style="position:absolute;font-size:2rem;color:white;font-weight:900;text-shadow:0 0 5px #000">${u.cds[i]}</div>`:''}
+                        </div>`).join('');
                     el('btl-ui').classList.add('active');
                 }
             } else {
                 el('btl-ui').classList.remove('active');
-                setTimeout(() => { const t = b.p.find(x=>!x.dead); Battle.execSkill(u, t||u, 0); }, 800/b.spd);
+                setTimeout(() => {
+                    const t = b.p.find(x=>!x.dead);
+                    Battle.execSkill(u, t||u, 0); // Enemy uses skill 0
+                }, 800/b.spd);
             }
         },
         act: (si) => {
-            const u = b.p[b.idx]; const sk = u.s[si];
-            if (sk.ty === 'heal') { b.skillPending = { sIdx: si }; el('act-msg').innerText = "Selecione um Aliado"; document.querySelectorAll('#r-pla .b-unit').forEach(e => { if (!e.classList.contains('dead')) e.classList.add('selectable'); }); return; }
-            if (sk.ty === 'heal_aoe' || sk.ty === 'buff_atk' || sk.ty === 'buff_def') { el('btl-ui').classList.remove('active'); Battle.execSkill(u, u, si); return; }
-            let t = null; if(b.target !== null && !b.e[b.target].dead) t = b.e[b.target]; else t = b.e.find(x=>!x.dead); 
-            if(!t) return; el('btl-ui').classList.remove('active'); Battle.execSkill(u, t, si);
+            const u = b.p[b.idx];
+            const sk = u.s[si];
+            if (sk.ty === 'heal') {
+                b.skillPending = { sIdx: si };
+                el('act-msg').innerText = "Selecione um Aliado";
+                document.querySelectorAll('#r-pla .b-unit').forEach(e => { if (!e.classList.contains('dead')) e.classList.add('selectable'); });
+                return;
+            }
+            if (sk.ty === 'heal_aoe' || sk.ty.includes('buff')) { el('btl-ui').classList.remove('active'); Battle.execSkill(u, u, si); return; }
+            let t = null;
+            if(b.target !== null && !b.e[b.target].dead) t = b.e[b.target];
+            else t = b.e.find(x=>!x.dead); // Auto pick first if no target selected
+
+            if(!t) return; // No targets
+            
+            el('btl-ui').classList.remove('active');
+            Battle.execSkill(u, t, si);
         },
         execSkill: (atk, def, si) => {
-            const sk = atk.s[si]; atk.cds[si] = sk.cd + 1;
-            const aEl = el(`${atk.side}${atk.idx}`); aEl.classList.remove('active-turn'); if(aEl) aEl.classList.add('actor'); 
+            const sk = atk.s[si];
+            atk.cds[si] = sk.cd + 1;
             
+            const aEl = el(`${atk.side}${atk.idx}`);
+            aEl.classList.remove('active-turn');
+            if(aEl) aEl.classList.add('actor'); // Trigger attack anim
+
             setTimeout(() => {
                 if(aEl) aEl.classList.remove('actor');
+                
                 let targets = [def];
-                if (sk.ty === 'aoe' || sk.ty.includes('aoe')) targets = atk.side==='p' ? (sk.ty.includes('heal')?b.p:b.e) : (sk.ty.includes('heal')?b.e:b.p);
-                else if (sk.ty.includes('buff') || sk.ty === 'heal') targets = [def]; // Single target support usually self or ally
+                if (sk.ty.includes('aoe')) targets = atk.side==='p' ? (sk.ty.includes('heal')?b.p:b.e) : (sk.ty.includes('heal')?b.e:b.p);
+                else if (sk.ty.includes('buff') || sk.ty === 'heal') targets = [def];
 
                 targets.forEach(t => {
                     if(t && !t.dead) {
                         const tEl = el(`${t.side}${t.idx}`);
                         if(tEl) {
-                            if (sk.ty === 'heal' || sk.ty === 'heal_aoe') {
-                                const heal = Math.floor(atk.atk * sk.m); t.cur = Math.min(t.max, t.cur + heal);
-                                const p = document.createElement('div'); p.className='dmg-popup'; p.innerHTML = `+${heal}`; p.style.color = '#22c55e'; tEl.appendChild(p); setTimeout(()=>p.remove(), 800);
+                            if (sk.ty.includes('heal')) {
+                                const healAmount = Math.floor(atk.atk * sk.m);
+                                t.cur = Math.min(t.max, t.cur + healAmount);
+                                const popup = document.createElement('div'); popup.className='dmg-popup'; popup.innerHTML = `+${healAmount}`; popup.style.color = '#22c55e';
+                                tEl.appendChild(popup); setTimeout(()=>popup.remove(), 800);
                             } else if (sk.ty.startsWith('buff_')) {
                                 t.buffs.push({type:sk.ty, turns:3});
                                 const p = document.createElement('div'); p.className='dmg-popup'; p.innerHTML = 'BUFF!'; p.style.color = '#3b82f6'; tEl.appendChild(p); setTimeout(()=>p.remove(), 800);
                             } else if (sk.ty === 'turn') {
-                                // Turn gain logic: handled by resetting index? Complex in current system. 
-                                // Simplified: Heal a bit + Buff Atk
+                                // Just heal small amount + buff atk
                                 t.buffs.push({type:'buff_atk', turns:2});
                                 const p = document.createElement('div'); p.className='dmg-popup'; p.innerHTML = 'FÚRIA!'; p.style.color = '#ef4444'; tEl.appendChild(p); setTimeout(()=>p.remove(), 800);
                             } else {
@@ -711,24 +1385,29 @@
                                 if ((at=='Água' && dt=='Fogo') || (at=='Fogo' && dt=='Vento') || (at=='Vento' && dt=='Terra') || (at=='Terra' && dt=='Água') || (at=='Luz' && dt=='Trevas') || (at=='Trevas' && dt=='Luz')) { mult = 1.2; txtColor = '#facc15'; txtExtra = 'CRUSH! '; } 
                                 else if ((at=='Fogo' && dt=='Água') || (at=='Vento' && dt=='Fogo') || (at=='Terra' && dt=='Vento') || (at=='Água' && dt=='Terra')) { mult = 0.8; txtColor = '#9ca3af'; txtExtra = 'Glance... '; }
                                 
-                                // Apply Buffs/Debuffs to Dmg
-                                let atkPower = atk.atk; if(atk.buffs.some(b=>b.type==='buff_atk')) atkPower *= 1.5;
-                                let defPower = 1; // Simplified def
+                                // Buffs/Debuffs Calc
+                                let finalAtk = atk.atk; if(atk.buffs.some(b=>b.type==='buff_atk')) finalAtk *= 1.5;
+                                let finalDef = 1; // Simplified
                                 
-                                const dmg = Math.floor(atkPower * sk.m * mult);
-                                t.cur = Math.max(0, t.cur - dmg); if(t.cur===0) t.dead = true;
+                                const dmg = Math.floor(finalAtk * sk.m * mult);
+                                t.cur = Math.max(0, t.cur - dmg);
+                                if(t.cur===0) t.dead = true;
                                 
                                 // Apply Debuffs (Chance)
-                                if(sk.ty.includes('debuff') || Math.random() > 0.7) { // 30% chance native debuff or specific
-                                     if(sk.ty==='debuff_spd') t.buffs.push({type:'poison', turns:2}); // Mapping spd to poison for now
+                                if(sk.ty.includes('debuff') || Math.random() > 0.8) {
+                                    if(sk.ty==='debuff_spd') t.buffs.push({type:'poison', turns:2});
                                 }
 
-                                const p = document.createElement('div'); p.className='dmg-popup'; p.innerHTML = `<span style="font-size:0.5em">${txtExtra}</span>${dmg}`; p.style.color = txtColor; tEl.appendChild(p); setTimeout(()=>p.remove(), 800);
+                                const popup = document.createElement('div'); popup.className='dmg-popup'; popup.innerHTML = `<span style="font-size:0.5em">${txtExtra}</span>${dmg}`; popup.style.color = txtColor;
+                                tEl.appendChild(popup); setTimeout(()=>popup.remove(), 800);
                             }
                         }
                     }
                 });
-                Battle.updateVisuals(); b.idx++; setTimeout(Battle.turn, 500/b.spd);
+                Battle.updateVisuals();
+                b.idx++; 
+                setTimeout(Battle.turn, 500/b.spd);
+
             }, 300/b.spd);
         },
         end: (w) => {
@@ -736,21 +1415,30 @@
                 if(w) {
                     const boostActive = s.xp_boost_end_time && Date.now() < s.xp_boost_end_time;
                     const gainScale = tmp.lvl || 1;
-                    const rMana = (2500 + (gainScale * 100)) * (boostActive ? 1.5 : 1); // Increased Mana
+                    const rMana = (2500 + (gainScale * 100)) * (boostActive ? 1.5 : 1);
                     const rXP = (100 + (gainScale * 20)) * (boostActive ? 2 : 1);
+                    
                     const stageKey = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
                     const isFirst = !s.cleared.includes(stageKey);
                     if(isFirst) s.cleared.push(stageKey);
                     
-                    if(tmp.mode === 'story' && tmp.lvl === s.maxStage) { s.maxStage++; UI.toast("Nova Fase Desbloqueada!"); }
-                    if(tmp.mode === 'tower' && tmp.lvl === s.maxTower) { s.maxTower++; }
+                    if(tmp.mode === 'story' && tmp.lvl === s.maxStage) {
+                        s.maxStage++;
+                        UI.toast("Nova Fase Desbloqueada!");
+                    }
+                    if(tmp.mode === 'tower' && tmp.lvl === s.maxTower) {
+                         s.maxTower++;
+                    }
 
                     const rGems = isFirst ? 50 : 5;
                     s.mana += rMana; s.xp += rXP; s.gems += rGems;
                     Core.updateMission('win');
                     if(tmp.mode==='dung') Core.updateMission('dun_win');
 
-                    if (s.xp >= s.max_xp) { s.xp -= s.max_xp; s.p_lvl++; s.gems += 100; s.max_xp = Math.floor(s.max_xp * 1.5); UI.toast(`LEVEL UP! +100 💎`); }
+                    if (s.xp >= s.max_xp) {
+                        s.xp -= s.max_xp; s.p_lvl++; s.gems += 100; s.max_xp = Math.floor(s.max_xp * 1.5);
+                        UI.toast(`LEVEL UP! +100 💎`);
+                    }
                     el('end-mana').innerText = `+${formatNum(Math.floor(rMana))}`; el('end-gems').innerText = `+${rGems}`; el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP`;
                     if(tmp.mode==='dung') {
                         let rType = 'Raro'; const roll = Math.random() * 100;
@@ -768,10 +1456,20 @@
         },
         close: () => { 
             UI.modal('m-end',0); 
-            if(tmp.mode === 'story') { UI.nav('expl'); const rid = Math.ceil(tmp.lvl/8); el('expl-regions').style.display='none'; el('expl-stages-list').style.display='flex'; Core.renStageList(rid); } 
-            else if (tmp.mode === 'dung') { UI.nav('dung'); Core.selectDung(tmp.dungType); } 
-            else if (tmp.mode === 'tower') { UI.nav('tower'); } 
-            else { UI.nav('hub'); }
+            if(tmp.mode === 'story') {
+                UI.nav('expl');
+                const rid = Math.ceil(tmp.lvl/8);
+                el('expl-regions').style.display='none';
+                el('expl-stages-list').style.display='flex';
+                Core.renStageList(rid);
+            } else if (tmp.mode === 'dung') {
+                UI.nav('dung');
+                Core.selectDung(tmp.dungType);
+            } else if (tmp.mode === 'tower') {
+                 UI.nav('tower');
+            } else {
+                UI.nav('hub');
+            }
         }
     };
 </script>
