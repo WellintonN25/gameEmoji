@@ -8,17 +8,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Manrope:wght@400;600;800&family=Titan+One&display=swap');
 
         :root {
-            --c-bg: #f3f4f6;
-            --c-panel: rgba(255, 255, 255, 0.98);
-            --c-primary: #3b82f6; 
-            --c-accent: #8b5cf6; 
-            --c-gold: #f59e0b; 
-            --c-danger: #ef4444;
-            --c-success: #10b981;
-            --c-text: #1f2937; 
-            --c-text-dim: #6b7280;
-            --c-border: #e5e7eb;
-            --dock-height: 80px;
+            --c-bg: #f3f4f6; --c-panel: rgba(255, 255, 255, 0.98); --c-primary: #3b82f6; --c-accent: #8b5cf6; 
+            --c-gold: #f59e0b; --c-danger: #ef4444; --c-success: #10b981; --c-text: #1f2937; --c-text-dim: #6b7280; --c-border: #e5e7eb; --dock-height: 80px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -70,9 +61,13 @@
         .hero-slot:active { transform: scale(0.95); }
         .hero-slot.selected { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
         .hero-slot .lvl-badge { position: absolute; bottom: 0; right: 0; background: rgba(0,0,0,0.8); color: #fff; font-size: 0.65rem; padding: 2px 5px; border-top-left-radius: 8px; font-weight: bold; }
-        .hero-slot .lvl-badge.max { background: var(--c-gold); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); }
         .hero-slot.leg-glow { border-color: var(--c-gold); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
-        .hero-slot img, .custom-img, .visual img { width: 100%; height: 100%; object-fit: contain; }
+        
+        /* IMAGE SUPPORT */
+        .hero-slot img, .custom-img, .visual img, .dex-slot img, .b-u img { 
+            width: 100%; height: 100%; object-fit: contain; display: block; 
+        }
+        
         .stars { display: flex; gap: 1px; justify-content: center; position: absolute; top: 3px; width: 100%; }
         .star { width: 8px; height: 8px; background: var(--c-gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
 
@@ -498,46 +493,56 @@ const MAX_LVL={1:10,2:20,3:30,4:40,5:50,6:50};
 const EXPL_REGIONS=[{id:1,name:"Floresta",icon:"🌲",color:"#10b981"},{id:2,name:"Vulcão",icon:"🌋",color:"#ef4444"},{id:3,name:"Ruínas",icon:"🏛️",color:"#fbbf24"},{id:4,name:"Pico",icon:"⚡",color:"#a855f7"}];
 const SHOP_DB=[{id:'pot',name:'Poção XP',cost:100,currency:'mana',icon:'🧪'},{id:'pot_pack',name:'Pack Poções (10)',cost:900,currency:'mana',icon:'⚗️'},{id:'tix',name:'Ticket',cost:1000,currency:'mana',icon:'🎫'},{id:'rare',name:'Ticket Raro',cost:100,currency:'gems',icon:'🎟️'},{id:'grimoire',name:'Grimório',cost:500,currency:'gems',icon:'📚'},{id:'xpboost',name:'Booster (7m)',cost:50,currency:'gems',icon:'🚀'},{id:'tix_pack',name:'Pack Comum (11)',cost:10000,currency:'mana',icon:'📦'},{id:'rare_pack',name:'Pack Raro (11)',cost:1000,currency:'gems',icon:'👑'},{id:'xpboost_15',name:'Booster (15m)',cost:90,currency:'gems',icon:'🚀'},{id:'food_5',name:'Rainbowmon',cost:500000,currency:'mana',icon:'🥚'}];
 const MISSIONS_DB=[{id:'bat_3',desc:'Batalhar 3 Vezes',target:3,r:{mana:50000,gems:10},type:'win'},{id:'bat_10',desc:'Batalhar 10 Vezes',target:10,r:{mana:100000,gems:30},type:'win'},{id:'sum_1',desc:'Invocar 1 Monstro',target:1,r:{mana:30000,gems:0},type:'sum'},{id:'pup_3',desc:'Upar Nível 3x',target:3,r:{mana:40000,gems:0},type:'pup'},{id:'rup_3',desc:'Upar Runa 3x',target:3,r:{mana:60000,gems:0},type:'rup'},{id:'dun_5',desc:'Masmorra 5 Vezes',target:5,r:{mana:0,gems:50},type:'dun_win'},{id:'login',desc:'Login Diário',target:1,r:{mana:50000,gems:20},type:'login'}];
+
+/*
+================================================================================
+>>> GUIA PARA ADICIONAR IMAGENS CUSTOMIZADAS <<<
+1. Encontre a variável "const DB = [...]" abaixo.
+2. No campo "img", coloque o link direto de uma imagem PNG com fundo transparente.
+   Exemplo: img: 'https://i.imgur.com/seumonstro.png'
+3. Se o campo "img" estiver preenchido, o jogo usa a imagem. Se estiver vazio (''), usa o emoji.
+================================================================================
+*/
 const DB = [
-    {id:101,nat:1,n:'Slime',type:'Água',visual:'💧',s:[{n:'Hit',m:1.2,cd:0,ty:'atk'},{n:'Gosma',m:1.1,cd:2,ty:'debuff_spd'}],hp:50,atk:10},
-    {id:102,nat:1,n:'Wisp',type:'Fogo',visual:'🔥',s:[{n:'Queimar',m:1.2,cd:0,ty:'atk'},{n:'Incêndio',m:1.3,cd:3,ty:'aoe'}],hp:45,atk:12},
-    {id:201,nat:2,n:'Goblin',type:'Terra',visual:'👺',s:[{n:'Lança',m:1.3,cd:0,ty:'atk'},{n:'Fúria',m:0,cd:3,ty:'buff_atk'}],hp:80,atk:18},
-    {id:304,nat:3,n:'Fairy',type:'Luz',visual:'🧚',s:[{n:'Raio',m:1.3,cd:0,ty:'atk'},{n:'Cura',m:2.5,cd:3,ty:'heal'}],hp:90,atk:15},
-    {id:503,nat:3,n:'Dríade',type:'Vento',visual:'🌿',s:[{n:'Espinhos',m:1.2,cd:0,ty:'atk'},{n:'Vento Suave',m:2.0,cd:3,ty:'heal_aoe'}],hp:110,atk:18},
-    {id:509,nat:3,n:'Ent Ancião',type:'Terra',visual:'🌳',s:[{n:'Esmagar',m:1.2,cd:0,ty:'atk'},{n:'Raízes',m:1.3,cd:3,ty:'aoe'}],hp:140,atk:15},
-    {id:505,nat:3,n:'Sereia',type:'Água',visual:'🧜‍♀️',s:[{n:'Bolha',m:1.2,cd:0,ty:'atk'},{n:'Canto',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:18},
-    {id:401,nat:4,n:'Valk',type:'Vento',visual:'🦅',s:[{n:'Corte',m:1.4,cd:0,ty:'atk'},{n:'Tempestade',m:1.6,cd:3,ty:'aoe'},{n:'Grito',m:0,cd:4,ty:'buff_atk'}],hp:150,atk:25},
-    {id:504,nat:4,n:'Ninja',type:'Vento',visual:'🥷',s:[{n:'Shuriken',m:1.4,cd:0,ty:'atk'},{n:'Corte Sônico',m:1.7,cd:3,ty:'aoe'},{n:'Executar',m:2.2,cd:5,ty:'atk'}],hp:120,atk:32},
-    {id:506,nat:4,n:'Mago Ígneo',type:'Fogo',visual:'🧙‍♂️',s:[{n:'Bola de Fogo',m:1.5,cd:0,ty:'atk'},{n:'Explosão',m:1.8,cd:3,ty:'aoe'},{n:'Meteoro',m:2.0,cd:5,ty:'aoe'}],hp:110,atk:30},
-    {id:510,nat:4,n:'Paladino',type:'Luz',visual:'🛡️',s:[{n:'Golpe Divino',m:1.3,cd:0,ty:'atk'},{n:'Proteção',m:0,cd:3,ty:'buff_def'},{n:'Cura Maior',m:3.0,cd:4,ty:'heal'}],hp:160,atk:20},
-    {id:503,nat:4,n:'Lobisomem',type:'Trevas',visual:'🐺',s:[{n:'Mordida',m:1.4,cd:0,ty:'atk'},{n:'Uivo',m:1.6,cd:3,ty:'aoe'},{n:'Fúria',m:0,cd:4,ty:'turn'}],hp:130,atk:25},
-    {id:511,nat:5,n:'Lorde Vampiro',type:'Fogo',visual:'🧛',s:[{n:'Drenar',m:1.5,cd:0,ty:'atk'},{n:'Morcegos',m:1.8,cd:3,ty:'aoe'},{n:'Imortalidade',m:0,cd:5,ty:'turn'}],hp:160,atk:35},
-    {id:507,nat:5,n:'Arcanjo',type:'Luz',visual:'👼',s:[{n:'Espada Sagrada',m:1.5,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Ressurreição',m:0,cd:6,ty:'heal_aoe'}],hp:170,atk:28},
-    {id:508,nat:5,n:'Poseidon',type:'Água',visual:'🔱',s:[{n:'Tridente',m:1.5,cd:0,ty:'atk'},{n:'Tsunami',m:1.8,cd:3,ty:'aoe'},{n:'Maremoto',m:2.0,cd:5,ty:'aoe'}],hp:180,atk:26},
-    {id:990,nat:5,n:'Rainbowmon',type:'Luz',visual:'🥚',s:[{n:'-',m:0,cd:0,ty:'atk'}],hp:100,atk:10},
-    {id:601,nat:5,n:'Fênix',type:'Fogo',visual:'🐦‍🔥',s:[{n:'Chama Viva',m:1.3,cd:0,ty:'atk'},{n:'Renascer',m:2.0,cd:5,ty:'heal'},{n:'Supernova',m:2.5,cd:6,ty:'aoe'}],hp:150,atk:38},
-    {id:602,nat:5,n:'Kraken',type:'Água',visual:'🦑',s:[{n:'Tentáculos',m:1.2,cd:0,ty:'atk'},{n:'Esmagar',m:1.6,cd:3,ty:'aoe'},{n:'Tinta',m:0,cd:4,ty:'debuff'}],hp:200,atk:25},
-    {id:603,nat:4,n:'Grifo',type:'Vento',visual:'🦅',s:[{n:'Bicada',m:1.3,cd:0,ty:'atk'},{n:'Ventania',m:1.5,cd:3,ty:'aoe'},{n:'Investida',m:2.0,cd:4,ty:'atk'}],hp:140,atk:30},
-    {id:604,nat:4,n:'Yeti',type:'Água',visual:'❄️',s:[{n:'Soco',m:1.2,cd:0,ty:'atk'},{n:'Congelar',m:1.4,cd:3,ty:'stun'},{n:'Avalanche',m:1.8,cd:5,ty:'aoe'}],hp:180,atk:20},
-    {id:605,nat:4,n:'Cérbero',type:'Fogo',visual:'🐕',s:[{n:'Mordida Tripla',m:1.4,cd:0,ty:'atk'},{n:'Uivo Infernal',m:1.5,cd:3,ty:'aoe'},{n:'Guardião',m:0,cd:4,ty:'buff_def'}],hp:150,atk:32},
-    {id:606,nat:4,n:'Medusa',type:'Terra',visual:'🐍',s:[{n:'Picada',m:1.2,cd:0,ty:'atk'},{n:'Olhar Pétreo',m:0,cd:4,ty:'stun'},{n:'Veneno',m:1.5,cd:3,ty:'poison'}],hp:140,atk:28},
-    {id:607,nat:3,n:'Esqueleto',type:'Trevas',visual:'💀',s:[{n:'Osso',m:1.1,cd:0,ty:'atk'},{n:'Susto',m:1.3,cd:3,ty:'debuff'}],hp:90,atk:20},
-    {id:608,nat:4,n:'Banshee',type:'Trevas',visual:'👻',s:[{n:'Grito',m:1.2,cd:0,ty:'aoe'},{n:'Maldição',m:1.5,cd:3,ty:'debuff'},{n:'Lamento',m:2.0,cd:5,ty:'atk'}],hp:110,atk:35},
-    {id:609,nat:4,n:'Samurai',type:'Fogo',visual:'👹',s:[{n:'Katana',m:1.5,cd:0,ty:'atk'},{n:'Corte Duplo',m:1.8,cd:3,ty:'atk'},{n:'Honra',m:0,cd:4,ty:'buff_atk'}],hp:130,atk:36},
-    {id:610,nat:5,n:'Druida',type:'Vento',visual:'🦌',s:[{n:'Bastão',m:1.2,cd:0,ty:'atk'},{n:'Raízes',m:1.5,cd:3,ty:'stun'},{n:'Cura da Natureza',m:2.5,cd:5,ty:'heal_aoe'}],hp:170,atk:25},
-    {id:611,nat:4,n:'Sacerdotisa',type:'Luz',visual:'🧝‍♀️',s:[{n:'Luz',m:1.1,cd:0,ty:'atk'},{n:'Cura',m:2.0,cd:2,ty:'heal'},{n:'Proteção',m:0,cd:4,ty:'buff_def'}],hp:120,atk:22},
-    {id:612,nat:3,n:'Minotauro',type:'Terra',visual:'🐂',s:[{n:'Machadada',m:1.3,cd:0,ty:'atk'},{n:'Investida',m:1.5,cd:3,ty:'stun'}],hp:160,atk:20},
-    {id:613,nat:3,n:'Harpia',type:'Vento',visual:'🦇',s:[{n:'Garras',m:1.2,cd:0,ty:'atk'},{n:'Voo Rasante',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:25},
-    {id:614,nat:5,n:'Valquíria Real',type:'Luz',visual:'🗡️',s:[{n:'Lança Sagrada',m:1.4,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Imortal',m:0,cd:6,ty:'buff_def'}],hp:160,atk:35}
+    {id:101,nat:1,n:'Slime',type:'Água',img:'',visual:'💧',s:[{n:'Hit',m:1.2,cd:0,ty:'atk'},{n:'Gosma',m:1.1,cd:2,ty:'debuff_spd'}],hp:50,atk:10},
+    {id:102,nat:1,n:'Wisp',type:'Fogo',img:'',visual:'🔥',s:[{n:'Queimar',m:1.2,cd:0,ty:'atk'},{n:'Incêndio',m:1.3,cd:3,ty:'aoe'}],hp:45,atk:12},
+    {id:201,nat:2,n:'Goblin',type:'Terra',img:'',visual:'👺',s:[{n:'Lança',m:1.3,cd:0,ty:'atk'},{n:'Fúria',m:0,cd:3,ty:'buff_atk'}],hp:80,atk:18},
+    {id:304,nat:3,n:'Fairy',type:'Luz',img:'',visual:'🧚',s:[{n:'Raio',m:1.3,cd:0,ty:'atk'},{n:'Cura',m:2.5,cd:3,ty:'heal'}],hp:90,atk:15},
+    {id:503,nat:3,n:'Dríade',type:'Vento',img:'',visual:'🌿',s:[{n:'Espinhos',m:1.2,cd:0,ty:'atk'},{n:'Vento Suave',m:2.0,cd:3,ty:'heal_aoe'}],hp:110,atk:18},
+    {id:509,nat:3,n:'Ent Ancião',type:'Terra',img:'',visual:'🌳',s:[{n:'Esmagar',m:1.2,cd:0,ty:'atk'},{n:'Raízes',m:1.3,cd:3,ty:'aoe'}],hp:140,atk:15},
+    {id:505,nat:3,n:'Sereia',type:'Água',img:'',visual:'🧜‍♀️',s:[{n:'Bolha',m:1.2,cd:0,ty:'atk'},{n:'Canto',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:18},
+    {id:401,nat:4,n:'Valk',type:'Vento',img:'',visual:'🦅',s:[{n:'Corte',m:1.4,cd:0,ty:'atk'},{n:'Tempestade',m:1.6,cd:3,ty:'aoe'},{n:'Grito',m:0,cd:4,ty:'buff_atk'}],hp:150,atk:25},
+    {id:504,nat:4,n:'Ninja',type:'Vento',img:'',visual:'🥷',s:[{n:'Shuriken',m:1.4,cd:0,ty:'atk'},{n:'Corte Sônico',m:1.7,cd:3,ty:'aoe'},{n:'Executar',m:2.2,cd:5,ty:'atk'}],hp:120,atk:32},
+    {id:506,nat:4,n:'Mago Ígneo',type:'Fogo',img:'',visual:'🧙‍♂️',s:[{n:'Bola de Fogo',m:1.5,cd:0,ty:'atk'},{n:'Explosão',m:1.8,cd:3,ty:'aoe'},{n:'Meteoro',m:2.0,cd:5,ty:'aoe'}],hp:110,atk:30},
+    {id:510,nat:4,n:'Paladino',type:'Luz',img:'',visual:'🛡️',s:[{n:'Golpe Divino',m:1.3,cd:0,ty:'atk'},{n:'Proteção',m:0,cd:3,ty:'buff_def'},{n:'Cura Maior',m:3.0,cd:4,ty:'heal'}],hp:160,atk:20},
+    {id:503,nat:4,n:'Lobisomem',type:'Trevas',img:'',visual:'🐺',s:[{n:'Mordida',m:1.4,cd:0,ty:'atk'},{n:'Uivo',m:1.6,cd:3,ty:'aoe'},{n:'Fúria',m:0,cd:4,ty:'turn'}],hp:130,atk:25},
+    {id:511,nat:5,n:'Lorde Vampiro',type:'Fogo',img:'',visual:'🧛',s:[{n:'Drenar',m:1.5,cd:0,ty:'atk'},{n:'Morcegos',m:1.8,cd:3,ty:'aoe'},{n:'Imortalidade',m:0,cd:5,ty:'turn'}],hp:160,atk:35},
+    {id:507,nat:5,n:'Arcanjo',type:'Luz',img:'',visual:'👼',s:[{n:'Espada Sagrada',m:1.5,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Ressurreição',m:0,cd:6,ty:'heal_aoe'}],hp:170,atk:28},
+    {id:508,nat:5,n:'Poseidon',type:'Água',img:'',visual:'🔱',s:[{n:'Tridente',m:1.5,cd:0,ty:'atk'},{n:'Tsunami',m:1.8,cd:3,ty:'aoe'},{n:'Maremoto',m:2.0,cd:5,ty:'aoe'}],hp:180,atk:26},
+    {id:990,nat:5,n:'Rainbowmon',type:'Luz',img:'',visual:'🥚',s:[{n:'-',m:0,cd:0,ty:'atk'}],hp:100,atk:10},
+    {id:601,nat:5,n:'Fênix',type:'Fogo',img:'',visual:'🐦‍🔥',s:[{n:'Chama Viva',m:1.3,cd:0,ty:'atk'},{n:'Renascer',m:2.0,cd:5,ty:'heal'},{n:'Supernova',m:2.5,cd:6,ty:'aoe'}],hp:150,atk:38},
+    {id:602,nat:5,n:'Kraken',type:'Água',img:'',visual:'🦑',s:[{n:'Tentáculos',m:1.2,cd:0,ty:'atk'},{n:'Esmagar',m:1.6,cd:3,ty:'aoe'},{n:'Tinta',m:0,cd:4,ty:'debuff'}],hp:200,atk:25},
+    {id:603,nat:4,n:'Grifo',type:'Vento',img:'',visual:'🦅',s:[{n:'Bicada',m:1.3,cd:0,ty:'atk'},{n:'Ventania',m:1.5,cd:3,ty:'aoe'},{n:'Investida',m:2.0,cd:4,ty:'atk'}],hp:140,atk:30},
+    {id:604,nat:4,n:'Yeti',type:'Água',img:'',visual:'❄️',s:[{n:'Soco',m:1.2,cd:0,ty:'atk'},{n:'Congelar',m:1.4,cd:3,ty:'stun'},{n:'Avalanche',m:1.8,cd:5,ty:'aoe'}],hp:180,atk:20},
+    {id:605,nat:4,n:'Cérbero',type:'Fogo',img:'',visual:'🐕',s:[{n:'Mordida Tripla',m:1.4,cd:0,ty:'atk'},{n:'Uivo Infernal',m:1.5,cd:3,ty:'aoe'},{n:'Guardião',m:0,cd:4,ty:'buff_def'}],hp:150,atk:32},
+    {id:606,nat:4,n:'Medusa',type:'Terra',img:'',visual:'🐍',s:[{n:'Picada',m:1.2,cd:0,ty:'atk'},{n:'Olhar Pétreo',m:0,cd:4,ty:'stun'},{n:'Veneno',m:1.5,cd:3,ty:'poison'}],hp:140,atk:28},
+    {id:607,nat:3,n:'Esqueleto',type:'Trevas',img:'',visual:'💀',s:[{n:'Osso',m:1.1,cd:0,ty:'atk'},{n:'Susto',m:1.3,cd:3,ty:'debuff'}],hp:90,atk:20},
+    {id:608,nat:4,n:'Banshee',type:'Trevas',img:'',visual:'👻',s:[{n:'Grito',m:1.2,cd:0,ty:'aoe'},{n:'Maldição',m:1.5,cd:3,ty:'debuff'},{n:'Lamento',m:2.0,cd:5,ty:'atk'}],hp:110,atk:35},
+    {id:609,nat:4,n:'Samurai',type:'Fogo',img:'',visual:'👹',s:[{n:'Katana',m:1.5,cd:0,ty:'atk'},{n:'Corte Duplo',m:1.8,cd:3,ty:'atk'},{n:'Honra',m:0,cd:4,ty:'buff_atk'}],hp:130,atk:36},
+    {id:610,nat:5,n:'Druida',type:'Vento',img:'',visual:'🦌',s:[{n:'Bastão',m:1.2,cd:0,ty:'atk'},{n:'Raízes',m:1.5,cd:3,ty:'stun'},{n:'Cura da Natureza',m:2.5,cd:5,ty:'heal_aoe'}],hp:170,atk:25},
+    {id:611,nat:4,n:'Sacerdotisa',type:'Luz',img:'',visual:'🧝‍♀️',s:[{n:'Luz',m:1.1,cd:0,ty:'atk'},{n:'Cura',m:2.0,cd:2,ty:'heal'},{n:'Proteção',m:0,cd:4,ty:'buff_def'}],hp:120,atk:22},
+    {id:612,nat:3,n:'Minotauro',type:'Terra',img:'',visual:'🐂',s:[{n:'Machadada',m:1.3,cd:0,ty:'atk'},{n:'Investida',m:1.5,cd:3,ty:'stun'}],hp:160,atk:20},
+    {id:613,nat:3,n:'Harpia',type:'Vento',img:'',visual:'🦇',s:[{n:'Garras',m:1.2,cd:0,ty:'atk'},{n:'Voo Rasante',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:25},
+    {id:614,nat:5,n:'Valquíria Real',type:'Luz',img:'',visual:'🗡️',s:[{n:'Lança Sagrada',m:1.4,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Imortal',m:0,cd:6,ty:'buff_def'}],hp:160,atk:35}
 ];
 
 const BOSS_DB = {
-    golem: {id:901,nat:6,n:'Golem Ancestral',type:'Terra',visual:'🗿',s:[{n:'Esmagar',m:1.5,cd:0,ty:'atk'},{n:'Terremoto',m:2.5,cd:4,ty:'aoe'}],hp:5000,atk:100},
-    dragon: {id:902,nat:6,n:'Dragão do Caos',type:'Fogo',visual:'🐲',s:[{n:'Baforada',m:1.5,cd:0,ty:'atk'},{n:'Apocalipse',m:3.0,cd:5,ty:'aoe'}],hp:4000,atk:150}
+    golem: {id:901,nat:6,n:'Golem Ancestral',type:'Terra',img:'',visual:'🗿',s:[{n:'Esmagar',m:1.5,cd:0,ty:'atk'},{n:'Terremoto',m:2.5,cd:4,ty:'aoe'}],hp:5000,atk:100},
+    dragon: {id:902,nat:6,n:'Dragão do Caos',type:'Fogo',img:'',visual:'🐲',s:[{n:'Baforada',m:1.5,cd:0,ty:'atk'},{n:'Apocalipse',m:3.0,cd:5,ty:'aoe'}],hp:4000,atk:150}
 };
 
 // DEFAULT STATE
-const DEFAULT_STATE={mana:2000,gems:50,pot:5,tix:0,rare_tix:5,grimoires:0,xp:0,max_xp:100,p_lvl:1,maxStage:1,maxTower:1,cleared:[],runes_inv:[],roster:[],xp_boost_end_time:0,first_summon_done:false,daily_missions:{last_reset:0,progress:{},claimed:[]}, arena_wings: 10, arena_pts: 0, arena_opponents: []};
+const DEFAULT_STATE={mana:2000,gems:50,pot:5,tix:0,rare_tix:10,grimoires:0,xp:0,max_xp:100,p_lvl:1,maxStage:1,maxTower:1,cleared:[],runes_inv:[],roster:[],xp_boost_end_time:0,first_summon_done:false,daily_missions:{last_reset:0,progress:{},claimed:[]}, arena_wings: 10, arena_pts: 0, arena_opponents: []};
 
 let s={},tmp={prep:[],selInv:null,mode:'story',lvl:1,selRuneSlot:null,dungType:null,upRune:null,evoFodder:[],skillFodder:[],invFilter:'all'},b={p:[],e:[],t:'p',idx:0,spd:1,auto:false,farmRuns:0,skillPending:null,target:null};
 
@@ -547,7 +552,7 @@ const Game = {
         const u = el('inp-user').value.trim();
         if(!u) return;
         currentUser = u;
-        const sav = localStorage.getItem(`gl_fix_${u}`);
+        const sav = localStorage.getItem(`gl_final_v2_${u}`); // Force reset again for 10 tickets
         s = sav ? JSON.parse(sav) : JSON.parse(JSON.stringify(DEFAULT_STATE));
         if(!s.runes_inv) s.runes_inv=[]; if(!s.daily_missions) s.daily_missions={last_reset:0,progress:{},claimed:[]}; if(!s.maxTower) s.maxTower=1; if(!Array.isArray(s.roster)) s.roster=[];
         if (s.arena_wings === undefined) s.arena_wings = 10; if (s.arena_pts === undefined) s.arena_pts = 0; if (!s.arena_opponents) s.arena_opponents = [];
@@ -565,7 +570,7 @@ const Game = {
             else { el('boost-status').innerText=`XP Boost Inativo`; el('boost-status').style.color='#6b7280'; }
         },1000);
     },
-    save: function() { if(currentUser) localStorage.setItem(`gl_fix_${currentUser}`, JSON.stringify(s)); },
+    save: function() { if(currentUser) localStorage.setItem(`gl_final_v2_${currentUser}`, JSON.stringify(s)); },
     logout: function() { currentUser=null; document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active')); el('login').classList.add('active'); }
 };
 
@@ -586,7 +591,6 @@ const UI = {
         if(dG!==0) { const u=el('ui-gems'), su=el('shop-gems'); if(u)u.classList.add(dG>0?'pulse-g':'pulse-r'); if(su)su.innerText=formatNum(s.gems); setTimeout(()=>u?.classList.remove('pulse-g','pulse-r'),500); el('h-gems').innerText=formatNum(s.gems); walletCache.gems=s.gems; } else { el('h-gems').innerText=formatNum(s.gems); const su=el('shop-gems'); if(su)su.innerText=formatNum(s.gems); }
         el('p-lvl').innerText=s.p_lvl; el('g-tix').innerText=s.tix; el('g-rare').innerText=s.rare_tix; el('sk-grim').innerText=s.grimoires;
         
-        // Arena Update
         const aW = el('arena-wings-display'); if(aW) aW.innerText = s.arena_wings;
         const aP = el('arena-pts'); const hA = el('h-arena');
         if(aP) aP.innerText = s.arena_pts; if(hA) hA.innerText = s.arena_wings;
@@ -936,10 +940,6 @@ const Battle = {
     end: function(w) {
         setTimeout(() => {
             if(w) {
-                if (tmp.mode === 'arena') {
-                     s.arena_pts += 10;
-                     UI.toast("Vitória! +10 Glória");
-                }
                 const ba = s.xp_boost_end_time && Date.now() < s.xp_boost_end_time, gs = tmp.lvl || 1;
                 const rM = (2500 + (gs * 100)) * (ba ? 1.5 : 1), rX = (100 + (gs * 20)) * (ba ? 2 : 1);
                 const sk = tmp.mode === 'story' ? `s-${tmp.lvl}` : `d-${tmp.dungType}-${tmp.lvl}`;
@@ -994,8 +994,6 @@ const Battle = {
             Core.selectDung(tmp.dungType);
         } else if(tmp.mode === 'tower') {
             UI.nav('tower');
-        } else if(tmp.mode === 'arena') {
-            Core.openArena();
         } else {
             UI.nav('hub');
         }
