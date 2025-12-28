@@ -117,13 +117,12 @@
         .hero-slot.selected { border-color: var(--c-primary); transform: scale(1.05); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
         .hero-slot .lvl-badge { position: absolute; bottom: 0; right:0; background: #000; color:#fff; font-size:0.6rem; padding:1px 4px; border-top-left-radius:6px; font-weight:bold; }
         .hero-slot.legendary-glow { box-shadow: 0 0 10px var(--c-gold), inset 0 0 5px var(--c-gold); border-color: var(--c-gold); }
+        .hero-slot img, .custom-img, .visual img { width: 100%; height: 100%; object-fit: contain; }
+        
         .stars { display: flex; gap: 1px; justify-content: center; }
         .star { width: 8px; height: 8px; background: var(--c-gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
         .star.p { background: var(--c-accent); }
         
-        /* SUPORTE PARA IMAGENS CUSTOMIZADAS */
-        .hero-slot img, .custom-img, .visual img { width: 100%; height: 100%; object-fit: contain; }
-
         /* LOJA CARDS */
         .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; padding: 10px; }
         .shop-card {
@@ -209,18 +208,21 @@
 
         /* --- MONSTRODEX STYLES --- */
         #dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px; padding: 15px; align-content: flex-start; }
-        .dex-slot { 
-            width: 65px; height: 65px; position: relative; background: #fff; 
-            border-radius: 12px; border: 2px solid #eee; overflow: hidden; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-        }
+        .dex-slot { width: 65px; height: 65px; position: relative; background: #fff; border-radius: 12px; border: 2px solid #eee; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .dex-slot.unknown { filter: grayscale(1); opacity: 0.6; }
-        .dex-slot.unknown::after { 
-            content:'?'; position:absolute; inset:0; display:flex; 
-            align-items:center; justify-content:center; 
-            font-size:2rem; color:rgba(0,0,0,0.3); font-weight:900; 
-        }
+        .dex-slot.unknown::after { content:'?'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2rem; color:rgba(0,0,0,0.3); font-weight:900; }
+        .dex-slot .stars { position:absolute; bottom:2px; left:0; width:100%; justify-content:center; gap:0; }
+        .dex-slot .star { width: 5px; height: 5px; }
+
+        /* DEX DETAIL MODAL COMPACT */
+        .dex-detail-compact { display: flex; flex-direction: column; gap: 10px; }
+        .dex-detail-header { display: flex; gap: 15px; align-items: center; padding: 10px; background: #f9fafb; border-radius: 12px; border: 1px solid #eee; }
+        .dex-vis { font-size: 3rem; width: 60px; text-align: center; }
+        .dex-info { display: flex; flex-direction: column; }
+        .dex-name { font-family: 'Cinzel'; font-size: 1.2rem; font-weight: 900; color: #333; }
+        .dex-stats-row { display: flex; gap: 15px; font-size: 0.8rem; color: #666; margin-top: 5px; }
+        .dex-skill-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #eee; }
+        .dex-skill-icon { font-size: 1.2rem; width: 30px; text-align: center; }
 
         /* --- BATTLE (REALISTIC ARENA) --- */
         #battle { background: radial-gradient(circle at 50% 20%, #0f172a 0%, #000 100%); overflow: hidden; padding-bottom: 0; }
@@ -497,20 +499,26 @@
 
     <!-- MODALS -->
     <div id="m-dex-detail" class="modal">
-        <div class="modal-content">
-            <div class="mon-detail-header">
-                <div id="dxd-vis" class="big-model"></div>
-                <h2 id="dxd-name" style="margin-bottom:5px"></h2>
-                <div id="dxd-stars" class="stars" style="position:relative; margin-bottom:5px; width:auto; justify-content:center"></div>
-                <div class="mon-info-badge" id="dxd-badge"></div>
+        <div class="modal-content" style="max-width:300px; padding:15px">
+            <div class="dex-detail-compact">
+                <div class="dex-detail-header">
+                    <div id="dxd-vis" class="dex-vis"></div>
+                    <div class="dex-info">
+                        <div id="dxd-name" class="dex-name"></div>
+                        <div id="dxd-stars" class="stars" style="gap:1px; justify-content:flex-start"></div>
+                        <div id="dxd-badge" style="font-size:0.8rem; font-weight:bold; color:var(--c-primary)"></div>
+                    </div>
+                </div>
+                <div class="stat-grid" style="grid-template-columns:1fr 1fr; gap:10px; margin:0">
+                    <div style="background:#f9fafb; padding:8px; border-radius:8px"><b>HP</b> <span id="dxd-hp"></span></div>
+                    <div style="background:#f9fafb; padding:8px; border-radius:8px"><b>ATK</b> <span id="dxd-atk"></span></div>
+                </div>
+                <div>
+                    <h4 style="margin:5px 0">Skills</h4>
+                    <div id="dxd-skills" style="display:flex; flex-direction:column; gap:5px"></div>
+                </div>
             </div>
-            <div class="stat-grid" style="padding:10px">
-                <div class="stat-box"><span class="stat-label">HP</span><div class="stat-val-group"><span id="dxd-hp" class="stat-value"></span></div></div>
-                <div class="stat-box"><span class="stat-label">ATK</span><div class="stat-val-group"><span id="dxd-atk" class="stat-value"></span></div></div>
-            </div>
-            <h3 style="text-align:left; padding:0 10px; margin-top:10px">Habilidades</h3>
-            <div id="dxd-skills" class="skill-list-container" style="padding:10px"></div>
-            <button class="btn btn-white" style="margin-top:10px" onclick="UI.modal('m-dex-detail',0)">Fechar</button>
+            <button class="btn btn-white" onclick="UI.modal('m-dex-detail',0)">Fechar</button>
         </div>
     </div>
 
@@ -863,13 +871,17 @@
             allMons.forEach(d => {
                 const owned = s.roster.some(m => m.id === d.id);
                 const div = document.createElement('div'); div.className = `dex-slot ${owned ? '' : 'unknown'}`;
-                div.innerHTML = `<div style="font-size:2rem">${UI.getVis(d)}</div><div class="stars" style="position:absolute; bottom:2px; left:0; width:100%; justify-content:center; gap:0">${'★'.repeat(d.nat)}</div>`;
+                div.innerHTML = `<div style="font-size:2rem">${UI.getVis(d)}</div><div class="stars" style="position:absolute; bottom:2px; left:0; width:100%; justify-content:center; gap:0">${'<div class="star" style="width:4px;height:4px"></div>'.repeat(d.nat)}</div>`;
                 div.onclick = () => Core.showDexDetail(d); g.appendChild(div);
             });
         },
         showDexDetail: (d) => {
-            el('dxd-vis').innerHTML = UI.getVis(d); el('dxd-name').innerText = d.n; el('dxd-stars').innerHTML = '★'.repeat(d.nat); el('dxd-badge').innerText = d.type;
+            el('dxd-vis').innerHTML = UI.getVis(d); el('dxd-name').innerText = d.n; 
+            el('dxd-stars').innerHTML = ''; for(let i=0;i<d.nat;i++) el('dxd-stars').innerHTML+=`<div class="star"></div>`;
+            el('dxd-badge').innerText = d.type;
+            
             el('dxd-hp').innerText = d.hp; el('dxd-atk').innerText = d.atk;
+            
             const sl = el('dxd-skills'); sl.innerHTML = '';
             d.s.forEach((sk,i)=>{
                 const c=document.createElement('div'); c.className='skill-card-detail';
