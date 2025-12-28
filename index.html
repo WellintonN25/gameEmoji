@@ -88,7 +88,16 @@
             border-bottom: 1px solid var(--c-border); 
             height: 70px; flex-shrink: 0;
         }
-        .currency-tag { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--c-border); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .currency-tag { 
+            display: flex; align-items: center; gap: 6px; 
+            background: #fff; border: 1px solid var(--c-border); 
+            padding: 4px 10px; border-radius: 20px; 
+            font-size: 0.75rem; font-weight: 700; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            transition: color 0.3s, transform 0.1s;
+        }
+        .currency-tag.pulse-green { color: #10b981 !important; transform: scale(1.1); }
+        .currency-tag.pulse-red { color: #ef4444 !important; transform: scale(1.1); }
 
         .nav-dock { 
             position: absolute; bottom: 0; left: 0; width: 100%; 
@@ -321,8 +330,8 @@
                 </div>
             </div>
             <div style="text-align:right">
-                <div class="currency-tag" style="color:var(--c-primary)">💠 <span id="h-mana">0</span></div>
-                <div class="currency-tag" style="margin-top:4px; color:var(--c-gold)">💎 <span id="h-gems">0</span></div>
+                <div class="currency-tag" id="ui-mana" style="color:var(--c-primary)">💠 <span id="h-mana">0</span></div>
+                <div class="currency-tag" id="ui-gems" style="margin-top:4px; color:var(--c-gold)">💎 <span id="h-gems">0</span></div>
             </div>
         </div>
 
@@ -600,26 +609,11 @@
 
     /*
     ================================================================================
-    >>> GUIA PARA ADICIONAR UM NOVO PERSONAGEM MANUALMENTE <<<
-    
-    1. Encontre a variável "const DB = [...]" abaixo.
-    2. Adicione um novo objeto na lista seguindo o modelo:
-
-       {
-           id: 999,                   // ID único (use um número que não exista na lista)
-           nat: 5,                    // Estrelas (1 a 5)
-           n: 'Nome do Heroi',        // Nome que aparecerá no jogo
-           type: 'Fogo',              // Elemento: 'Água', 'Fogo', 'Vento', 'Terra', 'Luz', 'Trevas'
-           img: '',                   // Deixe vazio '' para usar o emoji, ou coloque a URL da imagem (ex: 'https://site.com/imagem.png')
-           visual: '🤠',              // Emoji (usado se a imagem estiver vazia ou falhar)
-           s: [                       // Habilidades (Skills)
-               {n:'Ataque 1', m:1, cd:0, ty:'atk'},     // ty: 'atk' (dano), 'aoe' (area), 'heal' (cura)
-               {n:'Ataque 2', m:1.5, cd:3, ty:'aoe'}    // m: Multiplicador de dano, cd: Cooldown (Turnos)
-           ],
-           hp: 100, atk: 50           // Status Base (Vida e Ataque)
-       },
-
-    3. Salve o arquivo. O novo personagem aparecerá no Gacha ou nas batalhas.
+    >>> GUIA PARA ADICIONAR IMAGENS CUSTOMIZADAS <<<
+    1. Encontre a variável "const DB = [...]".
+    2. No campo "img", coloque o link direto de uma imagem PNG com fundo transparente.
+       Exemplo: img: 'https://i.imgur.com/seumonstro.png'
+    3. Se o campo "img" estiver preenchido, o jogo usa a imagem. Se estiver vazio (''), usa o emoji.
     ================================================================================
     */
     const MAX_LVL = {1:10, 2:20, 3:30, 4:40, 5:50, 6:50};
@@ -635,7 +629,6 @@
         {id:'xpboost_15',name:'Booster (15m)',cost:90,currency:'gems',icon:'🚀'},
         {id:'food_5',name:'Rainbowmon',cost:500000,currency:'mana',icon:'🥚'}
     ];
-    // Simple missions db
     const MISSIONS_DB = [
         {id:'bat_3', desc:'Vencer 3 Batalhas', target:3, r:{mana:2000, gems:0}, type:'win'},
         {id:'bat_10', desc:'Vencer 10 Batalhas', target:10, r:{mana:0, gems:20}, type:'win'},
@@ -663,6 +656,24 @@
         {id:509,nat:3,n:'Ent Ancião',type:'Terra',img:'',visual:'🌳',s:[{n:'Esmagar',m:1.1,cd:0,ty:'atk'},{n:'Raízes',m:1.3,cd:3,ty:'aoe'}],hp:140,atk:15},
         {id:512,nat:3,n:'Dríade',type:'Vento',img:'',visual:'🌿',s:[{n:'Espinhos',m:1.2,cd:0,ty:'atk'},{n:'Vento Suave',m:2.0,cd:3,ty:'heal_aoe'}],hp:110,atk:18},
         {id:511,nat:5,n:'Vampiro',type:'Fogo',img:'',visual:'🧛',s:[{n:'Drenar',m:1.3,cd:0,ty:'atk'},{n:'Morcegos',m:1.5,cd:3,ty:'aoe'},{n:'Imortalidade',m:0,cd:5,ty:'turn'}],hp:160,atk:35},
+        
+        // --- NOVOS 14 PERSONAGENS ---
+        {id:601,nat:5,n:'Fênix',type:'Fogo',img:'',visual:'🐦‍🔥',s:[{n:'Chama Viva',m:1.3,cd:0,ty:'atk'},{n:'Renascer',m:2.0,cd:5,ty:'heal'},{n:'Supernova',m:2.5,cd:6,ty:'aoe'}],hp:150,atk:38},
+        {id:602,nat:5,n:'Kraken',type:'Água',img:'',visual:'🦑',s:[{n:'Tentáculos',m:1.2,cd:0,ty:'atk'},{n:'Esmagar',m:1.6,cd:3,ty:'aoe'},{n:'Tinta',m:0,cd:4,ty:'debuff'}],hp:200,atk:25},
+        {id:603,nat:4,n:'Grifo',type:'Vento',img:'',visual:'🦅',s:[{n:'Bicada',m:1.3,cd:0,ty:'atk'},{n:'Ventania',m:1.5,cd:3,ty:'aoe'},{n:'Investida',m:2.0,cd:4,ty:'atk'}],hp:140,atk:30},
+        {id:604,nat:4,n:'Yeti',type:'Água',img:'',visual:'❄️',s:[{n:'Soco',m:1.2,cd:0,ty:'atk'},{n:'Congelar',m:1.4,cd:3,ty:'stun'},{n:'Avalanche',m:1.8,cd:5,ty:'aoe'}],hp:180,atk:20},
+        {id:605,nat:4,n:'Cérbero',type:'Fogo',img:'',visual:'🐕',s:[{n:'Mordida Tripla',m:1.4,cd:0,ty:'atk'},{n:'Uivo Infernal',m:1.5,cd:3,ty:'aoe'},{n:'Guardião',m:0,cd:4,ty:'buff_def'}],hp:150,atk:32},
+        {id:606,nat:4,n:'Medusa',type:'Terra',img:'',visual:'🐍',s:[{n:'Picada',m:1.2,cd:0,ty:'atk'},{n:'Olhar Pétreo',m:0,cd:4,ty:'stun'},{n:'Veneno',m:1.5,cd:3,ty:'poison'}],hp:140,atk:28},
+        {id:607,nat:3,n:'Esqueleto',type:'Trevas',img:'',visual:'💀',s:[{n:'Osso',m:1.1,cd:0,ty:'atk'},{n:'Susto',m:1.3,cd:3,ty:'debuff'}],hp:90,atk:20},
+        {id:608,nat:4,n:'Banshee',type:'Trevas',img:'',visual:'👻',s:[{n:'Grito',m:1.2,cd:0,ty:'aoe'},{n:'Maldição',m:1.5,cd:3,ty:'debuff'},{n:'Lamento',m:2.0,cd:5,ty:'atk'}],hp:110,atk:35},
+        {id:609,nat:4,n:'Samurai',type:'Fogo',img:'',visual:'👹',s:[{n:'Katana',m:1.5,cd:0,ty:'atk'},{n:'Corte Duplo',m:1.8,cd:3,ty:'atk'},{n:'Honra',m:0,cd:4,ty:'buff_atk'}],hp:130,atk:36},
+        {id:610,nat:5,n:'Druida',type:'Vento',img:'',visual:'🦌',s:[{n:'Bastão',m:1.2,cd:0,ty:'atk'},{n:'Raízes',m:1.5,cd:3,ty:'stun'},{n:'Cura da Natureza',m:2.5,cd:5,ty:'heal_aoe'}],hp:170,atk:25},
+        {id:611,nat:4,n:'Sacerdotisa',type:'Luz',img:'',visual:'🧝‍♀️',s:[{n:'Luz',m:1.1,cd:0,ty:'atk'},{n:'Cura',m:2.0,cd:2,ty:'heal'},{n:'Proteção',m:0,cd:4,ty:'buff_def'}],hp:120,atk:22},
+        {id:612,nat:3,n:'Minotauro',type:'Terra',img:'',visual:'🐂',s:[{n:'Machadada',m:1.3,cd:0,ty:'atk'},{n:'Investida',m:1.5,cd:3,ty:'stun'}],hp:160,atk:20},
+        {id:613,nat:3,n:'Harpia',type:'Vento',img:'',visual:'🦇',s:[{n:'Garras',m:1.2,cd:0,ty:'atk'},{n:'Voo Rasante',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:25},
+        {id:614,nat:5,n:'Valquíria Real',type:'Luz',img:'',visual:'🗡️',s:[{n:'Lança Sagrada',m:1.4,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Imortal',m:0,cd:6,ty:'buff_def'}],hp:160,atk:35},
+
+        // RAINBOWMON
         {id:990,nat:5,n:'Rainbowmon',type:'Luz',img:'',visual:'🥚',s:[{n:'-',m:0,cd:0,ty:'atk'}],hp:100,atk:10}
     ];
     
@@ -679,6 +690,8 @@
     let s = {}, tmp = { prep:[], selInv:null, mode:'story', lvl:1, selRuneSlot:null, dungType:null, upRune:null, evoFodder:[], skillFodder:[], invFilter: 'all' };
     let b = { p:[], e:[], t:'p', idx:0, spd:1, auto:false, farmRuns:0, skillPending:null, target:null };
     let uidCount=2, runeIdCount=1, currentUser=null, pendingAction=null;
+    // Wallet cache for animation
+    let walletCache = { mana: 0, gems: 0 };
 
     const el = id => document.getElementById(id);
 
@@ -693,25 +706,17 @@
             if(!s.daily_missions) s.daily_missions = { last_reset: 0, progress: {}, claimed: [] };
             if(!s.maxTower) s.maxTower = 1;
 
-            // Check Daily Reset
             const now = new Date();
             const lastDate = new Date(s.daily_missions.last_reset);
             const isDifferentDay = now.getDate() !== lastDate.getDate() || now.getMonth() !== lastDate.getMonth();
-            
-            if (isDifferentDay) {
-                s.daily_missions = { last_reset: Date.now(), progress: {}, claimed: [] };
-            }
+            if (isDifferentDay) s.daily_missions = { last_reset: Date.now(), progress: {}, claimed: [] };
 
-            // Auto Login Mission
             Core.updateMission('login', 1);
-            
-            // Fix Roster if corrupted
             if(!Array.isArray(s.roster)) s.roster = [];
-            
             uidCount = s.roster.reduce((m,r)=>Math.max(m,r.uid),0)+1;
             runeIdCount = Math.max((s.runes_inv.reduce((m,r)=>Math.max(m,r.id),0)),100)+1;
+            walletCache.mana = s.mana; walletCache.gems = s.gems; // Init cache
             el('p-name').innerText=u; UI.upd(); UI.nav('hub');
-            
             setInterval(() => {
                 const n = Date.now();
                 if (s.xp_boost_end_time > n) {
@@ -742,7 +747,34 @@
             el(`tab-${t}`).classList.add('active'); el(`cont-${t}`).classList.add('active');
         },
         toast: (m) => { const d=document.createElement('div'); d.style.cssText=`position:fixed;top:10%;left:50%;transform:translate(-50%,-50%);background:#333;color:#fff;padding:10px;border-radius:10px;z-index:999`; d.innerText=m; document.body.appendChild(d); setTimeout(()=>d.remove(),1500); },
-        upd: () => { el('h-mana').innerText=formatNum(s.mana); el('h-gems').innerText=formatNum(s.gems); el('p-lvl').innerText=s.p_lvl; el('g-tix').innerText=s.tix; el('g-rare').innerText=s.rare_tix; el('sk-grim').innerText=s.grimoires; },
+        upd: () => { 
+            // Wallet Animation
+            const diffMana = s.mana - walletCache.mana;
+            const diffGems = s.gems - walletCache.gems;
+            
+            if (diffMana !== 0) {
+                const ui = el('ui-mana');
+                ui.classList.add(diffMana > 0 ? 'pulse-green' : 'pulse-red');
+                setTimeout(() => ui.classList.remove('pulse-green', 'pulse-red'), 500);
+                // Simple interpolation could go here, but CSS pulse + formatNum is cleaner
+                el('h-mana').innerText = formatNum(s.mana);
+                walletCache.mana = s.mana;
+            } else {
+                el('h-mana').innerText = formatNum(s.mana);
+            }
+
+            if (diffGems !== 0) {
+                const ui = el('ui-gems');
+                ui.classList.add(diffGems > 0 ? 'pulse-green' : 'pulse-red');
+                setTimeout(() => ui.classList.remove('pulse-green', 'pulse-red'), 500);
+                el('h-gems').innerText = formatNum(s.gems);
+                walletCache.gems = s.gems;
+            } else {
+                el('h-gems').innerText = formatNum(s.gems);
+            }
+
+            el('p-lvl').innerText=s.p_lvl; el('g-tix').innerText=s.tix; el('g-rare').innerText=s.rare_tix; el('sk-grim').innerText=s.grimoires; 
+        },
         getVis: (d) => d.img ? `<img src="${d.img}">` : d.visual,
         renMon: (m) => {
             const d = DB.find(x=>x.id===m.id)||DB[0];
@@ -823,69 +855,44 @@
         },
         openDex: () => {
             UI.nav('dex'); const g=el('dex-grid'); g.innerHTML='';
-            const allMons = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990); // No bosses, no rainbowmon
-            // Sort
+            const allMons = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990);
             const elemOrder = {'Água':1, 'Fogo':2, 'Vento':3, 'Luz':4, 'Trevas':5, 'Terra':6};
             allMons.sort((a,b) => {
-                const ea=elemOrder[a.type]||99, eb=elemOrder[b.type]||99;
-                if(ea!==eb) return ea-eb;
-                return b.nat - a.nat;
+                const ea=elemOrder[a.type]||99, eb=elemOrder[b.type]||99; if(ea!==eb) return ea-eb; return b.nat - a.nat;
             });
-
             allMons.forEach(d => {
                 const owned = s.roster.some(m => m.id === d.id);
-                const div = document.createElement('div');
-                div.className = `dex-slot ${owned ? '' : 'unknown'}`;
+                const div = document.createElement('div'); div.className = `dex-slot ${owned ? '' : 'unknown'}`;
                 div.innerHTML = `<div style="font-size:2rem">${UI.getVis(d)}</div><div class="stars" style="position:absolute; bottom:2px; left:0; width:100%; justify-content:center; gap:0">${'★'.repeat(d.nat)}</div>`;
-                div.onclick = () => Core.showDexDetail(d);
-                g.appendChild(div);
+                div.onclick = () => Core.showDexDetail(d); g.appendChild(div);
             });
         },
         showDexDetail: (d) => {
-            el('dxd-vis').innerHTML = UI.getVis(d);
-            el('dxd-name').innerText = d.n;
-            el('dxd-stars').innerHTML = '★'.repeat(d.nat);
-            el('dxd-badge').innerText = d.type;
-            
-            el('dxd-hp').innerText = d.hp;
-            el('dxd-atk').innerText = d.atk;
-            
+            el('dxd-vis').innerHTML = UI.getVis(d); el('dxd-name').innerText = d.n; el('dxd-stars').innerHTML = '★'.repeat(d.nat); el('dxd-badge').innerText = d.type;
+            el('dxd-hp').innerText = d.hp; el('dxd-atk').innerText = d.atk;
             const sl = el('dxd-skills'); sl.innerHTML = '';
             d.s.forEach((sk,i)=>{
                 const c=document.createElement('div'); c.className='skill-card-detail';
                 c.innerHTML=`<div class="skill-icon-large">${i===0?'⚔️':i===1?'⚡':'🔥'}</div><div><div style="font-weight:bold">${sk.n}</div><div style="font-size:0.75rem;color:#888">${sk.ty ? sk.ty.toUpperCase() : 'ATK'}</div></div>`;
                 sl.appendChild(c);
-            });
-            UI.modal('m-dex-detail', 1);
+            }); UI.modal('m-dex-detail', 1);
         },
         selInv: (uid) => {
             tmp.selInv=uid; const m=s.roster.find(x=>x.uid===uid); const d=DB.find(x=>x.id===m.id); UI.nav('mon_detail');
             let elemColor = d.type==='Fogo'?'#ef4444':d.type==='Água'?'#3b82f6':'#10b981';
             el('mon_detail').style.setProperty('--elem-bg', elemColor);
             el('md-vis').innerHTML=UI.getVis(d); el('md-name').innerText=d.n;
-            
             let typeIcon = d.type === 'Fogo' ? '🔥' : (d.type === 'Água' ? '💧' : (d.type === 'Vento' ? '🍃' : (d.type === 'Terra' ? '⛰️' : (d.type === 'Luz' ? '☀️' : '🌙'))));
-            let maxLvl = MAX_LVL[m.star] || 50;
-            let isMax = m.lvl >= maxLvl;
+            let maxLvl = MAX_LVL[m.star] || 50; let isMax = m.lvl >= maxLvl;
             el('md-badge').innerHTML = `${typeIcon} Nv. ${m.lvl} ${isMax ? '<span style="color:#f59e0b; font-weight:800">(MAX)</span>' : ''}`;
             if (isMax) el('md-badge').classList.add('max-lvl'); else el('md-badge').classList.remove('max-lvl');
-
-            let stars = ''; for(let i=0;i<m.star;i++) stars+=`<div class="star" style="width:12px;height:12px"></div>`;
-            el('md-stars').innerHTML=stars;
-            
-            let sm = 1 + m.lvl*0.1;
-            let bon = {hp:0, atk:0, def:0, crit:0};
+            let stars = ''; for(let i=0;i<m.star;i++) stars+=`<div class="star" style="width:12px;height:12px"></div>`; el('md-stars').innerHTML=stars;
+            let sm = 1 + m.lvl*0.1; let bon = {hp:0, atk:0, def:0, crit:0};
             m.runes.forEach(r => { if(r) { bon[r.type] += r.val; if(r.subs) r.subs.forEach(s => bon[s.type] += s.val); } });
-
-            const baseHp = Math.floor(d.hp * sm);
-            const baseAtk = Math.floor(d.atk * sm);
-            const baseDef = Math.floor(10 + (m.lvl)); 
-            
-            el('st-hp').innerText = baseHp; el('bn-hp').innerText = `(+${bon.hp})`;
-            el('st-atk').innerText = baseAtk; el('bn-atk').innerText = `(+${bon.atk})`;
-            el('st-def').innerText = baseDef; el('bn-def').innerText = `(+${bon.def})`;
+            el('st-hp').innerText = Math.floor(d.hp * sm); el('bn-hp').innerText = `(+${bon.hp})`;
+            el('st-atk').innerText = Math.floor(d.atk * sm); el('bn-atk').innerText = `(+${bon.atk})`;
+            el('st-def').innerText = Math.floor(10 + m.lvl); el('bn-def').innerText = `(+${bon.def})`;
             el('st-crit').innerText = 15;
-
             [0,1,2,3].forEach(i=>{ 
                 const r=m.runes[i]; const rx=el(`rs-${i}`); 
                 if(r) { rx.className='rune-slot-fancy filled'; rx.style.setProperty('--rune-color',r.type==='hp'?'#ef4444':'#3b82f6'); rx.innerHTML=`<div class="icon" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div><div class="lvl">+${r.lvl}</div>`; } 
@@ -899,12 +906,7 @@
             });
         },
         backToInv: () => UI.nav('inv'),
-        pup: () => { 
-            const m=s.roster.find(x=>x.uid===tmp.selInv); 
-            if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||50)) return; 
-            s.pot--; m.lvl++; Game.save(); Core.selInv(m.uid); UI.upd();
-            Core.updateMission('pup');
-        },
+        pup: () => { const m=s.roster.find(x=>x.uid===tmp.selInv); if(s.pot<1 || m.lvl>=(MAX_LVL[m.star]||50)) return; s.pot--; m.lvl++; Game.save(); Core.selInv(m.uid); UI.upd(); Core.updateMission('pup'); },
         openEvo: () => { const m=s.roster.find(x=>x.uid===tmp.selInv); if(m.star>=6) return; tmp.evoTarget=tmp.selInv; tmp.evoFodder=[]; el('evo-req-c').innerText=m.star; el('evo-req-s').innerText=m.star; UI.modal('m-evo',1); Core.renEvo(); },
         renEvo: () => {
             const t=s.roster.find(x=>x.uid===tmp.evoTarget); const g=el('evo-grid'); g.innerHTML='';
@@ -917,32 +919,31 @@
             el('btn-do-evo').disabled = tmp.evoFodder.length<t.star;
         },
         doEvolution: () => {
-            const t=s.roster.find(x=>x.uid===tmp.evoTarget);
-            s.roster=s.roster.filter(m=>!tmp.evoFodder.includes(m.uid));
-            tmp.prep=tmp.prep.filter(u=>!tmp.evoFodder.includes(u)); 
-            t.star++; t.lvl=1; Game.save(); UI.modal('m-evo',0); Core.selInv(t.uid); UI.toast("Evolução Sucesso!");
-            Core.openInv(); 
+            const t=s.roster.find(x=>x.uid===tmp.evoTarget); s.roster=s.roster.filter(m=>!tmp.evoFodder.includes(m.uid));
+            tmp.prep=tmp.prep.filter(u=>!tmp.evoFodder.includes(u)); t.star++; t.lvl=1; Game.save(); UI.modal('m-evo',0); Core.selInv(t.uid); UI.toast("Evolução Sucesso!"); Core.openInv(); 
         },
         openSkill: () => { tmp.skillFodder=[]; UI.modal('m-skill',1); Core.renSkill(); },
         renSkill: () => {
             const t=s.roster.find(x=>x.uid===tmp.selInv); const g=el('skill-grid'); g.innerHTML='';
             el('skill-slots').innerHTML=`<div class="hero-slot" style="width:40px;height:40px;border-style:dashed">${tmp.skillFodder[0]?UI.renMon(s.roster.find(x=>x.uid===tmp.skillFodder[0])):''}</div>`;
             s.roster.filter(m=>m.id===t.id && m.uid!==t.uid).forEach(m=>{
+                // FIX: Ensure correct class usage for image display
                 const d=document.createElement('div'); d.className=`hero-slot ${tmp.skillFodder.includes(m.uid)?'selected':''}`;
+                d.innerHTML=UI.renMon(m); 
                 d.onclick=()=>{ tmp.skillFodder=tmp.skillFodder.includes(m.uid)?[]:[m.uid]; Core.renSkill(); };
                 g.appendChild(d);
             });
             el('btn-do-skill').disabled=tmp.skillFodder.length===0;
         },
         doSkill: () => {
-            const t=s.roster.find(x=>x.uid===tmp.selInv);
-            s.roster=s.roster.filter(m=>!tmp.skillFodder.includes(m.uid));
+            const t=s.roster.find(x=>x.uid===tmp.selInv); s.roster=s.roster.filter(m=>!tmp.skillFodder.includes(m.uid));
             tmp.prep=tmp.prep.filter(u=>!tmp.skillFodder.includes(u));
-            t.skLvl[0]++; Game.save(); UI.modal('m-skill',0); Core.selInv(t.uid); UI.toast("Skill UP!");
-            Core.openInv(); 
+            if(!t.skLvl) t.skLvl = t.id === 990 ? [1] : DB.find(x=>x.id===t.id).s.map(()=>1);
+            t.skLvl[0]++; Game.save(); UI.modal('m-skill',0); Core.selInv(t.uid); UI.toast("Skill UP!"); Core.openInv(); 
         },
         useGrimoire: () => {
             if(s.grimoires<1) return; s.grimoires--; const t=s.roster.find(x=>x.uid===tmp.selInv);
+            if(!t.skLvl) t.skLvl = DB.find(x=>x.id===t.id).s.map(()=>1);
             t.skLvl[0]++; Game.save(); UI.modal('m-skill',0); UI.upd(); Core.selInv(t.uid);
         },
         openRuneBag: () => {
@@ -950,24 +951,18 @@
             s.runes_inv.forEach(r=>{
                 const rarityColor = r.rarity === 'Lendario' ? 'border-color:var(--c-gold); box-shadow:0 0 5px var(--c-gold)' : (r.rarity === 'Epico' ? 'border-color:var(--c-accent)' : 'border-color:var(--c-primary)');
                 const d=document.createElement('div'); d.className='rune-slot-bag'; d.style.cssText = rarityColor;
-                d.innerHTML=`
-                    <div class="rune-content"><div class="rune-img" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div></div>
-                    <div class="rune-lvl-tag">+${r.lvl}</div><div class="rune-set-icon">${r.type.toUpperCase()}</div>
-                `;
-                d.onclick = () => Core.popRuneUp(r.id);
-                g.appendChild(d);
+                d.innerHTML=`<div class="rune-content"><div class="rune-img" style="color:${r.type==='hp'?'#ef4444':'#3b82f6'}">⬢</div></div><div class="rune-lvl-tag">+${r.lvl}</div><div class="rune-set-icon">${r.type.toUpperCase()}</div>`;
+                d.onclick = () => Core.popRuneUp(r.id); g.appendChild(d);
             });
         },
         sellRune: (rid, p) => { s.runes_inv=s.runes_inv.filter(r=>r.id!==rid); s.mana+=p; Game.save(); UI.upd(); Core.openRuneBag(); },
         openRuneSelect: (slot) => { tmp.selRuneSlot=slot; UI.modal('m-rune',1); Core.renRuneList(); },
         renRuneList: () => {
-            const l=el('rune-list'); l.innerHTML='';
-            const m=s.roster.find(x=>x.uid===tmp.selInv);
+            const l=el('rune-list'); l.innerHTML=''; const m=s.roster.find(x=>x.uid===tmp.selInv);
             if(m.runes[tmp.selRuneSlot]) { l.innerHTML+=`<div class="panel" style="padding:10px;border-left:4px solid red" onclick="Core.unequipRune()">Remover Atual</div>`; }
             s.runes_inv.forEach(r=>{
                 const d=document.createElement('div'); d.className='panel'; d.style.padding='10px'; d.style.cursor='pointer';
-                d.innerHTML=`+${r.lvl} ${r.type} <small>${r.rarity}</small>`; d.onclick=()=>Core.equipRune(r.id);
-                l.appendChild(d);
+                d.innerHTML=`+${r.lvl} ${r.type} <small>${r.rarity}</small>`; d.onclick=()=>Core.equipRune(r.id); l.appendChild(d);
             });
         },
         equipRune: (rid) => {
@@ -981,17 +976,10 @@
             const m=s.roster.find(x=>x.uid===tmp.selInv); s.runes_inv.push(m.runes[tmp.selRuneSlot]); m.runes[tmp.selRuneSlot]=null;
             Game.save(); UI.modal('m-rune',0); Core.selInv(m.uid); UI.upd();
         },
-        
-        // --- RUNE POWER UP (NEW) ---
         popRuneUp: (rid) => {
-            let r = s.runes_inv.find(x=>x.id===rid);
-            if(!r) s.roster.forEach(m => m.runes.forEach(eq=>{if(eq&&eq.id===rid) r=eq}));
-            if(!r) return;
-            tmp.upRune = r;
-            const rClass = r.rarity==='Lendario'?'legend':'';
-            const iconColor = r.type==='hp'?'#ef4444':'#3b82f6';
-            el('up-rune-visual').innerHTML = `<div style="color:${iconColor}">⬢</div>`;
-            el('up-rune-visual').className = `rune-preview-large ${rClass}`;
+            let r = s.runes_inv.find(x=>x.id===rid); if(!r) s.roster.forEach(m => m.runes.forEach(eq=>{if(eq&&eq.id===rid) r=eq})); if(!r) return;
+            tmp.upRune = r; const rClass = r.rarity==='Lendario'?'legend':''; const iconColor = r.type==='hp'?'#ef4444':'#3b82f6';
+            el('up-rune-visual').innerHTML = `<div style="color:${iconColor}">⬢</div>`; el('up-rune-visual').className = `rune-preview-large ${rClass}`;
             el('up-rune-type').innerText = r.type; el('up-rune-lvl').innerText = `+${r.lvl}`;
             const nextVal = Math.ceil(r.val * 1.1);
             let html = `<div class="stat-line"><span>${r.type.toUpperCase()}</span><div>${r.val} <span class="stat-arrow">➜</span> <span class="new-val">${nextVal}</span></div></div>`;
@@ -1000,31 +988,22 @@
             el('up-stats-comp').innerHTML = html;
             let cost = 500 + (r.lvl*500); el('up-cost').innerText = formatNum(cost);
             let chance = 100 - (r.lvl * 5); if(chance<5) chance=5;
-            el('up-chance').innerText = `${chance}%`;
-            UI.modal('m-rune-up',1);
+            el('up-chance').innerText = `${chance}%`; UI.modal('m-rune-up',1);
         },
         doUpgrade: () => {
             const r = tmp.upRune; if(r.lvl>=15) return UI.toast("Max!");
             const cost = 500 + (r.lvl*500); if(s.mana<cost) return UI.toast("Mana!");
-            s.mana-=cost; UI.upd();
-            Core.updateMission('rup');
+            s.mana-=cost; UI.upd(); Core.updateMission('rup');
             let chance = 100 - (r.lvl * 5); if(chance<5) chance=5;
             if(Math.random() * 100 < chance) {
                 r.lvl++; r.val = Math.ceil(r.val*1.1);
-                if(r.lvl%3===0) {
-                    if(!r.subs) r.subs=[];
-                    if(r.subs.length<4) r.subs.push({type:['atk','def','hp','crit'][Math.floor(Math.random()*4)], val:5}); 
-                    else r.subs[Math.floor(Math.random()*r.subs.length)].val+=5;
-                }
+                if(r.lvl%3===0) { if(!r.subs) r.subs=[]; if(r.subs.length<4) r.subs.push({type:['atk','def','hp','crit'][Math.floor(Math.random()*4)], val:5}); else r.subs[Math.floor(Math.random()*r.subs.length)].val+=5; }
                 Game.save(); Core.popRuneUp(r.id); UI.toast("Sucesso!"); 
                 if(el('mon_detail').classList.contains('active')) Core.selInv(tmp.selInv);
                 if(el('rune_bag').classList.contains('active')) Core.openRuneBag();
             } else UI.toast("Falha...");
         },
-        renShop: () => {
-            const c=el('shop-container'); c.innerHTML='';
-            SHOP_DB.forEach(i=>{ const d=document.createElement('div'); d.className='shop-card'; d.innerHTML=`<div class="shop-icon">${i.icon}</div><div class="shop-name">${i.name}</div><button class="shop-price" onclick="Core.buy('${i.id}',${i.cost},'${i.currency}')">${formatNum(i.cost)}${i.currency==='mana'?'💠':'💎'}</button>`; c.appendChild(d); });
-        },
+        renShop: () => { const c=el('shop-container'); c.innerHTML=''; SHOP_DB.forEach(i=>{ const d=document.createElement('div'); d.className='shop-card'; d.innerHTML=`<div class="shop-icon">${i.icon}</div><div class="shop-name">${i.name}</div><button class="shop-price" onclick="Core.buy('${i.id}',${i.cost},'${i.currency}')">${formatNum(i.cost)}${i.currency==='mana'?'💠':'💎'}</button>`; c.appendChild(d); }); },
         buy: (id,c,curr) => {
             if(curr==='mana'&&s.mana<c || curr==='gems'&&s.gems<c) return UI.toast("Falta grana");
             if (id === 'xpboost') { s.xp_boost_end_time = Math.max(Date.now(), s.xp_boost_end_time) + (7 * 60 * 1000); s.gems -= c; Game.save(); UI.upd(); return UI.toast("Booster +7min!"); }
@@ -1032,16 +1011,12 @@
             if (id === 'tix_pack') { s.mana -= c; s.tix += 11; UI.toast("Pack Comum!"); }
             else if (id === 'rare_pack') { s.gems -= c; s.rare_tix += 11; UI.toast("Pack Raro!"); }
             else if (id === 'food_5') { s.mana -= c; let f={uid:uidCount++, id:990, lvl:1, star:5, skLvl:[1], runes:[null,null,null,null]}; s.roster.push(f); UI.toast("Rainbowmon!"); }
-            else {
-                if(curr==='mana') s.mana-=c; else s.gems-=c;
-                if(id==='pot') s.pot++; else if(id==='tix') s.tix++; else if(id==='rare') s.rare_tix++; else s.grimoires++;
-            }
+            else { if(curr==='mana') s.mana-=c; else s.gems-=c; if(id==='pot') s.pot++; else if(id==='tix') s.tix++; else if(id==='rare') s.rare_tix++; else s.grimoires++; }
             Game.save(); UI.upd(); 
         },
         spin: (type, n) => {
             let k=type==='common'?'tix':'rare_tix'; if(s[k]<n) return UI.toast("Sem tickets");
-            s[k]-=n; UI.upd(); 
-            el('portal-visual').style.animation='spin 0.2s infinite linear'; 
+            s[k]-=n; UI.upd(); el('portal-visual').style.animation='spin 0.2s infinite linear'; 
             setTimeout(()=>{
                 el('portal-visual').style.animation='none';
                 let res=[]; let hasLegend = false;
@@ -1050,9 +1025,7 @@
                     if(type==='common') { if(r > 98) nat=3; else if(r > 75) nat=2; else nat=1; } 
                     else { if (!s.first_summon_done && i === 0) { if (r > 50) nat=5; else nat=4; s.first_summon_done = true; } else { if (r > 99.5) nat=5; else if (r > 91.5) nat=4; else nat=3; } }
                     if(nat === 5) hasLegend = true;
-                    // Exclui IDs 901 e 902 (Chefes) da roleta
-                    let p = DB.filter(x=>x.nat===nat && x.id !== 901 && x.id !== 902 && x.id !== 990); 
-                    if(p.length===0) p=DB.filter(x=>x.nat===1); 
+                    let p = DB.filter(x=>x.nat===nat && x.id !== 901 && x.id !== 902 && x.id !== 990); if(p.length===0) p=DB.filter(x=>x.nat===1); 
                     let m = p[Math.floor(Math.random()*p.length)];
                     let nm={uid:uidCount++, id:m.id, lvl:1, star:nat, skLvl:m.s.map(()=>1), runes:[null,null,null,null]};
                     s.roster.push(nm); res.push(nm);
@@ -1064,49 +1037,13 @@
                 Core.updateMission('sum', n);
             }, 400);
         },
-        renExpl: () => {
-            const c=el('expl-regions'); c.innerHTML='';
-            EXPL_REGIONS.forEach(r=>{
-                const d=document.createElement('div'); d.className='panel'; d.style.padding='15px'; d.style.display='flex'; d.style.gap='10px'; d.style.borderLeft=`4px solid ${r.color}`;
-                d.innerHTML=`<div style="font-size:1.5rem">${r.icon}</div><div><b>${r.name}</b></div>`;
-                d.onclick=()=>{ el('expl-regions').style.display='none'; el('expl-stages-list').style.display='flex'; Core.renStageList(r.id); };
-                c.appendChild(d);
-            });
-        },
+        renExpl: () => { const c=el('expl-regions'); c.innerHTML=''; EXPL_REGIONS.forEach(r=>{ const d=document.createElement('div'); d.className='panel'; d.style.padding='15px'; d.style.display='flex'; d.style.gap='10px'; d.style.borderLeft=`4px solid ${r.color}`; d.innerHTML=`<div style="font-size:1.5rem">${r.icon}</div><div><b>${r.name}</b></div>`; d.onclick=()=>{ el('expl-regions').style.display='none'; el('expl-stages-list').style.display='flex'; Core.renStageList(r.id); }; c.appendChild(d); }); },
         backToExplRegions: () => { el('expl-stages-list').style.display='none'; el('expl-regions').style.display='flex'; },
-        renStageList: (rid) => {
-            const c=el('expl-list-container'); c.innerHTML='';
-            for(let i=1;i<=8;i++) {
-                const gid=(rid-1)*8+i; const locked=gid>s.maxStage;
-                const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='10px';
-                d.innerHTML=`Fase ${rid}-${i} ${locked?'🔒':''}`; if(!locked) d.onclick=()=>Core.prep('story',gid);
-                c.appendChild(d);
-            }
-        },
+        renStageList: (rid) => { const c=el('expl-list-container'); c.innerHTML=''; for(let i=1;i<=8;i++) { const gid=(rid-1)*8+i; const locked=gid>s.maxStage; const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='10px'; d.innerHTML=`Fase ${rid}-${i} ${locked?'🔒':''}`; if(!locked) d.onclick=()=>Core.prep('story',gid); c.appendChild(d); } },
         renDung: () => { el('dung-select').style.display='block'; el('dung-floors').style.display='none'; },
-        selectDung: (t) => {
-            tmp.dungType=t; el('dung-select').style.display='none'; el('dung-floors').style.display='flex';
-            const c=el('dung-list-container'); c.innerHTML='';
-            for(let i=1;i<=10;i++) {
-                const pk=`d-${t}-${i-1}`; const locked = i>1 && !s.cleared.includes(pk);
-                const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; d.innerHTML=`Andar B${i} ${locked?'🔒':''}`;
-                if(!locked) d.onclick=()=>Core.prep('dung',i); 
-                c.appendChild(d);
-            }
-        },
+        selectDung: (t) => { tmp.dungType=t; el('dung-select').style.display='none'; el('dung-floors').style.display='flex'; const c=el('dung-list-container'); c.innerHTML=''; for(let i=1;i<=10;i++) { const pk=`d-${t}-${i-1}`; const locked = i>1 && !s.cleared.includes(pk); const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; d.innerHTML=`Andar B${i} ${locked?'🔒':''}`; if(!locked) d.onclick=()=>Core.prep('dung',i); c.appendChild(d); } },
         backToDungSelect: () => { el('dung-floors').style.display='none'; el('dung-select').style.display='block'; },
-        renTower: () => {
-            const c=el('tower-list-container'); c.innerHTML='';
-            for(let i=1;i<=50;i++) {
-                 const locked = i > s.maxTower;
-                 const isBoss = i % 10 === 0;
-                 const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; 
-                 d.style.borderColor = isBoss ? 'var(--c-gold)' : '#e5e7eb';
-                 d.innerHTML=`<div style="display:flex;justify-content:space-between"><span>${isBoss?'👑 ':''}Andar ${i}</span><span>${locked?'🔒':'⚔️'}</span></div>`;
-                 if(!locked) d.onclick=()=>Core.prep('tower',i);
-                 c.appendChild(d);
-            }
-        },
+        renTower: () => { const c=el('tower-list-container'); c.innerHTML=''; for(let i=1;i<=50;i++) { const locked = i > s.maxTower; const isBoss = i % 10 === 0; const d=document.createElement('div'); d.className=`panel ${locked?'locked':''}`; d.style.padding='15px'; d.style.borderColor = isBoss ? 'var(--c-gold)' : '#e5e7eb'; d.innerHTML=`<div style="display:flex;justify-content:space-between"><span>${isBoss?'👑 ':''}Andar ${i}</span><span>${locked?'🔒':'⚔️'}</span></div>`; if(!locked) d.onclick=()=>Core.prep('tower',i); c.appendChild(d); } },
         prep: (m,l) => { tmp.mode=m; tmp.lvl=l; tmp.prep=[]; UI.nav('prep'); Prep.render(); },
         reqConfirm: (m,a) => { el('confirm-msg').innerText=m; pendingAction=a; UI.modal('m-confirm',1); },
         execConfirm: () => { if(pendingAction) pendingAction(); UI.modal('m-confirm',0); }
@@ -1115,362 +1052,125 @@
     const Prep = {
         render: () => {
             [0,1,2].forEach(i=>el(`s${i}`).innerHTML=tmp.prep[i]?UI.renMon(s.roster.find(x=>x.uid===tmp.prep[i])):'+');
-            const g=el('prep-grid'); g.innerHTML='';
-            s.roster.sort((a,b)=>(b.star-a.star)||(b.lvl-a.lvl));
-            s.roster.forEach(m=>{
-                const d=document.createElement('div'); d.className=`hero-slot ${tmp.prep.includes(m.uid)?'selected':''}`;
-                d.innerHTML=UI.renMon(m); d.onclick=()=>{ if(tmp.prep.includes(m.uid)) tmp.prep=tmp.prep.filter(x=>x!==m.uid); else if(tmp.prep.length<3) tmp.prep.push(m.uid); Prep.render(); };
-                g.appendChild(d);
-            });
-            const sk = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
-            el('btn-farm').style.display = s.cleared.includes(sk) ? 'block' : 'none';
+            const g=el('prep-grid'); g.innerHTML=''; s.roster.sort((a,b)=>(b.star-a.star)||(b.lvl-a.lvl));
+            s.roster.forEach(m=>{ const d=document.createElement('div'); d.className=`hero-slot ${tmp.prep.includes(m.uid)?'selected':''}`; d.innerHTML=UI.renMon(m); d.onclick=()=>{ if(tmp.prep.includes(m.uid)) tmp.prep=tmp.prep.filter(x=>x!==m.uid); else if(tmp.prep.length<3) tmp.prep.push(m.uid); Prep.render(); }; g.appendChild(d); });
+            const sk = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`; el('btn-farm').style.display = s.cleared.includes(sk) ? 'block' : 'none';
         },
         rem: (i) => { if(tmp.prep[i]) { tmp.prep.splice(i,1); Prep.render(); } }
     };
 
     const Battle = {
-        spd: () => { 
-            let next = b.spd === 1 ? 2 : (b.spd === 2 ? 3 : 1);
-            if (next === 3 && s.p_lvl < 5) { UI.toast("3x libera no Nv. 5"); next = 1; }
-            b.spd = next;
-            el('btn-spd').innerText = 'x' + b.spd;
-        },
-        toggleAuto: () => { 
-            if (s.p_lvl < 2) return UI.toast("Auto libera no Nv. 2");
-            b.auto=!b.auto; 
-            if(b.auto) el('btn-auto').classList.add('active'); else el('btn-auto').classList.remove('active');
-            if(b.auto) Battle.turn(); 
-        },
-        start: (n) => {
-            if(!tmp.prep.length) return UI.toast("Selecione monstros!");
-            b.farmRuns=n; b.auto=n>0; b.spd=s.p_lvl>=5?3:2; el('btn-spd').innerText='x'+b.spd; el('btn-auto').classList.toggle('active', b.auto); el('farm-ui').style.display=n>0?'block':'none';
-            b.p = tmp.prep.map((uid,i) => {
-                const m=s.roster.find(x=>x.uid===uid); const d=DB.find(x=>x.id===m.id);
-                let sm=1+m.lvl*0.1; let rs={hp:0,atk:0,def:0,crit:0};
-                m.runes.forEach(r=>{if(r){rs[r.type]+=r.val}});
-                return {...d, max:Math.floor(d.hp*sm+rs.hp), cur:Math.floor(d.hp*sm+rs.hp), atk:Math.floor(d.atk*sm+rs.atk), idx:i, side:'p', dead:false, cds:d.s.map(()=>0), skLvl:m.skLvl, buffs:[]};
+        spd: () => { let next=b.spd===1?2:(b.spd===2?3:1); if(next===3&&s.p_lvl<5)next=1; b.spd=next; el('btn-spd').innerText='x'+b.spd; },
+        toggleAuto: () => { if(s.p_lvl>=2){ b.auto=!b.auto; el('btn-auto').classList.toggle('active',b.auto); if(b.auto) Battle.turn(); } },
+        start: n => {
+            if(!tmp.prep.length) return; b.farmRuns=n; b.auto=n>0; b.spd=s.p_lvl>=5?3:2; el('btn-spd').innerText='x'+b.spd; el('btn-auto').classList.toggle('active', b.auto); el('farm-ui').style.display=n>0?'block':'none';
+            b.p = tmp.prep.map((uid,i)=>{
+                const m=s.roster.find(x=>x.uid===uid), d=DB.find(x=>x.id===m.id);
+                let sm=1+m.lvl*0.1; let rs={hp:0,atk:0,def:0,crit:0}; m.runes.forEach(r=>{if(r){rs[r.type]+=r.val;if(r.subs)r.subs.forEach(s=>rs[s.type]+=s.val)}});
+                return {...d,max:Math.floor(d.hp*sm+rs.hp),cur:Math.floor(d.hp*sm+rs.hp),atk:Math.floor(d.atk*sm+rs.atk),idx:i,side:'p',dead:false,cds:d.s.map(()=>0),skLvl:m.skLvl,buffs:[]};
             });
             b.e = Array(tmp.mode==='story'?3:1).fill(0).map((_,i)=>{
-                let d; let sm;
-                if (tmp.mode==='dung') {
-                    if (tmp.dungType === 'golem') d = BOSS_DB.golem;
-                    else d = BOSS_DB.dragon;
-                    sm = 1 + (tmp.lvl * 0.5); // Escala agressiva masmorra
-                } else if (tmp.mode === 'tower') {
-                     // TOWER LOGIC
-                     if (tmp.lvl % 10 === 0) { // Boss Floor
-                        d = BOSS_DB.dragon; // Placeholder Boss
-                        sm = 1 + (tmp.lvl * 0.3);
-                     } else {
-                        const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990);
-                        d = commonDB[Math.floor(Math.random()*commonDB.length)];
-                        sm = 1 + (tmp.lvl * 0.15);
-                     }
-                } else {
-                    // FILTRO DE SEGURANÇA: NUNCA SPAWNAR BOSS OU FOOD EM HISTÓRIA
-                    const commonDB = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990);
-                    d = commonDB[Math.floor(Math.random()*commonDB.length)]; 
-                    sm = 1 + (tmp.lvl * 0.2); // Escala suave historia
-                }
-                // Clonar objeto para evitar referência
-                return {...d, max:Math.floor(d.hp*sm), cur:Math.floor(d.hp*sm), atk:Math.floor(d.atk*sm), idx:i, side:'e', dead:false, cds:d.s.map(()=>0), skLvl:[1], buffs:[]};
+                let d, sm;
+                if(tmp.mode==='dung'){ if(tmp.dungType==='golem')d=BOSS_DB.golem; else d=BOSS_DB.dragon; sm=1+(tmp.lvl*0.5); }
+                else if(tmp.mode==='tower'){ if(tmp.lvl%10===0){ d=BOSS_DB.dragon; sm=1+(tmp.lvl*0.3); } else { const cdb=DB.filter(x=>x.id!==901&&x.id!==902&&x.id!==990); d=cdb[Math.floor(Math.random()*cdb.length)]; sm=1+(tmp.lvl*0.15); } }
+                else { const cdb=DB.filter(x=>x.id!==901&&x.id!==902&&x.id!==990); d=cdb[Math.floor(Math.random()*cdb.length)]; sm=1+(tmp.lvl*0.2); }
+                return {...d,max:Math.floor(d.hp*sm),cur:Math.floor(d.hp*sm),atk:Math.floor(d.atk*sm),idx:i,side:'e',dead:false,cds:d.s.map(()=>0),skLvl:[1],buffs:[]};
             });
-            b.t='p'; b.idx=0; b.target=null; 
-            UI.nav('battle'); Battle.initBoard(); Battle.turn();
+            b.t='p'; b.idx=0; UI.nav('battle'); Battle.initBoard(); Battle.turn();
         },
         initBoard: () => {
-            const ren = (u) => `
-                <div id="${u.side}${u.idx}" class="b-unit" onclick="Battle.clk('${u.side}',${u.idx})">
-                    <div class="hp-bar-w"><div class="hp-fill" style="width:100%"></div></div>
-                    <div class="buffs-container" id="bf-${u.side}${u.idx}"></div>
-                    <div class="visual">${UI.getVis(u)}</div>
-                    ${u.side==='e'?'<div id="tgt-'+u.idx+'" class="target-marker" style="display:none">▼</div>':''}
-                </div>`;
-            el('r-pla').innerHTML = b.p.map(ren).join('');
-            el('r-ene').innerHTML = b.e.map(ren).join('');
+            const ren = u => `<div id="${u.side}${u.idx}" class="b-unit" onclick="Battle.clk('${u.side}',${u.idx})"><div class="hp-bar-w"><div class="hp-fill" style="width:100%"></div></div><div class="buffs-container" id="bf-${u.side}${u.idx}"></div><div class="visual">${UI.getVis(u)}</div>${u.side==='e'?'<div id="tgt-'+u.idx+'" class="target-marker" style="display:none">▼</div>':''}</div>`;
+            el('r-pla').innerHTML=b.p.map(ren).join(''); el('r-ene').innerHTML=b.e.map(ren).join('');
         },
         updateVisuals: () => {
-            const update = (list) => {
-                list.forEach(u => {
-                    const d = el(`${u.side}${u.idx}`);
-                    if(d) {
-                        d.querySelector('.hp-fill').style.width = `${(u.cur/u.max)*100}%`;
-                        if(u.dead) { 
-                            d.classList.add('dead'); 
-                            d.querySelector('.hp-bar-w').style.display='none'; 
-                        } else {
-                            d.classList.remove('dead');
-                            d.querySelector('.hp-bar-w').style.display='block';
-                        }
-                    }
-                    // Update Buffs
-                    const bf = el(`bf-${u.side}${u.idx}`);
-                    bf.innerHTML = '';
-                    u.buffs.forEach(b => {
-                        const bDiv = document.createElement('div');
-                        bDiv.className = `buff-icon ${b.type}`;
-                        bDiv.innerHTML = `${b.type.substring(0,3).toUpperCase()}<span class="buff-turn">${b.turns}</span>`;
-                        bf.appendChild(bDiv);
-                    });
-
-                    if(u.side==='e') el(`tgt-${u.idx}`).style.display = b.target===u.idx ? 'block' : 'none';
-                });
-            };
-            update(b.p); update(b.e);
+            const update = list => { list.forEach(u => {
+                const d=el(`${u.side}${u.idx}`); if(d){ d.querySelector('.hp-fill').style.width=`${(u.cur/u.max)*100}%`; if(u.dead){d.classList.add('dead');d.querySelector('.hp-bar-w').style.display='none';} else {d.classList.remove('dead');d.querySelector('.hp-bar-w').style.display='block';} 
+                const bf=el(`bf-${u.side}${u.idx}`); bf.innerHTML=''; u.buffs.forEach(b=>bf.innerHTML+=`<div class="buff-icon ${b.type}">${b.type.substring(0,3).toUpperCase()}<span class="buff-turn">${b.turns}</span></div>`);
+                if(u.side==='e')el(`tgt-${u.idx}`).style.display=b.target===u.idx?'block':'none'; }
+            });}; update(b.p); update(b.e);
         },
-        clk: (side, idx) => {
-            if (b.skillPending && side === 'p') {
-                const u = b.p[b.idx];
-                const skillIdx = b.skillPending.sIdx;
-                Battle.execSkill(u, b.p[idx], skillIdx);
-                b.skillPending = null;
-                el('act-msg').innerText = `Turno de ${u.n}`;
-                document.querySelectorAll('.b-unit.selectable').forEach(e => e.classList.remove('selectable'));
-                return;
-            }
-            if(b.t!=='p' || b.auto) return;
-            if(side==='e' && !b.e[idx].dead) {
-                b.target = idx; // JUST SELECT TARGET
-                Battle.updateVisuals();
-            }
-        },
+        clk: (s,i) => { if(b.skillPending&&s==='p'){ const u=b.p[b.idx]; const skIdx=b.skillPending.sIdx; Battle.execSkill(u,b.p[i],skIdx); b.skillPending=null; el('act-msg').innerText=`Turno de ${u.n}`; document.querySelectorAll('.b-unit.selectable').forEach(e=>e.classList.remove('selectable')); return; } if(b.t!=='p'||b.auto)return; if(s==='e'&&!b.e[i].dead){ b.target=i; Battle.updateVisuals(); } },
         turn: () => {
             if(b.e.every(x=>x.dead)) return Battle.end(1); if(b.p.every(x=>x.dead)) return Battle.end(0);
-            
-            // Cleanup actors
-            document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('actor'));
-            document.querySelectorAll('.b-unit').forEach(u=>u.classList.remove('active-turn'));
-            
-            const sideList = b.t==='p'?b.p:b.e;
-            if(b.idx >= sideList.length) { 
-                b.t = b.t==='p'?'e':'p'; 
-                b.idx = 0; 
-                return Battle.turn(); 
-            }
-            
-            const u = sideList[b.idx];
-            if(u.dead) { b.idx++; return Battle.turn(); }
-            
-            // --- PROCESS DOTS/STUNS/BUFFS ---
-            let stunned = false;
-            u.buffs = u.buffs.filter(bf => {
-                if(bf.type === 'poison') {
-                    const dmg = Math.floor(u.max * 0.05); // 5% HP
-                    u.cur -= dmg;
-                    // Visual popup
-                    const tEl = el(`${u.side}${u.idx}`);
-                    if(tEl) {
-                        const p = document.createElement('div'); p.className='dmg-popup'; 
-                        p.innerText = "POISON"; p.style.color = '#10b981';
-                        tEl.appendChild(p); setTimeout(()=>p.remove(),800);
-                    }
-                }
-                if(bf.type === 'stun') stunned = true;
-                
-                bf.turns--;
-                return bf.turns > 0;
-            });
-            if(u.cur <= 0) u.dead = true;
-            
-            Battle.updateVisuals();
+            document.querySelectorAll('.b-unit').forEach(u=>{u.classList.remove('actor');u.classList.remove('active-turn');});
+            const sl=b.t==='p'?b.p:b.e; if(b.idx>=sl.length){ b.t=b.t==='p'?'e':'p'; b.idx=0; return Battle.turn(); }
+            const u=sl[b.idx]; if(u.dead){ b.idx++; return Battle.turn(); }
 
-            if(u.dead || stunned) {
-                b.idx++;
-                setTimeout(Battle.turn, 500/b.spd);
-                return;
-            }
+            let stunned=false; u.buffs=u.buffs.filter(bf=>{ if(bf.type==='poison'){const dmg=Math.floor(u.max*0.05); u.cur-=dmg; const tEl=el(`${u.side}${u.idx}`); if(tEl){const p=document.createElement('div'); p.className='dmg-popup'; p.innerText="POISON"; p.style.color='#10b981'; tEl.appendChild(p); setTimeout(()=>p.remove(),800);}} if(bf.type==='stun')stunned=true; bf.turns--; return bf.turns>0; });
+            if(u.cur<=0)u.dead=true; Battle.updateVisuals(); if(u.dead||stunned){ b.idx++; setTimeout(Battle.turn,500/b.spd); return; }
 
-            u.cds = u.cds.map(c=>Math.max(0, c-1));
+            u.cds=u.cds.map(c=>Math.max(0,c-1));
 
-            if(b.t==='p') {
-                if(b.auto) {
-                    el('btl-ui').classList.remove('active');
-                    setTimeout(() => {
-                        // AI LOGIC
-                        let t = null; let si = 0;
-                        
-                        // 1. Check Heal
-                        const healSkillIdx = u.s.findIndex(sk => (sk.ty === 'heal' || sk.ty === 'heal_aoe') && u.cds[u.s.indexOf(sk)] === 0);
-                        if(healSkillIdx !== -1 && b.p.some(a => !a.dead && a.cur < a.max*0.5)) {
-                             t = b.p.find(a => !a.dead && a.cur < a.max*0.5);
-                             si = healSkillIdx;
-                        } else {
-                            // 2. Elemental Adv
-                            const targets = b.e.filter(e => !e.dead);
-                            const advT = targets.find(e => {
-                                const at = u.type, dt = e.type;
-                                return (at=='Água'&&dt=='Fogo')||(at=='Fogo'&&dt=='Vento')||(at=='Vento'&&dt=='Terra')||(at=='Terra'&&dt=='Água')||(at=='Luz'&&dt=='Trevas')||(at=='Trevas'&&dt=='Luz');
-                            });
-                            t = advT || targets[0];
-                            // 3. Best Atk Skill
-                            for(let k=u.s.length-1; k>=0; k--) if(u.cds[k]===0 && (u.s[k].ty==='atk'||u.s[k].ty==='aoe')) { si=k; break; }
-                        }
-
-                        Battle.execSkill(u, t, si); 
-                    }, 500/b.spd);
-                } else {
-                    el('act-msg').innerText = `Turno de ${u.n}`;
-                    el(`${u.side}${u.idx}`).classList.add('active-turn'); 
-
-                    el('skill-list').innerHTML = u.s.map((s,i) => `
-                        <div class="skill-btn-3d ${u.cds[i]>0?'cd':''}" onclick="${u.cds[i]>0?'':'Battle.act('+i+')'}">
-                            <div class="sk-icon">${i===0?'⚔️':(i===1?'⚡':'🔥')}</div>
-                            <div class="dk-badge">${s.ty ? s.ty.toUpperCase() : 'ATK'}</div>
-                            ${u.cds[i]>0 ? `<div style="position:absolute;font-size:2rem;color:white;font-weight:900;text-shadow:0 0 5px #000">${u.cds[i]}</div>`:''}
-                        </div>`).join('');
+            if(b.t==='p'){
+                if(b.auto){ el('btl-ui').classList.remove('active'); setTimeout(()=>{ 
+                    let t=null; let si=0;
+                    const heal=u.s.findIndex(sk=>(sk.ty==='heal'||sk.ty==='heal_aoe')&&u.cds[u.s.indexOf(sk)]===0);
+                    if(heal!==-1 && b.p.some(a=>!a.dead&&a.cur<a.max*0.5)){ t=b.p.find(a=>!a.dead&&a.cur<a.max*0.5); si=heal; }
+                    else { 
+                        const targets=b.e.filter(e=>!e.dead);
+                        const adv=targets.find(e=>{ const at=u.type, dt=e.type; return (at=='Água'&&dt=='Fogo')||(at=='Fogo'&&dt=='Vento')||(at=='Vento'&&dt=='Terra')||(at=='Terra'&&dt=='Água')||(at=='Luz'&&dt=='Trevas')||(at=='Trevas'&&dt=='Luz'); });
+                        t=adv||targets[0]; for(let k=u.s.length-1;k>=0;k--)if(u.cds[k]===0&&(u.s[k].ty==='atk'||u.s[k].ty==='aoe'||u.s[k].ty.includes('debuff'))){ si=k; break; }
+                    } Battle.execSkill(u,t,si);
+                },500/b.spd); }
+                else {
+                    el('act-msg').innerText=`Turno de ${u.n}`; el(`${u.side}${u.idx}`).classList.add('active-turn');
+                    el('skill-list').innerHTML=u.s.map((s,i)=>`<div class="skill-btn-3d ${u.cds[i]>0?'cd':''}" onclick="${u.cds[i]>0?'':'Battle.act('+i+')'}"><div class="sk-icon">${i===0?'⚔️':(i===1?'⚡':'🔥')}</div><div class="dk-badge">${s.ty?s.ty.toUpperCase():'ATK'}</div>${u.cds[i]>0?`<div style="position:absolute;font-size:2rem;color:white;font-weight:900;text-shadow:0 0 5px #000">${u.cds[i]}</div>`:''}</div>`).join('');
                     el('btl-ui').classList.add('active');
                 }
             } else {
-                el('btl-ui').classList.remove('active');
-                setTimeout(() => {
-                    const t = b.p.find(x=>!x.dead);
-                    Battle.execSkill(u, t||u, 0); // Enemy uses skill 0
-                }, 800/b.spd);
+                el('btl-ui').classList.remove('active'); setTimeout(()=>{ const t=b.p.find(x=>!x.dead); Battle.execSkill(u,t||u,0); },800/b.spd);
             }
         },
-        act: (si) => {
-            const u = b.p[b.idx];
-            const sk = u.s[si];
-            if (sk.ty === 'heal') {
-                b.skillPending = { sIdx: si };
-                el('act-msg').innerText = "Selecione um Aliado";
-                document.querySelectorAll('#r-pla .b-unit').forEach(e => { if (!e.classList.contains('dead')) e.classList.add('selectable'); });
-                return;
-            }
-            if (sk.ty === 'heal_aoe' || sk.ty.includes('buff')) { el('btl-ui').classList.remove('active'); Battle.execSkill(u, u, si); return; }
-            let t = null;
-            if(b.target !== null && !b.e[b.target].dead) t = b.e[b.target];
-            else t = b.e.find(x=>!x.dead); // Auto pick first if no target selected
+        act: i => { const u=b.p[b.idx]; const sk=u.s[i]; if(sk.ty==='heal'){ b.skillPending={sIdx:i}; el('act-msg').innerText="Selecione um Aliado"; document.querySelectorAll('#r-pla .b-unit').forEach(e=>{if(!e.classList.contains('dead'))e.classList.add('selectable');}); return; } if(sk.ty==='heal_aoe'||sk.ty.includes('buff')){ el('btl-ui').classList.remove('active'); Battle.execSkill(u,u,i); return; } let t=null; 
+        if(b.target!==null&&b.e[b.target]&&!b.e[b.target].dead)t=b.e[b.target]; else t=b.e.find(x=>!x.dead); if(!t)return; el('btl-ui').classList.remove('active'); Battle.execSkill(u,t,i); },
+        execSkill: (atk,def,si) => {
+            const sk=atk.s[si]; atk.cds[si]=sk.cd+1; const aEl=el(`${atk.side}${atk.idx}`); aEl.classList.remove('active-turn'); if(aEl)aEl.classList.add('actor');
+            setTimeout(()=>{
+                if(aEl)aEl.classList.remove('actor');
+                let targets=[def]; if(sk.ty.includes('aoe')) targets=atk.side==='p'?(sk.ty.includes('heal')?b.p:b.e):(sk.ty.includes('heal')?b.e:b.p); else if(sk.ty.includes('buff')||sk.ty==='heal') targets=[def];
 
-            if(!t) return; // No targets
-            
-            el('btl-ui').classList.remove('active');
-            Battle.execSkill(u, t, si);
+                targets.forEach(t=>{ if(t&&!t.dead){ const tEl=el(`${t.side}${t.idx}`); if(tEl){
+                    if(sk.ty.includes('heal')){ const h=Math.floor(atk.atk*sk.m); t.cur=Math.min(t.max,t.cur+h); const p=document.createElement('div'); p.className='dmg-popup'; p.innerHTML=`+${h}`; p.style.color='#22c55e'; tEl.appendChild(p); setTimeout(()=>p.remove(),800); }
+                    else if(sk.ty.startsWith('buff_')){ t.buffs.push({type:sk.ty,turns:3}); const p=document.createElement('div'); p.className='dmg-popup'; p.innerHTML='BUFF!'; p.style.color='#3b82f6'; tEl.appendChild(p); setTimeout(()=>p.remove(),800); }
+                    else if(sk.ty==='turn'){ t.buffs.push({type:'buff_atk',turns:2}); const p=document.createElement('div'); p.className='dmg-popup'; p.innerHTML='FÚRIA!'; p.style.color='#ef4444'; tEl.appendChild(p); setTimeout(()=>p.remove(),800); }
+                    else {
+                        tEl.classList.add('hit'); setTimeout(()=>tEl.classList.remove('hit'),300);
+                        let mult=1; let tc='#fff'; let ex='';
+                        const at=atk.type, dt=t.type;
+                        if((at=='Água'&&dt=='Fogo')||(at=='Fogo'&&dt=='Vento')||(at=='Vento'&&dt=='Terra')||(at=='Terra'&&dt=='Água')||(at=='Luz'&&dt=='Trevas')||(at=='Trevas'&&dt=='Luz')){mult=1.2;tc='#facc15';ex='CRUSH! ';}
+                        else if((at=='Fogo'&&dt=='Água')||(at=='Vento'&&dt=='Fogo')||(at=='Terra'&&dt=='Vento')||(at=='Água'&&dt=='Terra')){mult=0.8;tc='#9ca3af';ex='Glance... ';}
+                        let ap=atk.atk; if(atk.buffs.some(b=>b.type==='buff_atk'))ap*=1.5;
+                        const dmg=Math.floor(ap*sk.m*mult); t.cur=Math.max(0,t.cur-dmg); if(t.cur===0)t.dead=true;
+                        if(sk.ty.includes('debuff')||Math.random()>0.8){ if(sk.ty==='debuff_spd')t.buffs.push({type:'poison',turns:2}); }
+                        const p=document.createElement('div'); p.className='dmg-popup'; p.innerHTML=`<span style="font-size:0.5em">${ex}</span>${dmg}`; p.style.color=tc; tEl.appendChild(p); setTimeout(()=>p.remove(),800);
+                    }
+                }}});
+                Battle.updateVisuals(); b.idx++; setTimeout(Battle.turn,500/b.spd);
+            },300/b.spd);
         },
-        execSkill: (atk, def, si) => {
-            const sk = atk.s[si];
-            atk.cds[si] = sk.cd + 1;
-            
-            const aEl = el(`${atk.side}${atk.idx}`);
-            aEl.classList.remove('active-turn');
-            if(aEl) aEl.classList.add('actor'); // Trigger attack anim
-
-            setTimeout(() => {
-                if(aEl) aEl.classList.remove('actor');
-                
-                let targets = [def];
-                if (sk.ty.includes('aoe')) targets = atk.side==='p' ? (sk.ty.includes('heal')?b.p:b.e) : (sk.ty.includes('heal')?b.e:b.p);
-                else if (sk.ty.includes('buff') || sk.ty === 'heal') targets = [def];
-
-                targets.forEach(t => {
-                    if(t && !t.dead) {
-                        const tEl = el(`${t.side}${t.idx}`);
-                        if(tEl) {
-                            if (sk.ty.includes('heal')) {
-                                const healAmount = Math.floor(atk.atk * sk.m);
-                                t.cur = Math.min(t.max, t.cur + healAmount);
-                                const popup = document.createElement('div'); popup.className='dmg-popup'; popup.innerHTML = `+${healAmount}`; popup.style.color = '#22c55e';
-                                tEl.appendChild(popup); setTimeout(()=>popup.remove(), 800);
-                            } else if (sk.ty.startsWith('buff_')) {
-                                t.buffs.push({type:sk.ty, turns:3});
-                                const p = document.createElement('div'); p.className='dmg-popup'; p.innerHTML = 'BUFF!'; p.style.color = '#3b82f6'; tEl.appendChild(p); setTimeout(()=>p.remove(), 800);
-                            } else if (sk.ty === 'turn') {
-                                // Just heal small amount + buff atk
-                                t.buffs.push({type:'buff_atk', turns:2});
-                                const p = document.createElement('div'); p.className='dmg-popup'; p.innerHTML = 'FÚRIA!'; p.style.color = '#ef4444'; tEl.appendChild(p); setTimeout(()=>p.remove(), 800);
-                            } else {
-                                tEl.classList.add('hit'); setTimeout(()=>tEl.classList.remove('hit'), 300);
-                                let mult = 1; let txtColor = '#fff'; let txtExtra = '';
-                                const at = atk.type; const dt = t.type;
-                                if ((at=='Água' && dt=='Fogo') || (at=='Fogo' && dt=='Vento') || (at=='Vento' && dt=='Terra') || (at=='Terra' && dt=='Água') || (at=='Luz' && dt=='Trevas') || (at=='Trevas' && dt=='Luz')) { mult = 1.2; txtColor = '#facc15'; txtExtra = 'CRUSH! '; } 
-                                else if ((at=='Fogo' && dt=='Água') || (at=='Vento' && dt=='Fogo') || (at=='Terra' && dt=='Vento') || (at=='Água' && dt=='Terra')) { mult = 0.8; txtColor = '#9ca3af'; txtExtra = 'Glance... '; }
-                                
-                                // Buffs/Debuffs Calc
-                                let finalAtk = atk.atk; if(atk.buffs.some(b=>b.type==='buff_atk')) finalAtk *= 1.5;
-                                let finalDef = 1; // Simplified
-                                
-                                const dmg = Math.floor(finalAtk * sk.m * mult);
-                                t.cur = Math.max(0, t.cur - dmg);
-                                if(t.cur===0) t.dead = true;
-                                
-                                // Apply Debuffs (Chance)
-                                if(sk.ty.includes('debuff') || Math.random() > 0.8) {
-                                    if(sk.ty==='debuff_spd') t.buffs.push({type:'poison', turns:2});
-                                }
-
-                                const popup = document.createElement('div'); popup.className='dmg-popup'; popup.innerHTML = `<span style="font-size:0.5em">${txtExtra}</span>${dmg}`; popup.style.color = txtColor;
-                                tEl.appendChild(popup); setTimeout(()=>popup.remove(), 800);
-                            }
-                        }
+        end: w => {
+            setTimeout(()=>{
+                if(w){
+                    const ba=s.xp_boost_end_time&&Date.now()<s.xp_boost_end_time; const gs=tmp.lvl||1;
+                    const rMana=(2500+(gs*100))*(ba?1.5:1); const rXP=(100+(gs*20))*(ba?2:1);
+                    const sk=tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
+                    const f=!s.cleared.includes(sk); if(f)s.cleared.push(sk);
+                    if(tmp.mode==='story'&&tmp.lvl===s.maxStage){ s.maxStage++; UI.toast("Nova Fase!"); }
+                    if(tmp.mode==='tower'&&tmp.lvl===s.maxTower){ s.maxTower++; }
+                    const rGems=f?50:5; s.mana+=rMana; s.xp+=rXP; s.gems+=rGems;
+                    Core.updateMission('win'); if(tmp.mode==='dung')Core.updateMission('dun_win');
+                    if(s.xp>=s.max_xp){ s.xp-=s.max_xp; s.p_lvl++; s.gems+=100; s.max_xp=Math.floor(s.max_xp*1.5); UI.toast("LEVEL UP! +100 💎"); }
+                    el('end-mana').innerText=`+${formatNum(Math.floor(rMana))}`; el('end-gems').innerText=`+${rGems}`; el('rune-drop-msg').innerText=`+${Math.floor(rXP)} XP`;
+                    if(tmp.mode==='dung'){
+                        let rt='Raro'; const r=Math.random()*100; if(tmp.lvl<=3){if(r>90)rt='Epico';} else if(tmp.lvl<=7){if(r>95)rt='Lendario';else if(r>60)rt='Epico';} else {if(r>80)rt='Lendario';else if(r>40)rt='Epico';}
+                        const ru={id:runeIdCount++,type:['hp','atk','def'][Math.floor(Math.random()*3)],val:10+(tmp.lvl*2),lvl:0,rarity:rt}; s.runes_inv.push(ru); el('rune-drop-msg').innerText+=` | ${ru.type} ${ru.rarity}`;
                     }
-                });
-                Battle.updateVisuals();
-                b.idx++; 
-                setTimeout(Battle.turn, 500/b.spd);
-
-            }, 300/b.spd);
-        },
-        end: (w) => {
-            setTimeout(() => {
-                if(w) {
-                    const boostActive = s.xp_boost_end_time && Date.now() < s.xp_boost_end_time;
-                    const gainScale = tmp.lvl || 1;
-                    const rMana = (2500 + (gainScale * 100)) * (boostActive ? 1.5 : 1);
-                    const rXP = (100 + (gainScale * 20)) * (boostActive ? 2 : 1);
-                    
-                    const stageKey = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
-                    const isFirst = !s.cleared.includes(stageKey);
-                    if(isFirst) s.cleared.push(stageKey);
-                    
-                    if(tmp.mode === 'story' && tmp.lvl === s.maxStage) {
-                        s.maxStage++;
-                        UI.toast("Nova Fase Desbloqueada!");
-                    }
-                    if(tmp.mode === 'tower' && tmp.lvl === s.maxTower) {
-                         s.maxTower++;
-                    }
-
-                    const rGems = isFirst ? 50 : 5;
-                    s.mana += rMana; s.xp += rXP; s.gems += rGems;
-                    Core.updateMission('win');
-                    if(tmp.mode==='dung') Core.updateMission('dun_win');
-
-                    if (s.xp >= s.max_xp) {
-                        s.xp -= s.max_xp; s.p_lvl++; s.gems += 100; s.max_xp = Math.floor(s.max_xp * 1.5);
-                        UI.toast(`LEVEL UP! +100 💎`);
-                    }
-                    el('end-mana').innerText = `+${formatNum(Math.floor(rMana))}`; el('end-gems').innerText = `+${rGems}`; el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP`;
-                    if(tmp.mode==='dung') {
-                        let rType = 'Raro'; const roll = Math.random() * 100;
-                        if (tmp.lvl <= 3) { if (roll > 90) rType = 'Epico'; } 
-                        else if (tmp.lvl <= 7) { if (roll > 95) rType = 'Lendario'; else if (roll > 60) rType = 'Epico'; } 
-                        else { if (roll > 80) rType = 'Lendario'; else if (roll > 40) rType = 'Epico'; }
-                        const r = {id:runeIdCount++, type:['hp','atk','def'][Math.floor(Math.random()*3)], val:10 + (tmp.lvl * 2), lvl:0, rarity:rType};
-                        s.runes_inv.push(r); el('rune-drop-msg').innerText += ` | ${r.type} ${r.rarity}`;
-                    }
-                    if(b.farmRuns>1) { b.farmRuns--; el('farm-count').innerText=b.farmRuns; setTimeout(()=>Battle.start(b.farmRuns), 1000); return; }
+                    if(b.farmRuns>1){ b.farmRuns--; el('farm-count').innerText=b.farmRuns; setTimeout(()=>Battle.start(b.farmRuns),1000); return; }
                 }
-                el('end-title').innerText = w ? "VITÓRIA" : "DERROTA";
-                UI.modal('m-end',1); Game.save(); UI.upd();
-            }, 1000);
+                el('end-title').innerText=w?"VITÓRIA":"DERROTA"; UI.modal('m-end',1); Game.save(); UI.upd();
+            },1000);
         },
-        close: () => { 
-            UI.modal('m-end',0); 
-            if(tmp.mode === 'story') {
-                UI.nav('expl');
-                const rid = Math.ceil(tmp.lvl/8);
-                el('expl-regions').style.display='none';
-                el('expl-stages-list').style.display='flex';
-                Core.renStageList(rid);
-            } else if (tmp.mode === 'dung') {
-                UI.nav('dung');
-                Core.selectDung(tmp.dungType);
-            } else if (tmp.mode === 'tower') {
-                 UI.nav('tower');
-            } else {
-                UI.nav('hub');
-            }
-        }
+        close: () => { UI.modal('m-end',0); if(tmp.mode==='story'){ UI.nav('expl'); const rid=Math.ceil(tmp.lvl/8); el('expl-regions').style.display='none'; el('expl-stages-list').style.display='flex'; Core.renStageList(rid); } else if(tmp.mode==='dung'){ UI.nav('dung'); Core.selectDung(tmp.dungType); } else if(tmp.mode==='tower'){ UI.nav('tower'); } else { UI.nav('hub'); } }
     };
 </script>
 </body>
