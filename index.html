@@ -100,7 +100,7 @@
         .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--c-text-dim); font-size: 0.6rem; font-weight: 700; width: 20%; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: var(--c-primary); }
         .nav-btn .icon { font-size: 1.4rem; transition: 0.2s; }
-        .nav-btn.active .icon { transform: translateY(-5px); color: var(--c-primary); }
+        .nav-btn.active { transform: translateY(-5px); color: var(--c-primary); }
         .nav-btn.summon .icon { font-size: 1.8rem; color: var(--c-gold); filter: drop-shadow(0 4px 4px rgba(245, 158, 11, 0.3)); }
 
         /* ELEMENTOS VISUAIS */
@@ -1128,17 +1128,17 @@
                 if(b.auto) {
                     el('btl-ui').classList.remove('active');
                     setTimeout(() => {
-                        let t = b.e.find(x=>!x.dead); 
-                        Battle.execSkill(u, t, 0); 
+                        let t = b.e.find(x=>!x.dead); // Simple AI
+                        Battle.execSkill(u, t, 0); // Use skill 1
                     }, 500/b.spd);
                 } else {
                     el('act-msg').innerText = `Turno de ${u.n}`;
-                    el(`${u.side}${u.idx}`).classList.add('active-turn'); 
+                    el(`${u.side}${u.idx}`).classList.add('active-turn'); // Highlight only
 
                     el('skill-list').innerHTML = u.s.map((s,i) => `
                         <div class="skill-btn-3d ${u.cds[i]>0?'cd':''}" onclick="${u.cds[i]>0?'':'Battle.act('+i+')'}">
-                            <div class="sk-icon">${i===0?'⚔️':(i===1?'⚡':'🔥')}</div>
-                            <div class="dk-badge">${s.ty ? s.ty.toUpperCase() : 'ATK'}</div>
+                            <div class="sk-icon">${i===0?'⚔️':'⚡'}</div>
+                            <div class="dk-badge">${s.ty.toUpperCase()}</div>
                             ${u.cds[i]>0 ? `<div style="position:absolute;font-size:2rem;color:white;font-weight:900;text-shadow:0 0 5px #000">${u.cds[i]}</div>`:''}
                         </div>`).join('');
                     el('btl-ui').classList.add('active');
@@ -1167,8 +1167,10 @@
             if (sk.ty === 'heal_aoe') { el('btl-ui').classList.remove('active'); Battle.execSkill(u, u, si); return; }
             let t = null;
             if(b.target !== null && !b.e[b.target].dead) t = b.e[b.target];
-            else t = b.e.find(x=>!x.dead); 
-            if(!t) return; 
+            else t = b.e.find(x=>!x.dead); // Auto pick first if no target selected
+
+            if(!t) return; // No targets
+            
             el('btl-ui').classList.remove('active');
             Battle.execSkill(u, t, si);
         },
@@ -1178,8 +1180,9 @@
             
             const aEl = el(`${atk.side}${atk.idx}`);
             aEl.classList.remove('active-turn');
-            if(aEl) aEl.classList.add('actor'); 
+            if(aEl) aEl.classList.add('actor'); // Trigger attack anim
 
+            // Apply Dmg Delay
             setTimeout(() => {
                 if(aEl) aEl.classList.remove('actor');
                 
@@ -1247,7 +1250,7 @@
                         s.xp -= s.max_xp; s.p_lvl++; s.gems += 100; s.max_xp = Math.floor(s.max_xp * 1.5);
                         UI.toast(`LEVEL UP! +100 💎`);
                     }
-                    el('end-mana').innerText = `+${Math.floor(rMana)}`; el('end-gems').innerText = `+${rGems}`; el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP`;
+                    el('end-mana').innerText = `+${Math.floor(rMana)}`; el('end-gems').innerText = `+${rGems}`; el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP Conta`;
                     if(tmp.mode==='dung') {
                         let rType = 'Raro'; const roll = Math.random() * 100;
                         if (tmp.lvl <= 3) { if (roll > 90) rType = 'Epico'; } 
@@ -1256,7 +1259,6 @@
                         const r = {id:runeIdCount++, type:['hp','atk','def'][Math.floor(Math.random()*3)], val:10 + (tmp.lvl * 2), lvl:0, rarity:rType};
                         s.runes_inv.push(r); el('rune-drop-msg').innerText += ` | ${r.type} ${r.rarity}`;
                     }
-                    
                     if(b.farmRuns>1) { b.farmRuns--; el('farm-count').innerText=b.farmRuns; setTimeout(()=>Battle.start(b.farmRuns), 1000); return; }
                 }
                 el('end-title').innerText = w ? "VITÓRIA" : "DERROTA";
