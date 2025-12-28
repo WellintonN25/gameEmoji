@@ -604,12 +604,13 @@
         {id:304,nat:3,n:'Fairy',type:'Luz',img:'',visual:'🧚',s:[{n:'Beam',m:1,cd:0,ty:'atk'},{n:'Heal',m:2.5,cd:3,ty:'heal'}],hp:90,atk:15},
         {id:401,nat:4,n:'Valk',type:'Vento',img:'',visual:'🦅',s:[{n:'Cut',m:1,cd:0,ty:'atk'},{n:'Storm',m:1.5,cd:3,ty:'aoe'}],hp:150,atk:25},
         {id:502,nat:5,n:'Dragon',type:'Água',img:'',visual:'🐉',s:[{n:'Bite',m:1.2,cd:0,ty:'atk'},{n:'Tsunami',m:1.8,cd:4,ty:'aoe'}],hp:200,atk:30},
-        
-        // BOSSES FIXOS E FORTES (APENAS PARA MASMORRA)
-        {id:901,nat:6,n:'Golem Ancestral',type:'Terra',img:'',visual:'🗿',s:[{n:'Esmagar',m:1.5,cd:0,ty:'atk'},{n:'Terremoto',m:2.5,cd:4,ty:'aoe'}],hp:5000,atk:100},
-        {id:902,nat:6,n:'Dragão do Caos',type:'Fogo',img:'',visual:'🐲',s:[{n:'Baforada',m:1.5,cd:0,ty:'atk'},{n:'Apocalipse',m:3.0,cd:5,ty:'aoe'}],hp:4000,atk:150},
-        
-        // RAINBOWMON
+        {id:503,nat:4,n:'Lobisomem',type:'Trevas',img:'',visual:'🐺',s:[{n:'Mordida',m:1.2,cd:0,ty:'atk'},{n:'Uivo',m:1.4,cd:3,ty:'aoe'},{n:'Fúria',m:1.6,cd:4,ty:'atk'}],hp:130,atk:25},
+        {id:504,nat:4,n:'Ninja',type:'Vento',img:'',visual:'🥷',s:[{n:'Shuriken',m:1.2,cd:0,ty:'atk'},{n:'Corte Sônico',m:1.5,cd:3,ty:'aoe'},{n:'Assassinato',m:2.0,cd:5,ty:'atk'}],hp:120,atk:32},
+        {id:505,nat:3,n:'Sereia',type:'Água',img:'',visual:'🧜‍♀️',s:[{n:'Bolha',m:1.1,cd:0,ty:'atk'},{n:'Canto',m:1.4,cd:3,ty:'aoe'}],hp:100,atk:18},
+        {id:506,nat:4,n:'Mago Ígneo',type:'Fogo',img:'',visual:'🧙‍♂️',s:[{n:'Bola de Fogo',m:1.2,cd:0,ty:'atk'},{n:'Explosão',m:1.6,cd:3,ty:'aoe'},{n:'Chuva de Meteoros',m:1.8,cd:5,ty:'aoe'}],hp:110,atk:30},
+        {id:507,nat:5,n:'Arcanjo',type:'Luz',img:'',visual:'👼',s:[{n:'Espada Sagrada',m:1.3,cd:0,ty:'atk'},{n:'Julgamento',m:1.5,cd:3,ty:'aoe'},{n:'Ressurreição',m:2.5,cd:6,ty:'heal'}],hp:160,atk:28},
+        {id:508,nat:5,n:'Poseidon',type:'Água',img:'',visual:'🔱',s:[{n:'Tridente',m:1.3,cd:0,ty:'atk'},{n:'Tsunami',m:1.5,cd:3,ty:'aoe'},{n:'Maremoto',m:1.8,cd:5,ty:'aoe'}],hp:180,atk:26},
+        {id:509,nat:3,n:'Ent Ancião',type:'Terra',img:'',visual:'🌳',s:[{n:'Esmagar',m:1.1,cd:0,ty:'atk'},{n:'Raízes',m:1.3,cd:3,ty:'aoe'}],hp:140,atk:15},
         {id:990,nat:5,n:'Rainbowmon',type:'Luz',img:'',visual:'🥚',s:[{n:'-',m:0,cd:0,ty:'atk'}],hp:100,atk:10}
     ];
     
@@ -851,7 +852,7 @@
             s.roster=s.roster.filter(m=>!tmp.skillFodder.includes(m.uid));
             tmp.prep=tmp.prep.filter(u=>!tmp.skillFodder.includes(u));
             t.skLvl[0]++; Game.save(); UI.modal('m-skill',0); Core.selInv(t.uid); UI.toast("Skill UP!");
-            Core.openInv(); 
+            Core.openInv(); // FIX: Update list immediately
         },
         useGrimoire: () => {
             if(s.grimoires<1) return; s.grimoires--; const t=s.roster.find(x=>x.uid===tmp.selInv);
@@ -962,6 +963,7 @@
                     if(type==='common') { if(r > 98) nat=3; else if(r > 75) nat=2; else nat=1; } 
                     else { if (!s.first_summon_done && i === 0) { if (r > 50) nat=5; else nat=4; s.first_summon_done = true; } else { if (r > 99.5) nat=5; else if (r > 91.5) nat=4; else nat=3; } }
                     if(nat === 5) hasLegend = true;
+                    // Exclui IDs 901 e 902 (Chefes) da roleta
                     let p = DB.filter(x=>x.nat===nat && x.id !== 901 && x.id !== 902 && x.id !== 990); 
                     if(p.length===0) p=DB.filter(x=>x.nat===1); 
                     let m = p[Math.floor(Math.random()*p.length)];
@@ -1153,12 +1155,12 @@
                 if(b.auto) {
                     el('btl-ui').classList.remove('active');
                     setTimeout(() => {
-                        let t = b.e.find(x=>!x.dead); 
-                        Battle.execSkill(u, t, 0); 
+                        let t = b.e.find(x=>!x.dead); // Simple AI
+                        Battle.execSkill(u, t, 0); // Use skill 1
                     }, 500/b.spd);
                 } else {
                     el('act-msg').innerText = `Turno de ${u.n}`;
-                    el(`${u.side}${u.idx}`).classList.add('active-turn'); 
+                    el(`${u.side}${u.idx}`).classList.add('active-turn'); // Highlight only
 
                     el('skill-list').innerHTML = u.s.map((s,i) => `
                         <div class="skill-btn-3d ${u.cds[i]>0?'cd':''}" onclick="${u.cds[i]>0?'':'Battle.act('+i+')'}">
@@ -1192,8 +1194,10 @@
             if (sk.ty === 'heal_aoe') { el('btl-ui').classList.remove('active'); Battle.execSkill(u, u, si); return; }
             let t = null;
             if(b.target !== null && !b.e[b.target].dead) t = b.e[b.target];
-            else t = b.e.find(x=>!x.dead); 
-            if(!t) return; 
+            else t = b.e.find(x=>!x.dead); // Auto pick first if no target selected
+
+            if(!t) return; // No targets
+            
             el('btl-ui').classList.remove('active');
             Battle.execSkill(u, t, si);
         },
@@ -1203,8 +1207,9 @@
             
             const aEl = el(`${atk.side}${atk.idx}`);
             aEl.classList.remove('active-turn');
-            if(aEl) aEl.classList.add('actor'); 
+            if(aEl) aEl.classList.add('actor'); // Trigger attack anim
 
+            // Apply Dmg Delay
             setTimeout(() => {
                 if(aEl) aEl.classList.remove('actor');
                 
@@ -1249,6 +1254,7 @@
                     const rMana = (300 + (gainScale * 50)) * (boostActive ? 1.5 : 1);
                     const rXP = (100 + (gainScale * 20)) * (boostActive ? 2 : 1);
                     
+                    // SAVE PROGRESS (CORRIGIDO)
                     const stageKey = tmp.mode==='story'?`s-${tmp.lvl}`:`d-${tmp.dungType}-${tmp.lvl}`;
                     const isFirst = !s.cleared.includes(stageKey);
                     if(isFirst) s.cleared.push(stageKey);
@@ -1271,7 +1277,7 @@
                         s.xp -= s.max_xp; s.p_lvl++; s.gems += 100; s.max_xp = Math.floor(s.max_xp * 1.5);
                         UI.toast(`LEVEL UP! +100 💎`);
                     }
-                    el('end-mana').innerText = `+${formatNum(Math.floor(rMana))}`; el('end-gems').innerText = `+${rGems}`; el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP`;
+                    el('end-mana').innerText = `+${formatNum(Math.floor(rMana))}`; el('end-gems').innerText = `+${rGems}`; el('rune-drop-msg').innerText = `+${Math.floor(rXP)} XP Conta`;
                     if(tmp.mode==='dung') {
                         let rType = 'Raro'; const roll = Math.random() * 100;
                         if (tmp.lvl <= 3) { if (roll > 90) rType = 'Epico'; } 
