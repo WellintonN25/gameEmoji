@@ -8,17 +8,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Manrope:wght@400;600;800&family=Titan+One&display=swap');
 
         :root {
-            --c-bg: #f3f4f6;
-            --c-panel: rgba(255, 255, 255, 0.98);
-            --c-primary: #3b82f6; 
-            --c-accent: #8b5cf6; 
-            --c-gold: #f59e0b; 
-            --c-danger: #ef4444;
-            --c-success: #10b981;
-            --c-text: #1f2937; 
-            --c-text-dim: #6b7280;
-            --c-border: #e5e7eb;
-            --dock-height: 80px;
+            --c-bg: #f3f4f6; --c-panel: rgba(255, 255, 255, 0.98); --c-primary: #3b82f6; --c-accent: #8b5cf6; 
+            --c-gold: #f59e0b; --c-danger: #ef4444; --c-success: #10b981; --c-text: #1f2937; --c-text-dim: #6b7280; --c-border: #e5e7eb; --dock-height: 80px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -65,11 +56,19 @@
         .nav-btn.summon .icon { font-size: 2rem; color: var(--c-gold); filter: drop-shadow(0 4px 4px rgba(245, 158, 11, 0.3)); opacity: 1; margin-top: -10px; }
 
         /* SLOTS & GRID */
-        #inv-grid, #prep-grid, #rune-bag-grid, #evo-grid, #skill-grid, #dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; padding: 15px; align-content: flex-start; justify-content: center; }
+        #inv-grid, #prep-grid, #rune-bag-grid, #evo-grid, #skill-grid, #dex-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); 
+            gap: 10px; 
+            padding: 15px; 
+            align-content: flex-start; 
+            justify-content: center;
+        }
         .hero-slot { width: 100%; aspect-ratio: 1; position: relative; background: #fff; border-radius: 14px; border: 2px solid #e5e7eb; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.1s; }
         .hero-slot:active { transform: scale(0.95); }
         .hero-slot.selected { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
         .hero-slot .lvl-badge { position: absolute; bottom: 0; right: 0; background: rgba(0,0,0,0.8); color: #fff; font-size: 0.65rem; padding: 2px 5px; border-top-left-radius: 8px; font-weight: bold; }
+        .hero-slot .lvl-badge.max { background: var(--c-gold); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); }
         .hero-slot.leg-glow { border-color: var(--c-gold); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
         .hero-slot img, .custom-img, .visual img { width: 100%; height: 100%; object-fit: contain; }
         .stars { display: flex; gap: 1px; justify-content: center; position: absolute; top: 3px; width: 100%; }
@@ -452,44 +451,7 @@
         <div id="m-rune-up" class="modal"><div class="modal-content" style="max-width:350px"><h3>Upar Runa</h3><div class="rune-up-view"><div class="rune-preview-large" id="up-rune-visual"></div><div style="text-align:center"><div id="up-rune-type" style="font-weight:800;color:var(--c-primary);text-transform:uppercase"></div><div id="up-rune-lvl" style="font-size:0.9rem;background:#333;color:#fff;border-radius:10px;padding:2px 10px;display:inline-block;margin-top:5px"></div></div></div><div class="stats-comparison" id="up-stats-comp"></div><div style="margin:5px 0;font-size:.9rem">Chance: <span id="up-chance" style="font-weight:700"></span></div><div style="display:flex;gap:10px;width:100%"><button class="btn btn-w" style="flex:1" onclick="UI.modal('m-rune-up',0)">Voltar</button><button id="btn-do-up" class="btn btn-g" style="flex:1" onclick="Core.doUpgrade()">Upar (<span id="up-cost">0</span>)</button></div></div></div>
         <div id="m-evo" class="modal"><div class="modal-content"><h3>Evolução</h3><p>Use <span id="evo-req-c">0</span> monstros</p><div id="evo-slots" style="display:flex;justify-content:center;gap:5px"></div><div id="evo-grid" class="scroll-y" style="height:200px;border:1px solid #eee;border-radius:10px"></div><button id="btn-do-evo" class="btn btn-a" onclick="Core.doEvolution()" disabled>Evoluir</button><button class="btn btn-w" onclick="UI.modal('m-evo',0)">Fechar</button></div></div>
         <div id="m-skill" class="modal"><div class="modal-content"><h3>Skill Up</h3><button class="btn btn-g" onclick="Core.useGrimoire()">Usar Grimório (<span id="sk-grim">0</span>)</button><p>Ou Sacrifique Cópia:</p><div id="skill-slots" style="display:flex;justify-content:center;min-height:60px"></div><div id="skill-grid" class="scroll-y" style="height:150px;border:1px solid #eee;border-radius:10px"></div><button id="btn-do-skill" class="btn btn-p" onclick="Core.doSkill()" disabled>Sacrificar</button><button class="btn btn-w" onclick="UI.modal('m-skill',0)">Fechar</button></div></div>
-        
-        <!-- MODAL DEX DETAIL (REDESENHADO) -->
-        <div id="m-dex-detail" class="modal">
-            <div class="modal-content" style="max-width:340px; padding:0; overflow:hidden; border-radius:24px; text-align:left; background:#fff">
-                <!-- Header Visual -->
-                <div style="background:linear-gradient(135deg, #f8fafc, #e2e8f0); padding:30px 20px; text-align:center; position:relative; border-bottom:1px solid #cbd5e1">
-                    <div id="dxd-vis" style="font-size:5rem; filter:drop-shadow(0 10px 15px rgba(0,0,0,0.15)); animation:float 3s infinite ease-in-out; margin-bottom:10px"></div>
-                    <div id="dxd-stars" class="stars" style="gap:2px; justify-content:center; margin-bottom:5px"></div>
-                    <h2 id="dxd-name" style="font-size:1.6rem; color:#1e293b; margin:0"></h2>
-                    <span id="dxd-badge" style="position:absolute; top:15px; right:15px; background:#fff; padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:800; color:#64748b; box-shadow:0 2px 4px rgba(0,0,0,0.05)"></span>
-                </div>
-                
-                <div style="padding:20px; display:flex; flex-direction:column; gap:15px">
-                    <!-- Status Cards -->
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-                        <div style="background:#f0fdf4; padding:12px; border-radius:12px; border:1px solid #bbf7d0; text-align:center; box-shadow:0 2px 0 rgba(22, 163, 74, 0.1)">
-                            <div style="font-size:0.7rem; color:#166534; font-weight:800; text-transform:uppercase; letter-spacing:1px">Vida Base</div>
-                            <div style="font-size:1.4rem; font-weight:900; color:#15803d"><span id="dxd-hp"></span></div>
-                        </div>
-                        <div style="background:#fef2f2; padding:12px; border-radius:12px; border:1px solid #fecaca; text-align:center; box-shadow:0 2px 0 rgba(220, 38, 38, 0.1)">
-                            <div style="font-size:0.7rem; color:#991b1b; font-weight:800; text-transform:uppercase; letter-spacing:1px">Ataque Base</div>
-                            <div style="font-size:1.4rem; font-weight:900; color:#dc2626"><span id="dxd-atk"></span></div>
-                        </div>
-                    </div>
-    
-                    <!-- Skills List -->
-                    <div>
-                        <h4 style="font-size:0.9rem; color:#475569; margin-bottom:10px; font-weight:800; display:flex; align-items:center; gap:5px">
-                            Habilidades Iniciais
-                        </h4>
-                        <div id="dxd-skills" style="display:flex; flex-direction:column; gap:8px"></div>
-                    </div>
-    
-                    <button class="btn" style="width:100%; background:#f1f5f9; color:#64748b; font-weight:bold; margin-top:5px; border:1px solid #cbd5e1" onclick="UI.modal('m-dex-detail',0)">Voltar para Dex</button>
-                </div>
-            </div>
-        </div>
-
+        <div id="m-dex-detail" class="modal"><div class="modal-content" style="max-width:300px;padding:15px"><div class="dex-detail-compact"><div class="dx-dt-head"><div id="dxd-vis" class="dex-vis"></div><div class="dex-info"><div id="dxd-name" class="dex-name"></div><div id="dxd-stars" class="stars" style="gap:1px;justify-content:flex-start;position:static"></div><div id="dxd-badge" style="font-size:.8rem;font-weight:700;color:var(--c-primary)"></div></div></div><div class="stat-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin:0"><div style="background:#f9fafb;padding:8px;border-radius:8px"><b>HP</b> <span id="dxd-hp"></span></div><div style="background:#f9fafb;padding:8px;border-radius:8px"><b>ATK</b> <span id="dxd-atk"></span></div></div><div><h4 style="margin:5px 0">Skills</h4><div id="dxd-skills" style="display:flex;flex-direction:column;gap:5px"></div></div></div><button class="btn btn-w" onclick="UI.modal('m-dex-detail',0)">Fechar</button></div></div>
     </div>
     
 <script>
@@ -513,10 +475,10 @@ const DB = [
     {id:401,nat:4,n:'Valk',type:'Vento',visual:'🦅',s:[{n:'Corte',m:1.4,cd:0,ty:'atk'},{n:'Tempestade',m:1.6,cd:3,ty:'aoe'},{n:'Grito',m:0,cd:4,ty:'buff_atk'}],hp:150,atk:25},
     {id:504,nat:4,n:'Ninja',type:'Vento',visual:'🥷',s:[{n:'Shuriken',m:1.4,cd:0,ty:'atk'},{n:'Corte Sônico',m:1.7,cd:3,ty:'aoe'},{n:'Executar',m:2.2,cd:5,ty:'atk'}],hp:120,atk:32},
     {id:506,nat:4,n:'Mago Ígneo',type:'Fogo',visual:'🧙‍♂️',s:[{n:'Bola de Fogo',m:1.5,cd:0,ty:'atk'},{n:'Explosão',m:1.8,cd:3,ty:'aoe'},{n:'Meteoro',m:2.0,cd:5,ty:'aoe'}],hp:110,atk:30},
-    {id:510,nat:4,n:'Paladino',type:'Luz',visual:'🛡️',s:[{n:'Golpe Divino',m:1.3,cd:0,ty:'atk'},{n:'Proteção',m:0,cd:3,ty:'buff_def'},{n:'Cura Maior',m:3.0,cd:4,ty:'heal'}],hp:160,atk:20},
+    {id:510,nat:4,n:'Paladino',type:'Luz',visual:'🛡️',s:[{n:'Golpe Divino',m:1.3,cd:0,ty:'atk'},{n:'Proteção',m:0,cd:3,ty:'buff_def'},{n:'Cura Maior',m:4.0,cd:4,ty:'heal'}],hp:160,atk:20},
     {id:503,nat:4,n:'Lobisomem',type:'Trevas',visual:'🐺',s:[{n:'Mordida',m:1.4,cd:0,ty:'atk'},{n:'Uivo',m:1.6,cd:3,ty:'aoe'},{n:'Fúria',m:0,cd:4,ty:'turn'}],hp:130,atk:25},
     {id:511,nat:5,n:'Lorde Vampiro',type:'Fogo',visual:'🧛',s:[{n:'Drenar',m:1.5,cd:0,ty:'atk'},{n:'Morcegos',m:1.8,cd:3,ty:'aoe'},{n:'Imortalidade',m:0,cd:5,ty:'turn'}],hp:160,atk:35},
-    {id:507,nat:5,n:'Arcanjo',type:'Luz',visual:'👼',s:[{n:'Espada Sagrada',m:1.5,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Ressurreição',m:0,cd:6,ty:'heal_aoe'}],hp:170,atk:28},
+    {id:507,nat:5,n:'Arcanjo',type:'Luz',visual:'👼',s:[{n:'Espada Sagrada',m:1.5,cd:0,ty:'atk'},{n:'Julgamento',m:1.8,cd:3,ty:'aoe'},{n:'Ressurreição',m:4.0,cd:6,ty:'heal_aoe'}],hp:170,atk:28},
     {id:508,nat:5,n:'Poseidon',type:'Água',visual:'🔱',s:[{n:'Tridente',m:1.5,cd:0,ty:'atk'},{n:'Tsunami',m:1.8,cd:3,ty:'aoe'},{n:'Maremoto',m:2.0,cd:5,ty:'aoe'}],hp:180,atk:26},
     {id:990,nat:5,n:'Rainbowmon',type:'Luz',visual:'🥚',s:[{n:'-',m:0,cd:0,ty:'atk'}],hp:100,atk:10},
     {id:601,nat:5,n:'Fênix',type:'Fogo',visual:'🐦‍🔥',s:[{n:'Chama Viva',m:1.3,cd:0,ty:'atk'},{n:'Renascer',m:2.0,cd:5,ty:'heal'},{n:'Supernova',m:2.5,cd:6,ty:'aoe'}],hp:150,atk:38},
@@ -579,7 +541,7 @@ const UI = {
         if(o&&id==='m-shop') Core.renShop(); 
         if(o&&id==='m-gacha') el('btn-g-10').style.display=s.rare_tix>=10?'block':'none'; 
         if(o&&id==='m-missions') Core.renMissions(); 
-        if(o&&id==='m-skill') Core.renSkill(); // FIX: Refresh skills on open
+        if(o&&id==='m-skill') Core.renSkill(); 
     },
     tab: function(t) { document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.dt-cont').forEach(x=>x.classList.remove('active')); el(`tab-${t}`).classList.add('active'); el(`cont-${t}`).classList.add('active'); },
     toast: function(m) { const d=document.createElement('div'); d.style.cssText=`position:fixed;top:10%;left:50%;transform:translate(-50%,-50%);background:#333;color:#fff;padding:10px;border-radius:10px;z-index:999`; d.innerText=m; document.body.appendChild(d); setTimeout(()=>d.remove(),1500); },
@@ -622,7 +584,7 @@ const Core = {
         MISSIONS_DB.forEach(m => {
             const p = s.daily_missions.progress[m.id] || 0; const done = p >= m.target; const claimed = s.daily_missions.claimed.includes(m.id); const rw = m.r.mana ? `${formatNum(m.r.mana)} 💠` : `${m.r.gems} 💎`;
             const div = document.createElement('div'); div.className = 'mis-row';
-            div.innerHTML = `<div class="mis-info"><div class="mis-desc">${m.desc}</div><div class="mis-prog">Prog: ${p}/${m.target}</div><div class="mis-rw">Rec: ${rw}</div></div><button class="btn-claim" onclick="Core.claimMission('${m.id}')" ${claimed ? 'disabled' : (done ? '' : 'disabled')}>${claimed ? 'Recebido' : 'Resgatar'}</button>`;
+            div.innerHTML = `<div class="mis-desc">${m.desc}</div><div style="font-size:0.8rem;margin-top:5px">Progresso: ${p}/${m.target}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px"><span class="mis-rw">${rw}</span><button class="btn-claim" onclick="Core.claimMission('${m.id}')" ${claimed ? 'disabled' : (done ? '' : 'disabled')}>${claimed ? 'Recebido' : 'Resgatar'}</button></div>`;
             l.appendChild(div);
         });
     },
@@ -645,25 +607,8 @@ const Core = {
     },
     showDexDetail: function(did) {
         const d = DB.find(x => x.id === did);
-        el('dxd-vis').innerHTML = UI.getVis(d); el('dxd-name').innerText = d.n; 
-        el('dxd-stars').innerHTML = '<div class="star" style="width:12px; height:12px"></div>'.repeat(d.nat); 
-        
-        const typeIcon = d.type === 'Fogo' ? '🔥' : (d.type === 'Água' ? '💧' : (d.type === 'Vento' ? '🍃' : (d.type === 'Terra' ? '⛰️' : (d.type === 'Luz' ? '☀️' : '🌙'))));
-        el('dxd-badge').innerHTML = `${typeIcon} ${d.type.toUpperCase()}`;
-        
-        el('dxd-hp').innerText = d.hp; el('dxd-atk').innerText = d.atk;
-        
-        el('dxd-skills').innerHTML = d.s.map(k => `
-            <div style="display:flex; align-items:center; gap:12px; padding:10px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,0.02)">
-                <div style="font-size:1.2rem; background:#f8fafc; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #f1f5f9">
-                    ${k.ty && k.ty.includes('heal') ? '💊' : (k.ty === 'stun' ? '⚡' : (k.ty.includes('buff') ? '🛡️' : '⚔️'))}
-                </div>
-                <div>
-                    <div style="font-weight:bold; color:#334155; font-size:0.9rem">${k.n}</div>
-                    <div style="font-size:0.7rem; color:#94a3b8; font-weight:600">${k.ty ? k.ty.toUpperCase().replace('_',' ') : 'ATAQUE'} • CD: ${k.cd}</div>
-                </div>
-            </div>
-        `).join('');
+        el('dxd-vis').innerHTML = UI.getVis(d); el('dxd-name').innerText = d.n; el('dxd-stars').innerHTML = '<div class="star"></div>'.repeat(d.nat); el('dxd-badge').innerText = d.type; el('dxd-hp').innerText = d.hp; el('dxd-atk').innerText = d.atk;
+        el('dxd-skills').innerHTML = d.s.map(k => `<div class="dex-skill-row"><div class="dex-skill-icon">${k.ty && k.ty.includes('heal') ? '💊' : '⚔️'}</div><div><b>${k.n}</b><br><small>${k.ty || 'ATK'}</small></div></div>`).join('');
         UI.modal('m-dex-detail', 1);
     },
     selInv: function(uid) {
@@ -783,7 +728,26 @@ const Battle = {
         if(!tmp.prep.length) return UI.toast("Selecione monstros!"); b.farmRuns = n; b.auto = n > 0; b.spd = s.p_lvl >= 5 ? 3 : 2;
         el('btn-spd').innerText = 'x' + b.spd; el('btn-auto').classList.toggle('active', b.auto); el('farm-ui').style.display = n > 0 ? 'block' : 'none';
         b.p = tmp.prep.map((uid, i) => { const m = s.roster.find(x => x.uid === uid), d = DB.find(x => x.id === m.id); let sm = 1 + m.lvl * 0.1, rs = { hp: 0, atk: 0, def: 0, crit: 0 }; m.runes.forEach(r => { if(r) { rs[r.type] += r.val; if(r.subs) r.subs.forEach(s => rs[s.type] += s.val); } }); return { ...d, max: Math.floor(d.hp * sm + rs.hp), cur: Math.floor(d.hp * sm + rs.hp), atk: Math.floor(d.atk * sm + rs.atk), idx: i, side: 'p', dead: false, cds: d.s.map(() => 0), skLvl: m.skLvl, buffs: [] }; });
-        b.e = Array(tmp.mode === 'story' ? 3 : 1).fill(0).map((_, i) => { let d, sm; if(tmp.mode === 'dung') { d = tmp.dungType === 'golem' ? BOSS_DB.golem : BOSS_DB.dragon; sm = 1 + (tmp.lvl * 0.5); } else if(tmp.mode === 'tower') { if(tmp.lvl % 10 === 0) { d = BOSS_DB.dragon; sm = 1 + (tmp.lvl * 0.3); } else { const cdb = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990); d = cdb[Math.floor(Math.random() * cdb.length)]; sm = 1 + (tmp.lvl * 0.15); } } else { const cdb = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990); d = cdb[Math.floor(Math.random() * cdb.length)]; sm = 1 + (tmp.lvl * 0.2); } return { ...d, max: Math.floor(d.hp * sm), cur: Math.floor(d.hp * sm), atk: Math.floor(d.atk * sm), idx: i, side: 'e', dead: false, cds: d.s.map(() => 0), skLvl: [1], buffs: [] }; });
+        b.e = Array(tmp.mode === 'story' ? 3 : 1).fill(0).map((_, i) => { 
+            let d, sm; 
+            if(tmp.mode === 'dung') { d = tmp.dungType === 'golem' ? BOSS_DB.golem : BOSS_DB.dragon; sm = 1 + (tmp.lvl * 0.5); } 
+            else if(tmp.mode === 'tower') { 
+                if(tmp.lvl % 10 === 0) { d = BOSS_DB.dragon; sm = 1 + (tmp.lvl * 0.3); } 
+                else { const cdb = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990); d = cdb[Math.floor(Math.random() * cdb.length)]; sm = 1 + (tmp.lvl * 0.15); } 
+            } 
+            else { 
+                if (tmp.lvl % 8 === 0 && i === 1) { // Boss Stage 8
+                    const bosses = DB.filter(x => x.nat === 5 && x.id < 900);
+                    d = bosses[Math.floor(Math.random() * bosses.length)];
+                    sm = 1 + (tmp.lvl * 0.25);
+                } else {
+                    const cdb = DB.filter(x => x.id !== 901 && x.id !== 902 && x.id !== 990 && x.nat <= 4); 
+                    d = cdb[Math.floor(Math.random() * cdb.length)]; 
+                    sm = 1 + (tmp.lvl * 0.2); 
+                }
+            } 
+            return { ...d, max: Math.floor(d.hp * sm), cur: Math.floor(d.hp * sm), atk: Math.floor(d.atk * sm), idx: i, side: 'e', dead: false, cds: d.s.map(() => 0), skLvl: [1], buffs: [] }; 
+        });
         b.t = 'p'; b.idx = 0; UI.nav('battle'); Battle.initBoard(); Battle.turn();
     },
     initBoard: function() { el('r-pla').innerHTML = b.p.map(u => `<div id="p${u.idx}" class="b-u" onclick="Battle.clk('p',${u.idx})"><div class="hp-bw"><div class="hp-fill" style="width:100%"></div></div><div class="bfs" id="bf-p${u.idx}"></div><div class="vis">${UI.getVis(u)}</div></div>`).join(''); el('r-ene').innerHTML = b.e.map(u => `<div id="e${u.idx}" class="b-u" onclick="Battle.clk('e',${u.idx})"><div class="hp-bw"><div class="hp-fill" style="width:100%"></div></div><div class="bfs" id="bf-e${u.idx}"></div><div class="vis">${UI.getVis(u)}</div><div id="tgt-${u.idx}" class="tgt-mk" style="display:none">▼</div></div>`).join(''); },
@@ -802,7 +766,18 @@ const Battle = {
                 el('btl-ui').classList.remove('active');
                 setTimeout(() => {
                     let t = null, si = 0; const hl = u.s.findIndex(sk => (sk.ty === 'heal' || sk.ty === 'heal_aoe') && u.cds[u.s.indexOf(sk)] === 0);
-                    if(hl !== -1 && b.p.some(a => !a.dead && a.cur < a.max * 0.6)) { t = b.p.find(a => !a.dead && a.cur < a.max * 0.6); si = hl; } else { const trg = b.e.filter(e => !e.dead); const adv = trg.find(e => { const at = u.type, dt = e.type; return (at == 'Água' && dt == 'Fogo') || (at == 'Fogo' && dt == 'Vento') || (at == 'Vento' && dt == 'Terra') || (at == 'Terra' && dt == 'Água') || (at == 'Luz' && dt == 'Trevas') || (at == 'Trevas' && dt == 'Luz'); }); t = adv || trg[0]; for(let k = u.s.length - 1; k >= 0; k--) if(u.cds[k] === 0 && (u.s[k].ty === 'atk' || u.s[k].ty === 'aoe' || u.s[k].ty.includes('debuff'))) { si = k; break; } }
+                    if(hl !== -1 && b.p.some(a => !a.dead && a.cur < a.max * 0.6)) { t = b.p.find(a => !a.dead && a.cur < a.max * 0.6); si = hl; } 
+                    else { 
+                        const trg = b.e.filter(e => !e.dead); 
+                        const adv = trg.find(e => { const at = u.type, dt = e.type; return (at == 'Água' && dt == 'Fogo') || (at == 'Fogo' && dt == 'Vento') || (at == 'Vento' && dt == 'Terra') || (at == 'Terra' && dt == 'Água') || (at == 'Luz' && dt == 'Trevas') || (at == 'Trevas' && dt == 'Luz'); }); 
+                        t = adv || trg[0]; 
+                        // Prioritize disadvantage targets if no advantage found? No, simple logic: advantage > first available.
+                        // Sort targets by lowest HP to finish them off
+                        if (!adv) {
+                             t = trg.sort((a,b) => a.cur - b.cur)[0];
+                        }
+                        for(let k = u.s.length - 1; k >= 0; k--) if(u.cds[k] === 0 && (u.s[k].ty === 'atk' || u.s[k].ty === 'aoe' || u.s[k].ty.includes('debuff'))) { si = k; break; } 
+                    }
                     Battle.execSkill(u, t, si);
                 }, 500 / b.spd);
             } else {
@@ -810,7 +785,19 @@ const Battle = {
                 el('skill-list').innerHTML = u.s.map((s, i) => `<div class="sk-btn ${u.cds[i] > 0 ? 'cd' : ''}" onclick="${u.cds[i] > 0 ? '' : 'Battle.act(' + i + ')'}"><div style="font-size:1.5rem">${i === 0 ? '⚔️' : (i === 1 ? '⚡' : '🔥')}</div><div class="dk-badge">${s.ty ? s.ty.toUpperCase() : 'ATK'}</div>${u.cds[i] > 0 ? `<div style="position:absolute;font-size:2rem;color:white;font-weight:900;text-shadow:0 0 5px #000">${u.cds[i]}</div>` : ''}</div>`).join('');
                 el('btl-ui').classList.add('active');
             }
-        } else { el('btl-ui').classList.remove('active'); setTimeout(() => { const t = b.p.find(x => !x.dead); Battle.execSkill(u, t || u, 0); }, 800 / b.spd); }
+        } else { 
+            // Enemy AI
+            el('btl-ui').classList.remove('active'); 
+            setTimeout(() => { 
+                let t = null;
+                // Enemy AI: Target Elemental Advantage
+                const trg = b.p.filter(p => !p.dead);
+                const adv = trg.find(e => { const at = u.type, dt = e.type; return (at == 'Água' && dt == 'Fogo') || (at == 'Fogo' && dt == 'Vento') || (at == 'Vento' && dt == 'Terra') || (at == 'Terra' && dt == 'Água') || (at == 'Luz' && dt == 'Trevas') || (at == 'Trevas' && dt == 'Luz'); });
+                t = adv || trg[Math.floor(Math.random() * trg.length)]; // Random if no advantage
+                
+                Battle.execSkill(u, t || u, 0); 
+            }, 800 / b.spd); 
+        }
     },
     act: function(i) {
         const u = b.p[b.idx], sk = u.s[i];
